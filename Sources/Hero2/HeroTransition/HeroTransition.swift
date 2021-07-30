@@ -73,6 +73,7 @@ open class HeroTransition: Transition {
         snap.layer.shadowColor = view.layer.shadowColor
         snap.layer.shadowRadius = view.layer.shadowRadius
         snap.layer.shadowOffset = view.layer.shadowOffset
+        snap.layer.cornerRadius = view.layer.cornerRadius
         snap.clipsToBounds = view.clipsToBounds
         contexts[view]?.snapshotView = snap
       } else {
