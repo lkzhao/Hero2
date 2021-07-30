@@ -12,10 +12,14 @@ import Hero2
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
   var window: UIWindow?
+  let trans = HeroTransition()
 
   func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     window = UIWindow()
-    window?.rootViewController = MatchViewController()
+    let navVC = UINavigationController(rootViewController: MatchViewController())
+    navVC.setNavigationBarHidden(true, animated: false)
+    navVC.delegate = trans
+    window?.rootViewController = navVC
     window?.makeKeyAndVisible()
     return true
   }

@@ -36,7 +36,7 @@ class MatchViewController: ComponentViewController {
           Image(shape.image).tintColor(shape.color).contentMode(.scaleAspectFit).heroID(shape.id).heroModifiers([.whenNotMatched([.fade])]).size(width: .fill, height: .fill).tappableView {
             let vc = MatchDetailViewController()
             vc.shape = shape
-            $0.present(vc)
+            $0.parentViewController?.navigationController?.pushViewController(vc, animated: true)
           }.size(width: 150, height: 150)
           .transform(shape.transform)
 //          .backgroundColor(.lightGray.withAlphaComponent(0.2)).cornerRadius(10)
@@ -96,7 +96,7 @@ class MatchDetailViewController: ComponentViewController {
       Spacer()
       HStack(justifyContent: .spaceEvenly) {
         Image(systemName: "chevron.left").tintColor(.systemBlue).tappableView {
-          $0.dismiss()
+          $0.parentViewController?.navigationController?.popViewController(animated: true)
         }.heroID("back-button")
       }
     }.inset(20)

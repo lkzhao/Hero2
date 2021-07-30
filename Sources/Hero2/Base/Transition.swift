@@ -125,37 +125,55 @@ extension Transition: UIViewControllerAnimatedTransitioning {
   open func animateTransition(using context: UIViewControllerContextTransitioning) {
     transitionContext = context
     isTransitioning = true
-
-    let container = transitionContainer!
-    container.addSubview(backgroundView!)
-    container.addSubview(foregroundView!)
-    toView!.frame = container.frame
-    toView!.layoutIfNeeded()
     
-    container.isUserInteractionEnabled = false
     animator = UIViewPropertyAnimator(duration: duration, timingParameters: timingParameters)
-    let (dismissedState, presentedState, completion) = animate()
-    
-    if isPresenting {
-      dismissedState()
-      animator!.addAnimations(presentedState)
-    } else {
-      presentedState()
-      animator!.addAnimations(dismissedState)
-    }
-    
-    // flush the current transaction before animation start.
-    // otherwise delay animation on dismiss might not be registered.
-    CATransaction.flush()
 
-    animator!.addCompletion { [weak self] pos in
-      container.isUserInteractionEnabled = true
-      completion(pos == .end)
-      self?.completeTransition(finished: pos == .end)
+    let fullScreenSnapshot = transitionContainer?.window?.snapshotView(afterScreenUpdates: false) ?? fromView?.snapshotView(afterScreenUpdates: false)
+    if let fullScreenSnapshot = fullScreenSnapshot {
+      (transitionContainer?.window ?? transitionContainer)?.addSubview(fullScreenSnapshot)
     }
-    
-    if !isInteractive {
-      animator?.startAnimation()
+    func startAnimation() {
+      let container = transitionContainer!
+      container.isUserInteractionEnabled = false
+      container.addSubview(backgroundView!)
+      container.addSubview(foregroundView!)
+      toView!.frame = container.frame
+      toView!.layoutIfNeeded()
+
+      let (dismissedState, presentedState, completion) = animate()
+      
+      if isPresenting {
+        dismissedState()
+        animator!.addAnimations(presentedState)
+      } else {
+        presentedState()
+        animator!.addAnimations(dismissedState)
+      }
+      
+      // flush the current transaction before animation start.
+      // otherwise delay animation on dismiss might not be registered.
+      CATransaction.flush()
+
+      animator!.addCompletion { [weak self] pos in
+        container.isUserInteractionEnabled = true
+        completion(pos == .end)
+        self?.completeTransition(finished: pos == .end)
+      }
+      
+      fullScreenSnapshot?.removeFromSuperview()
+      if !isInteractive {
+        animator?.startAnimation()
+      }
+    }
+
+    if isNavigationTransition {
+      // When animating within navigationController, we have to dispatch later into the main queue.
+      // otherwise snapshots will be pure white. Possibly a bug with UIKit
+      DispatchQueue.main.async {
+        startAnimation()
+      }
+    } else {
+      startAnimation()
     }
   }
 
@@ -213,7 +231,8 @@ extension Transition: UINavigationControllerDelegate {
     return interactiveTransitioning
   }
 
-  public func navigationController(_: UINavigationController, animationControllerFor operation: UINavigationController.Operation, from: UIViewController, to: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+  public func navigationController(_ navigationController: UINavigationController, animationControllerFor operation: UINavigationController.Operation, from: UIViewController, to: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+//    navigationController.view.layoutIfNeeded()
     setupTransition(isPresenting: operation == .push, isNavigationTransition: true)
     return self
   }
