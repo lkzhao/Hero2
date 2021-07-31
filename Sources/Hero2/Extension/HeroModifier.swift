@@ -25,6 +25,10 @@ public enum HeroModifier: Equatable {
   
   case whenPresenting([HeroModifier])
   case whenDismissing([HeroModifier])
+  case whenAppearing([HeroModifier])
+  case whenDisappearing([HeroModifier])
+  case whenForeground([HeroModifier])
+  case whenBackground([HeroModifier])
   case whenMatched([HeroModifier])
   case whenNotMatched([HeroModifier])
   

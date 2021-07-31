@@ -25,13 +25,13 @@ func convert(layerTransform: CATransform3D, to container: CALayer) -> CATransfor
   return CATransform3DConcat(layerTransform, CATransform3DInvert(containerTrans))
 }
 
-func viewStateFrom(modifiers: [HeroModifier], isPresenting: Bool, isMatched: Bool) -> ViewState {
+func viewStateFrom(modifiers: [HeroModifier], isPresenting: Bool, isMatched: Bool, isForeground: Bool) -> ViewState {
   var state = ViewState()
-  process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched)
+  process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched, isForeground: isForeground)
   return state
 }
 
-func process(modifiers: [HeroModifier], on state: inout ViewState, isPresenting: Bool, isMatched: Bool) {
+func process(modifiers: [HeroModifier], on state: inout ViewState, isPresenting: Bool, isMatched: Bool, isForeground: Bool) {
   for modifier in modifiers {
     switch modifier {
     case .fade:
@@ -61,23 +61,39 @@ func process(modifiers: [HeroModifier], on state: inout ViewState, isPresenting:
       state.snapshotType = snapshotType
     case .whenPresenting(let modifiers):
       if isPresenting {
-        process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched)
+        process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched, isForeground: isForeground)
       }
     case .whenDismissing(let modifiers):
       if !isPresenting {
-        process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched)
+        process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched, isForeground: isForeground)
       }
     case .whenMatched(let modifiers):
       if isMatched {
-        process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched)
+        process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched, isForeground: isForeground)
       }
     case .whenNotMatched(let modifiers):
       if !isMatched {
-        process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched)
+        process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched, isForeground: isForeground)
+      }
+    case .whenAppearing(let modifiers):
+      if isPresenting == isForeground {
+        process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched, isForeground: isForeground)
+      }
+    case .whenDisappearing(let modifiers):
+      if isPresenting != isForeground {
+        process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched, isForeground: isForeground)
+      }
+    case .whenForeground(let modifiers):
+      if isForeground {
+        process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched, isForeground: isForeground)
+      }
+    case .whenBackground(let modifiers):
+      if !isForeground {
+        process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched, isForeground: isForeground)
       }
     case.beginWith(let modifiers):
       var beginState = ViewState()
-      process(modifiers: modifiers, on: &beginState, isPresenting: isPresenting, isMatched: isMatched)
+      process(modifiers: modifiers, on: &beginState, isPresenting: isPresenting, isMatched: isMatched, isForeground: isForeground)
       state.beginState = (state.beginState ?? ViewState())?.merge(state: beginState)
     }
   }

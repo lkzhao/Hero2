@@ -45,7 +45,8 @@ open class HeroTransition: Transition {
         let other = heroID.flatMap { otherIdToView[$0] }
         let modifierState = viewStateFrom(modifiers: modifiers,
                                           isPresenting: isPresenting,
-                                          isMatched: other != nil)
+                                          isMatched: other != nil,
+                                          isForeground: isFront)
         if other != nil || modifierState != ViewState() {
           let matchedSuperview = (modifierState.containerType ?? .parent) == .parent ? findMatchedSuperview(view: view) : nil
           let sourceState = sourceViewStateFrom(view: view, modifierState: modifierState)
