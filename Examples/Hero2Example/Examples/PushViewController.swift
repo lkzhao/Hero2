@@ -51,7 +51,10 @@ class PushDetailViewController: ComponentViewController {
       transition.beginInteractiveTransition()
       dismiss(animated: true, completion: nil)
     case .changed:
-      transition.fractionCompleted = gr.translation(in: view).x / view.bounds.width
+      let trans = gr.translation(in: view)
+      transition.fractionCompleted = trans.x / view.bounds.width
+//      transition.pause(view: view, animationForKey: "transform")
+//      view.transform = .identity.translatedBy(x: trans.x, y: trans.y)
     default:
       transition.endInteractiveTransition(shouldFinish: gr.translation(in: view).x + gr.velocity(in: view).x > view.bounds.width / 4)
     }

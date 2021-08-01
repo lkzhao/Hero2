@@ -12,6 +12,7 @@
 		A304892F21C347020026EDA7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A304892E21C347020026EDA7 /* Assets.xcassets */; };
 		A304893221C347020026EDA7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A304893021C347020026EDA7 /* LaunchScreen.storyboard */; };
 		B10A123224F31EAA0076B038 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10A123124F31EAA0076B038 /* Helpers.swift */; };
+		B1115EEF26B72A030096DB85 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1115EEE26B72A030096DB85 /* Util.swift */; };
 		B121A0A024F8771E00E59F78 /* Hero2 in Frameworks */ = {isa = PBXBuildFile; productRef = B121A09F24F8771E00E59F78 /* Hero2 */; };
 		B154155526AE16F60062E486 /* MatchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B154155426AE16F60062E486 /* MatchViewController.swift */; };
 		B1C5DB2C26B27F4000026969 /* DelayViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C5DB2B26B27F4000026969 /* DelayViewController.swift */; };
@@ -42,6 +43,7 @@
 		A304893121C347020026EDA7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		A304893321C347020026EDA7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B10A123124F31EAA0076B038 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
+		B1115EEE26B72A030096DB85 /* Util.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 		B154155426AE16F60062E486 /* MatchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchViewController.swift; sourceTree = "<group>"; };
 		B1C5DB2B26B27F4000026969 /* DelayViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DelayViewController.swift; sourceTree = "<group>"; };
 		B1C5DB2D26B3BE0600026969 /* PushViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushViewController.swift; sourceTree = "<group>"; };
@@ -101,6 +103,7 @@
 		B1CC3F682677FFCC005BCE8C /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				B1115EEE26B72A030096DB85 /* Util.swift */,
 				A304892721C347010026EDA7 /* AppDelegate.swift */,
 				B1CD861026AE333500481EC8 /* ComponentViewController.swift */,
 				B10A123124F31EAA0076B038 /* Helpers.swift */,
@@ -204,6 +207,7 @@
 				B154155526AE16F60062E486 /* MatchViewController.swift in Sources */,
 				B1CD861126AE333500481EC8 /* ComponentViewController.swift in Sources */,
 				B1C5DB2C26B27F4000026969 /* DelayViewController.swift in Sources */,
+				B1115EEF26B72A030096DB85 /* Util.swift in Sources */,
 				B10A123224F31EAA0076B038 /* Helpers.swift in Sources */,
 				A304892A21C347010026EDA7 /* ViewController.swift in Sources */,
 				A304892821C347010026EDA7 /* AppDelegate.swift in Sources */,

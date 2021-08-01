@@ -1,10 +1,19 @@
 import UIKit
 
 open class HeroTransition: Transition {
+  var pausedAnimations: [UIView: [String: CAAnimation]] = [:]
+  
+  public func pause(view: UIView, animationForKey key: String) {
+    guard pausedAnimations[view]?[key] == nil, let anim = view.layer.animation(forKey: key) else { return }
+    pausedAnimations[view, default: [:]][key] = anim
+    view.layer.removeAnimation(forKey: key)
+  }
+
   open override func animate() -> (dismissed: () -> Void, presented: () -> Void, completed: (Bool) -> Void) {
     guard let back = backgroundView, let front = foregroundView, let container = transitionContainer else {
       fatalError()
     }
+    pausedAnimations.removeAll()
 
     var contexts: [UIView: ViewTransitionContext] = [:]
     let isPresenting = isPresenting
@@ -135,5 +144,20 @@ open class HeroTransition: Transition {
       }
     }
     return (dismissed, presented, completion)
+  }
+  
+  open override func endInteractiveTransition(shouldFinish: Bool) {
+    for (view, animations) in pausedAnimations {
+      for (key, anim) in animations {
+        view.layer.add(anim, forKey: key)
+      }
+    }
+    pausedAnimations.removeAll()
+    super.endInteractiveTransition(shouldFinish: shouldFinish)
+  }
+  
+  open override func animationEnded(_ transitionCompleted: Bool) {
+    pausedAnimations.removeAll()
+    super.animationEnded(transitionCompleted)
   }
 }
