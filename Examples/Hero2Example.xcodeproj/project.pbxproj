@@ -15,6 +15,8 @@
 		B1115EEF26B72A030096DB85 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1115EEE26B72A030096DB85 /* Util.swift */; };
 		B121A0A024F8771E00E59F78 /* Hero2 in Frameworks */ = {isa = PBXBuildFile; productRef = B121A09F24F8771E00E59F78 /* Hero2 */; };
 		B154155526AE16F60062E486 /* MatchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B154155426AE16F60062E486 /* MatchViewController.swift */; };
+		B1BAEE0726B750D5002F1312 /* ImageGalleryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1BAEE0626B750D5002F1312 /* ImageGalleryViewController.swift */; };
+		B1BAEE0926B750FC002F1312 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = B1BAEE0826B750FC002F1312 /* Kingfisher */; };
 		B1C5DB2C26B27F4000026969 /* DelayViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C5DB2B26B27F4000026969 /* DelayViewController.swift */; };
 		B1C5DB2E26B3BE0600026969 /* PushViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C5DB2D26B3BE0600026969 /* PushViewController.swift */; };
 		B1CD860F26AE32EF00481EC8 /* UIComponent in Frameworks */ = {isa = PBXBuildFile; productRef = B1CD860E26AE32EF00481EC8 /* UIComponent */; };
@@ -45,6 +47,7 @@
 		B10A123124F31EAA0076B038 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		B1115EEE26B72A030096DB85 /* Util.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 		B154155426AE16F60062E486 /* MatchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchViewController.swift; sourceTree = "<group>"; };
+		B1BAEE0626B750D5002F1312 /* ImageGalleryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageGalleryViewController.swift; sourceTree = "<group>"; };
 		B1C5DB2B26B27F4000026969 /* DelayViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DelayViewController.swift; sourceTree = "<group>"; };
 		B1C5DB2D26B3BE0600026969 /* PushViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushViewController.swift; sourceTree = "<group>"; };
 		B1CD861026AE333500481EC8 /* ComponentViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComponentViewController.swift; sourceTree = "<group>"; };
@@ -55,6 +58,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B1BAEE0926B750FC002F1312 /* Kingfisher in Frameworks */,
 				B1CD860F26AE32EF00481EC8 /* UIComponent in Frameworks */,
 				B121A0A024F8771E00E59F78 /* Hero2 in Frameworks */,
 			);
@@ -120,6 +124,7 @@
 				B154155426AE16F60062E486 /* MatchViewController.swift */,
 				B1C5DB2B26B27F4000026969 /* DelayViewController.swift */,
 				B1C5DB2D26B3BE0600026969 /* PushViewController.swift */,
+				B1BAEE0626B750D5002F1312 /* ImageGalleryViewController.swift */,
 			);
 			path = Examples;
 			sourceTree = "<group>";
@@ -144,6 +149,7 @@
 			packageProductDependencies = (
 				B121A09F24F8771E00E59F78 /* Hero2 */,
 				B1CD860E26AE32EF00481EC8 /* UIComponent */,
+				B1BAEE0826B750FC002F1312 /* Kingfisher */,
 			);
 			productName = Hero2;
 			productReference = A304892421C347010026EDA7 /* Hero2Example.app */;
@@ -209,6 +215,7 @@
 				B1C5DB2C26B27F4000026969 /* DelayViewController.swift in Sources */,
 				B1115EEF26B72A030096DB85 /* Util.swift in Sources */,
 				B10A123224F31EAA0076B038 /* Helpers.swift in Sources */,
+				B1BAEE0726B750D5002F1312 /* ImageGalleryViewController.swift in Sources */,
 				A304892A21C347010026EDA7 /* ViewController.swift in Sources */,
 				A304892821C347010026EDA7 /* AppDelegate.swift in Sources */,
 				B1C5DB2E26B3BE0600026969 /* PushViewController.swift in Sources */,
@@ -433,6 +440,11 @@
 		B121A09F24F8771E00E59F78 /* Hero2 */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Hero2;
+		};
+		B1BAEE0826B750FC002F1312 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B16EA69E2677E262005CFB18 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
 		};
 		B1CD860E26AE32EF00481EC8 /* UIComponent */ = {
 			isa = XCSwiftPackageProductDependency;

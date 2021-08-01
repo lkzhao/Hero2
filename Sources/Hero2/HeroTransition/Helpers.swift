@@ -145,7 +145,7 @@ func originalViewStateFrom(view: UIView, sourceState: ViewState, targetState: Vi
     .merge(state: viewStateFrom(view: view, ifExistOn: targetState))
 }
 
-func apply(viewState: ViewState, to view: UIView) {
+func applyViewState(_ viewState: ViewState, to view: UIView) {
   if let windowPosition = viewState.windowPosition {
     let container = view.superview!
     view.center = container.convert(windowPosition, from: container.window)
@@ -185,10 +185,10 @@ func applyState(viewSnap: UIView, presented: Bool,
     let relativeDuration = duration > 0 ? duration / animationDuration : 1 - delay / animationDuration
     UIView.animateKeyframes(withDuration: animationDuration, delay: 0, options: [], animations: {
       UIView.addKeyframe(withRelativeStartTime: delay / animationDuration, relativeDuration: relativeDuration) {
-        apply(viewState: state, to: viewSnap)
+        applyViewState(state, to: viewSnap)
       }
     }, completion: nil)
   } else {
-    apply(viewState: state, to: viewSnap)
+    applyViewState(state, to: viewSnap)
   }
 }

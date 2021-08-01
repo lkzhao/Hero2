@@ -16,7 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
   func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     window = UIWindow()
-    let navVC = UINavigationController(rootViewController: PushViewController())
+    let navVC = UINavigationController(rootViewController: ImageGalleryViewController())
     navVC.setNavigationBarHidden(true, animated: false)
     navVC.delegate = trans
     window?.rootViewController = navVC

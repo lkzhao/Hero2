@@ -2,11 +2,22 @@ import UIKit
 
 open class HeroTransition: Transition {
   var pausedAnimations: [UIView: [String: CAAnimation]] = [:]
+  var contexts: [UIView: ViewTransitionContext] = [:]
   
-  public func pause(view: UIView, animationForKey key: String) {
+  func pause(view: UIView, animationForKey key: String) {
     guard pausedAnimations[view]?[key] == nil, let anim = view.layer.animation(forKey: key) else { return }
     pausedAnimations[view, default: [:]][key] = anim
     view.layer.removeAnimation(forKey: key)
+  }
+  
+  public func apply(position: CGPoint, to view: UIView) {
+    guard let context = contexts[view], let container = view.superview else { return }
+    pause(view: context.snapshotView, animationForKey: "position")
+    context.snapshotView.layer.position = container.convert(position, to: context.snapshotView.superview!)
+    if let otherView = context.targetView, let otherSnap = contexts[otherView]?.snapshotView {
+      pause(view: otherSnap, animationForKey: "position")
+      otherSnap.layer.position = container.convert(position, to: otherSnap.superview!)
+    }
   }
 
   open override func animate() -> (dismissed: () -> Void, presented: () -> Void, completed: (Bool) -> Void) {
@@ -14,8 +25,7 @@ open class HeroTransition: Transition {
       fatalError()
     }
     pausedAnimations.removeAll()
-
-    var contexts: [UIView: ViewTransitionContext] = [:]
+    contexts.removeAll()
     let isPresenting = isPresenting
     
     var dismissedOperations: [() -> Void] = []
@@ -118,7 +128,7 @@ open class HeroTransition: Transition {
           }
           placeholderView.removeFromSuperview()
           viewSnap.removeOverlayView()
-          apply(viewState: viewContext.originalState, to: viewSnap)
+          applyViewState(viewContext.originalState, to: viewSnap)
         } else {
           viewSnap.removeFromSuperview()
           view.isHidden = false
@@ -158,6 +168,7 @@ open class HeroTransition: Transition {
   
   open override func animationEnded(_ transitionCompleted: Bool) {
     pausedAnimations.removeAll()
+    contexts.removeAll()
     super.animationEnded(transitionCompleted)
   }
 }
