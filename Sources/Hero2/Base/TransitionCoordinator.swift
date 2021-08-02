@@ -12,25 +12,25 @@ public class TransitionCoordinator: NSObject {
 
   private func setupTransition(from: UIViewController, to: UIViewController, isPresenting: Bool, isNavigationTransition: Bool) {
     let transition = ((isPresenting ? to : from) as? TransitionProvider)?.transition ?? defaultTransition
-    self.transition = transition
+    self.currentTransition = transition
     transition.setupTransition(isPresenting: isPresenting, isNavigationTransition: isNavigationTransition)
   }
 }
 
 extension TransitionCoordinator: UIViewControllerTransitioningDelegate {
   var interactiveTransitioning: UIViewControllerInteractiveTransitioning? {
-    transition as? UIViewControllerInteractiveTransitioning
+    currentTransition
   }
 
   public func animationController(forPresented presented: UIViewController, presenting: UIViewController, source _: UIViewController) -> UIViewControllerAnimatedTransitioning? {
     setupTransition(from: presenting, to: presented, isPresenting: true, isNavigationTransition: false)
-    return transition
+    return currentTransition
   }
 
   public func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
     guard let toVC = dismissed.presentingViewController else { return nil }
     setupTransition(from: dismissed, to: toVC, isPresenting: false, isNavigationTransition: false)
-    return transition
+    return currentTransition
   }
 
   public func interactionControllerForDismissal(using _: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
@@ -49,6 +49,6 @@ extension TransitionCoordinator: UINavigationControllerDelegate {
 
   public func navigationController(_: UINavigationController, animationControllerFor operation: UINavigationController.Operation, from: UIViewController, to: UIViewController) -> UIViewControllerAnimatedTransitioning? {
     setupTransition(from: from, to: to, isPresenting: operation == .push, isNavigationTransition: true)
-    return transition
+    return currentTransition
   }
 }
