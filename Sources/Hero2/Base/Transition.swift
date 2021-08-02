@@ -198,7 +198,7 @@ extension Transition: UIViewControllerAnimatedTransitioning {
 }
 
 extension Transition: UIViewControllerTransitioningDelegate {
-  private func setupTransition(isPresenting: Bool, isNavigationTransition: Bool) {
+  internal func setupTransition(isPresenting: Bool, isNavigationTransition: Bool) {
     self.isPresenting = isPresenting
     self.isNavigationTransition = isNavigationTransition
     self.isTransitioning = true
