@@ -161,8 +161,9 @@ extension Transition: UIViewControllerAnimatedTransitioning {
       }
       
       fullScreenSnapshot?.removeFromSuperview()
-      if !isInteractive {
-        animator?.startAnimation()
+      animator?.startAnimation()
+      if isInteractive {
+        animator?.pauseAnimation()
       }
     }
 
