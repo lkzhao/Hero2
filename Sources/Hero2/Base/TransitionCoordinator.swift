@@ -1,7 +1,7 @@
 import UIKit
 
 public protocol TransitionProvider: UIViewController {
-  var transition: Transition? { get }
+  func transitionFor(presenting: Bool, otherViewController: UIViewController) -> Transition?
 }
 
 public class TransitionCoordinator: NSObject {
@@ -11,7 +11,8 @@ public class TransitionCoordinator: NSObject {
   public private(set) var currentTransition: Transition?
 
   private func setupTransition(from: UIViewController, to: UIViewController, isPresenting: Bool, isNavigationTransition: Bool) {
-    let transition = ((isPresenting ? to : from) as? TransitionProvider)?.transition ?? defaultTransition
+    let transitionProvider = (isPresenting ? to : from) as? TransitionProvider
+    let transition = transitionProvider?.transitionFor(presenting: isPresenting, otherViewController: isPresenting ? from : to) ?? defaultTransition
     self.currentTransition = transition
     transition.setupTransition(isPresenting: isPresenting, isNavigationTransition: isNavigationTransition)
   }
