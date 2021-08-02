@@ -19,6 +19,13 @@ open class HeroTransition: Transition {
       otherSnap.layer.position = container.convert(position, to: otherSnap.superview!)
     }
   }
+  
+  public func position(for view: UIView) -> CGPoint? {
+    guard let context = contexts[view],
+          let container = view.superview,
+          let position = context.snapshotView.layer.presentation()?.position else { return nil }
+    return context.snapshotView.superview!.convert(position, to: container)
+  }
 
   open override func animate() -> (dismissed: () -> Void, presented: () -> Void, completed: (Bool) -> Void) {
     guard let back = backgroundView, let front = foregroundView, let container = transitionContainer else {

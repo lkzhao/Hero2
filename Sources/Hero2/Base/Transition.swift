@@ -10,14 +10,23 @@ open class Transition: NSObject {
   public private(set) var isInteractive = false
   public private(set) var animator: UIViewPropertyAnimator?
   public private(set) var transitionContext: UIViewControllerContextTransitioning?
-
-  public var fractionCompleted: CGFloat {
-    get { animator?.fractionComplete ?? 0 }
-    set { animator?.fractionComplete = newValue }
-  }
+  
+  public var isUserInteractionEnabled = false
   
   public var duration: TimeInterval
   public var timingParameters: UITimingCurveProvider
+  
+  public var isReversed: Bool {
+    animator?.isReversed ?? false
+  }
+  
+  public var fractionCompleted: CGFloat {
+    get { animator?.fractionComplete ?? 0 }
+    set {
+      guard let animator = animator, animator.state == .active else { return }
+      animator.fractionComplete = newValue
+    }
+  }
 
   public init(duration: TimeInterval = 0.4, timingParameters: UITimingCurveProvider = UISpringTimingParameters(dampingRatio: 0.9)) {
     self.duration = duration
@@ -27,6 +36,9 @@ open class Transition: NSObject {
   
   open func beginInteractiveTransition() {
     isInteractive = true
+    
+    animator?.pauseAnimation()
+    transitionContext?.pauseInteractiveTransition()
   }
   
   open func endInteractiveTransition(shouldFinish: Bool) {
@@ -125,21 +137,23 @@ extension Transition: UIViewControllerAnimatedTransitioning {
   open func animateTransition(using context: UIViewControllerContextTransitioning) {
     transitionContext = context
     isTransitioning = true
-    
-    animator = UIViewPropertyAnimator(duration: duration, timingParameters: timingParameters)
 
     let fullScreenSnapshot = transitionContainer?.window?.snapshotView(afterScreenUpdates: false) ?? fromView?.snapshotView(afterScreenUpdates: false)
     if let fullScreenSnapshot = fullScreenSnapshot {
       (transitionContainer?.window ?? transitionContainer)?.addSubview(fullScreenSnapshot)
     }
-    func startAnimation() {
-      let container = transitionContainer!
-      container.isUserInteractionEnabled = false
-      container.addSubview(backgroundView!)
-      container.addSubview(foregroundView!)
-      toView!.frame = container.frame
-      toView!.layoutIfNeeded()
+    
+    let container = transitionContainer!
+    container.addSubview(backgroundView!)
+    container.addSubview(foregroundView!)
+    toView!.frame = container.frame
+    toView!.layoutIfNeeded()
 
+    // Allows the ViewControllers to load their views, and setup the transition during viewDidLoad
+    container.isUserInteractionEnabled = isUserInteractionEnabled
+    animator = UIViewPropertyAnimator(duration: duration, timingParameters: timingParameters)
+
+    func startAnimation() {
       let (dismissedState, presentedState, completion) = animate()
       
       if isPresenting {

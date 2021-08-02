@@ -12,6 +12,7 @@ import Hero2
 import Kingfisher
 
 struct ImageData {
+  let id = UUID().uuidString
   let url: URL
   let size: CGSize
 }
@@ -49,6 +50,18 @@ class ImageGalleryViewController: ComponentViewController {
           size: CGSize(width: 640, height: 426)),
     ImageData(url: URL(string: "https://unsplash.com/photos/MOfETox0bkE/download?force=true&w=640")!,
           size: CGSize(width: 640, height: 426)),
+    ImageData(url: URL(string: "https://unsplash.com/photos/Yn0l7uwBrpw/download?force=true&w=640")!,
+          size: CGSize(width: 640, height: 360)),
+    ImageData(url: URL(string: "https://unsplash.com/photos/J4-xolC4CCU/download?force=true&w=640")!,
+          size: CGSize(width: 640, height: 800)),
+    ImageData(url: URL(string: "https://unsplash.com/photos/biggKnv1Oag/download?force=true&w=640")!,
+          size: CGSize(width: 640, height: 434)),
+    ImageData(url: URL(string: "https://unsplash.com/photos/MR2A97jFDAs/download?force=true&w=640")!,
+          size: CGSize(width: 640, height: 959)),
+    ImageData(url: URL(string: "https://unsplash.com/photos/oaCnDk89aho/download?force=true&w=640")!,
+          size: CGSize(width: 640, height: 426)),
+    ImageData(url: URL(string: "https://unsplash.com/photos/MOfETox0bkE/download?force=true&w=640")!,
+          size: CGSize(width: 640, height: 426)),
   ]
 
   override var component: Component {
@@ -56,7 +69,7 @@ class ImageGalleryViewController: ComponentViewController {
       for image in images {
         AsyncImage(image.url)
           .size(width: .fill, height: .aspectPercentage(image.size.height / image.size.width))
-          .heroID(image.url.absoluteString)
+          .heroID(image.id)
           .tappableView {
             let detailVC = ImageDetailViewController()
             detailVC.image = image
@@ -72,7 +85,7 @@ class ImageDetailViewController: ComponentViewController {
   var image: ImageData! {
     didSet {
       imageView.kf.setImage(with: image.url)
-      imageView.heroID = image.url.absoluteString
+      imageView.heroID = image.id
     }
   }
   let imageView = UIImageView()
@@ -89,22 +102,39 @@ class ImageDetailViewController: ComponentViewController {
   
   override func viewDidLoad() {
     super.viewDidLoad()
-    view.heroModifiers = [.fade]
+    transition.isUserInteractionEnabled = true
+    view.heroModifiers = [.fade, .snapshotType(.none)]
     view.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(handlePan(gr:))))
   }
 
+  var initialFractionCompleted: CGFloat = 0
+  var initialPosition: CGPoint = .zero
   @objc func handlePan(gr: UIPanGestureRecognizer) {
     switch gr.state {
     case .began:
       transition.beginInteractiveTransition()
-      dismiss(animated: true, completion: nil)
+      if !isBeingPresented && !isBeingDismissed {
+        dismiss(animated: true, completion: nil)
+      }
+      initialFractionCompleted = transition.fractionCompleted
+      initialPosition = transition.position(for: imageView) ?? imageView.center
     case .changed:
+      guard transition.isTransitioning else { return }
       let trans = gr.translation(in: view)
-      transition.apply(position: imageView.center + trans, to: imageView)
-      transition.fractionCompleted = trans.y / view.bounds.height
+      let delta = (transition.isPresenting != transition.isReversed ? -trans.y : trans.y) / view.bounds.height
+      transition.apply(position: initialPosition + trans, to: imageView)
+      transition.fractionCompleted = initialFractionCompleted + delta
     default:
-      transition.endInteractiveTransition(shouldFinish: gr.translation(in: view).y + gr.velocity(in: view).y > view.bounds.height / 4)
+      guard transition.isTransitioning else { return }
+      let point = gr.translation(in: view) + gr.velocity(in: view)
+      let delta = (transition.isPresenting != transition.isReversed ? -point.y : point.y) / view.bounds.height
+      let shouldFinish = delta > 0.5
+      transition.endInteractiveTransition(shouldFinish: shouldFinish)
+      if isBeingPresented != shouldFinish {
+        // dismissing, do not let our view handle touches anymore.
+        // this allows user to swipe on the background view immediately
+        view.isUserInteractionEnabled = false
+      }
     }
   }
 }
-
