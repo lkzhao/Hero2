@@ -103,6 +103,7 @@ class ImageDetailViewController: ComponentViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     transition.isUserInteractionEnabled = true
+    imageView.heroModifiers = [.snapshotType(.none)]
     view.heroModifiers = [.fade, .snapshotType(.none)]
     view.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(handlePan(gr:))))
   }
