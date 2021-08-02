@@ -70,16 +70,36 @@ class ImageGalleryViewController: ComponentViewController {
         AsyncImage(image.url)
           .size(width: .fill, height: .aspectPercentage(image.size.height / image.size.width))
           .heroID(image.id)
-          .tappableView {
-            let detailVC = ImageDetailViewController()
-            detailVC.image = image
-            $0.present(detailVC)
+          .tappableView { [unowned self] in
+            self.didTap(image: image)
           }
       }
     }
   }
+  
+  override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    if let image = toBePresentedImage {
+      toBePresentedImage = nil
+      present(image: image)
+    }
+  }
+  
+  var toBePresentedImage: ImageData?
+  func didTap(image: ImageData) {
+    if presentingViewController != nil {
+      toBePresentedImage = image
+    } else {
+      present(image: image)
+    }
+  }
+  
+  func present(image: ImageData) {
+    let detailVC = ImageDetailViewController()
+    detailVC.image = image
+    present(detailVC, animated: true, completion: nil)
+  }
 }
-
 
 class ImageDetailViewController: ComponentViewController {
   var image: ImageData! {
@@ -89,9 +109,10 @@ class ImageDetailViewController: ComponentViewController {
     }
   }
   let imageView = UIImageView()
+  lazy var panGR = UIPanGestureRecognizer(target: self, action: #selector(handlePan(gr:)))
 
   override var component: Component {
-    VStack {
+    VStack(justifyContent: .center) {
       imageView
         .size(width: .fill, height: .aspectPercentage(image.size.height / image.size.width))
         .tappableView {
@@ -103,9 +124,11 @@ class ImageDetailViewController: ComponentViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     transition.isUserInteractionEnabled = true
+//    transition.duration = 1
     imageView.heroModifiers = [.snapshotType(.none)]
     view.heroModifiers = [.fade, .snapshotType(.none)]
-    view.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(handlePan(gr:))))
+    panGR.delegate = self
+    view.addGestureRecognizer(panGR)
   }
 
   var initialFractionCompleted: CGFloat = 0
@@ -114,7 +137,7 @@ class ImageDetailViewController: ComponentViewController {
     switch gr.state {
     case .began:
       transition.beginInteractiveTransition()
-      if !isBeingPresented && !isBeingDismissed {
+      if !isBeingPresented, !isBeingDismissed {
         dismiss(animated: true, completion: nil)
       }
       initialFractionCompleted = transition.fractionCompleted
@@ -122,13 +145,14 @@ class ImageDetailViewController: ComponentViewController {
     case .changed:
       guard transition.isTransitioning else { return }
       let trans = gr.translation(in: view)
-      let delta = (transition.isPresenting != transition.isReversed ? -trans.y : trans.y) / view.bounds.height
+      let distance = trans.distance(.zero)
+      let delta = (transition.isPresenting != transition.isReversed ? -distance : distance) / view.bounds.height
       transition.apply(position: initialPosition + trans, to: imageView)
       transition.fractionCompleted = initialFractionCompleted + delta
     default:
       guard transition.isTransitioning else { return }
-      let point = gr.translation(in: view) + gr.velocity(in: view)
-      let delta = (transition.isPresenting != transition.isReversed ? -point.y : point.y) / view.bounds.height
+      let distance = (gr.translation(in: view) + gr.velocity(in: view)).distance(.zero)
+      let delta = (transition.isPresenting != transition.isReversed ? -distance : distance) / view.bounds.height
       let shouldFinish = delta > 0.5
       transition.endInteractiveTransition(shouldFinish: shouldFinish)
       if isBeingPresented != shouldFinish {
@@ -137,5 +161,12 @@ class ImageDetailViewController: ComponentViewController {
         view.isUserInteractionEnabled = false
       }
     }
+  }
+}
+
+extension ImageDetailViewController: UIGestureRecognizerDelegate {
+  func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+    let velocity = panGR.velocity(in: nil)
+    return velocity.x > abs(velocity.y) || velocity.y > abs(velocity.x)
   }
 }
