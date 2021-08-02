@@ -118,7 +118,7 @@ class ImageDetailViewController: ComponentViewController {
         dismiss(animated: true, completion: nil)
       }
       initialFractionCompleted = transition.fractionCompleted
-      initialPosition = transition.position(for: imageView) ?? imageView.center
+      initialPosition = transition.position(for: imageView) ?? view.convert(imageView.bounds.center, from: imageView)
     case .changed:
       guard transition.isTransitioning else { return }
       let trans = gr.translation(in: view)
