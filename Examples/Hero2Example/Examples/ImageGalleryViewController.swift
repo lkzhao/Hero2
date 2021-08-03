@@ -39,29 +39,29 @@ public struct AsyncImage: ViewComponentBuilder {
 class ImageGalleryViewController: ComponentViewController {
   let images = [
     ImageData(url: URL(string: "https://unsplash.com/photos/Yn0l7uwBrpw/download?force=true&w=640")!,
-          size: CGSize(width: 640, height: 360)),
+              size: CGSize(width: 640, height: 360)),
     ImageData(url: URL(string: "https://unsplash.com/photos/J4-xolC4CCU/download?force=true&w=640")!,
-          size: CGSize(width: 640, height: 800)),
+              size: CGSize(width: 640, height: 800)),
     ImageData(url: URL(string: "https://unsplash.com/photos/biggKnv1Oag/download?force=true&w=640")!,
-          size: CGSize(width: 640, height: 434)),
+              size: CGSize(width: 640, height: 434)),
     ImageData(url: URL(string: "https://unsplash.com/photos/MR2A97jFDAs/download?force=true&w=640")!,
-          size: CGSize(width: 640, height: 959)),
+              size: CGSize(width: 640, height: 959)),
     ImageData(url: URL(string: "https://unsplash.com/photos/oaCnDk89aho/download?force=true&w=640")!,
-          size: CGSize(width: 640, height: 426)),
+              size: CGSize(width: 640, height: 426)),
     ImageData(url: URL(string: "https://unsplash.com/photos/MOfETox0bkE/download?force=true&w=640")!,
-          size: CGSize(width: 640, height: 426)),
+              size: CGSize(width: 640, height: 426)),
     ImageData(url: URL(string: "https://unsplash.com/photos/Yn0l7uwBrpw/download?force=true&w=640")!,
-          size: CGSize(width: 640, height: 360)),
+              size: CGSize(width: 640, height: 360)),
     ImageData(url: URL(string: "https://unsplash.com/photos/J4-xolC4CCU/download?force=true&w=640")!,
-          size: CGSize(width: 640, height: 800)),
+              size: CGSize(width: 640, height: 800)),
     ImageData(url: URL(string: "https://unsplash.com/photos/biggKnv1Oag/download?force=true&w=640")!,
-          size: CGSize(width: 640, height: 434)),
+              size: CGSize(width: 640, height: 434)),
     ImageData(url: URL(string: "https://unsplash.com/photos/MR2A97jFDAs/download?force=true&w=640")!,
-          size: CGSize(width: 640, height: 959)),
+              size: CGSize(width: 640, height: 959)),
     ImageData(url: URL(string: "https://unsplash.com/photos/oaCnDk89aho/download?force=true&w=640")!,
-          size: CGSize(width: 640, height: 426)),
+              size: CGSize(width: 640, height: 426)),
     ImageData(url: URL(string: "https://unsplash.com/photos/MOfETox0bkE/download?force=true&w=640")!,
-          size: CGSize(width: 640, height: 426)),
+              size: CGSize(width: 640, height: 426)),
   ]
 
   override var component: Component {
@@ -134,6 +134,10 @@ class ImageDetailViewController: ComponentViewController {
   var initialFractionCompleted: CGFloat = 0
   var initialPosition: CGPoint = .zero
   @objc func handlePan(gr: UIPanGestureRecognizer) {
+    func progressFrom(offset: CGPoint) -> CGFloat {
+      let progress = (offset.x + offset.y) / ((view.bounds.height + view.bounds.width) / 4)
+      return (transition.isPresenting != transition.isReversed ? -progress : progress)
+    }
     switch gr.state {
     case .began:
       transition.beginInteractiveTransition()
@@ -144,16 +148,15 @@ class ImageDetailViewController: ComponentViewController {
       initialPosition = transition.position(for: imageView) ?? view.convert(imageView.bounds.center, from: imageView)
     case .changed:
       guard transition.isTransitioning else { return }
-      let trans = gr.translation(in: view)
-      let distance = trans.distance(.zero)
-      let delta = (transition.isPresenting != transition.isReversed ? -distance : distance) / view.bounds.height
-      transition.apply(position: initialPosition + trans, to: imageView)
-      transition.fractionCompleted = initialFractionCompleted + delta
+      let translation = gr.translation(in: view)
+      let progress = progressFrom(offset: translation)
+      transition.apply(position: initialPosition + translation, to: imageView)
+      transition.fractionCompleted = (initialFractionCompleted + progress).clamp(0, 1)
     default:
       guard transition.isTransitioning else { return }
-      let distance = (gr.translation(in: view) + gr.velocity(in: view)).distance(.zero)
-      let delta = (transition.isPresenting != transition.isReversed ? -distance : distance) / view.bounds.height
-      let shouldFinish = delta > 0.5
+      let combinedOffset = gr.translation(in: view) + gr.velocity(in: view)
+      let progress = progressFrom(offset: combinedOffset)
+      let shouldFinish = progress > 0.5
       transition.endInteractiveTransition(shouldFinish: shouldFinish)
       if isBeingPresented != shouldFinish {
         // dismissing, do not let our view handle touches anymore.
@@ -167,6 +170,7 @@ class ImageDetailViewController: ComponentViewController {
 extension ImageDetailViewController: UIGestureRecognizerDelegate {
   func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
     let velocity = panGR.velocity(in: nil)
+    // only allow right and down swipe
     return velocity.x > abs(velocity.y) || velocity.y > abs(velocity.x)
   }
 }
