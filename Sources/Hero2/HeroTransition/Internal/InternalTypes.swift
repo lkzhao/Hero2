@@ -1,15 +1,5 @@
 import UIKit
 
-public enum SnapshotType {
-  case `default`
-  case none
-}
-
-public enum ContainerType {
-  case parent
-  case global
-}
-
 struct ViewTransitionContext {
   var id: String?
   var isFront: Bool

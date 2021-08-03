@@ -67,60 +67,57 @@ open class Transition: NSObject {
 // MARK: - Helper Getters
 extension Transition {
   public var transitionContainer: UIView? {
-    return transitionContext?.containerView
+    transitionContext?.containerView
   }
 
   public var toViewController: UIViewController? {
-    return transitionContext?.viewController(forKey: .to)
+    transitionContext?.viewController(forKey: .to)
   }
 
   public var fromViewController: UIViewController? {
-    return transitionContext?.viewController(forKey: .from)
+    transitionContext?.viewController(forKey: .from)
   }
 
   public var toView: UIView? {
-    return toViewController?.view
+    toViewController?.view
   }
 
   public var fromView: UIView? {
-    return fromViewController?.view
+    fromViewController?.view
   }
 
   public var foregroundViewController: UIViewController? {
-    return isPresenting ? toViewController : fromViewController
+    isPresenting ? toViewController : fromViewController
   }
 
   public var backgroundViewController: UIViewController? {
-    return !isPresenting ? toViewController : fromViewController
+    !isPresenting ? toViewController : fromViewController
   }
 
   public var foregroundView: UIView? {
-    return isPresenting ? toView : fromView
+    isPresenting ? toView : fromView
   }
 
   public var backgroundView: UIView? {
-    return !isPresenting ? toView : fromView
+    !isPresenting ? toView : fromView
   }
 
   public var toOverFullScreen: Bool {
-    return toViewController?.modalPresentationStyle == .overFullScreen
-      || toViewController?.modalPresentationStyle == .overCurrentContext
+    toViewController?.modalPresentationStyle == .overFullScreen || toViewController?.modalPresentationStyle == .overCurrentContext
   }
 
   public var fromOverFullScreen: Bool {
-    return fromViewController?.modalPresentationStyle == .overFullScreen
-      || fromViewController?.modalPresentationStyle == .overCurrentContext
+    fromViewController?.modalPresentationStyle == .overFullScreen || fromViewController?.modalPresentationStyle == .overCurrentContext
   }
 
   public func isBackground(viewController: UIViewController) -> Bool {
-    return (isPresenting && fromViewController == viewController)
-      || (!isPresenting && toViewController == viewController)
+    (isPresenting && fromViewController == viewController) || (!isPresenting && toViewController == viewController)
   }
 }
 
 extension Transition: UIViewControllerInteractiveTransitioning {
   open func interruptibleAnimator(using _: UIViewControllerContextTransitioning) -> UIViewImplicitlyAnimating {
-    return animator!
+    animator!
   }
   
   open func startInteractiveTransition(_ transitionContext: UIViewControllerContextTransitioning) {
@@ -131,7 +128,6 @@ extension Transition: UIViewControllerInteractiveTransitioning {
     isInteractive
   }
 }
-
 
 extension Transition: UIViewControllerAnimatedTransitioning {
   open func animateTransition(using context: UIViewControllerContextTransitioning) {
@@ -212,43 +208,40 @@ extension Transition: UIViewControllerAnimatedTransitioning {
 }
 
 extension Transition: UIViewControllerTransitioningDelegate {
-  internal func setupTransition(isPresenting: Bool, isNavigationTransition: Bool) {
+  @discardableResult internal func setupTransition(isPresenting: Bool, isNavigationTransition: Bool) -> Self {
     self.isPresenting = isPresenting
     self.isNavigationTransition = isNavigationTransition
     self.isTransitioning = true
+    return self
   }
   
-  var interactiveTransitioning: UIViewControllerInteractiveTransitioning? {
-    return self
+  private var interactiveTransitioning: UIViewControllerInteractiveTransitioning? {
+    self
   }
 
   public func animationController(forPresented presented: UIViewController, presenting: UIViewController, source _: UIViewController) -> UIViewControllerAnimatedTransitioning? {
     setupTransition(isPresenting: true, isNavigationTransition: false)
-    return self
   }
 
   public func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
     setupTransition(isPresenting: false, isNavigationTransition: false)
-    return self
   }
 
   public func interactionControllerForDismissal(using _: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
-    return interactiveTransitioning
+    interactiveTransitioning
   }
 
   public func interactionControllerForPresentation(using _: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
-    return interactiveTransitioning
+    interactiveTransitioning
   }
 }
 
 extension Transition: UINavigationControllerDelegate {
   public func navigationController(_: UINavigationController, interactionControllerFor _: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
-    return interactiveTransitioning
+    interactiveTransitioning
   }
 
   public func navigationController(_ navigationController: UINavigationController, animationControllerFor operation: UINavigationController.Operation, from: UIViewController, to: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-//    navigationController.view.layoutIfNeeded()
     setupTransition(isPresenting: operation == .push, isNavigationTransition: true)
-    return self
   }
 }

@@ -1,14 +1,7 @@
 import UIKit
 
 open class HeroTransition: Transition {
-  var pausedAnimations: [UIView: [String: CAAnimation]] = [:]
-  var contexts: [UIView: ViewTransitionContext] = [:]
-  
-  func pause(view: UIView, animationForKey key: String) {
-    guard pausedAnimations[view]?[key] == nil, let anim = view.layer.animation(forKey: key) else { return }
-    pausedAnimations[view, default: [:]][key] = anim
-    view.layer.removeAnimation(forKey: key)
-  }
+  // MARK: - public
   
   public func apply(position: CGPoint, to view: UIView) {
     guard let context = contexts[view], let container = view.superview else { return }
@@ -26,6 +19,19 @@ open class HeroTransition: Transition {
           let position = context.snapshotView.layer.presentation()?.position else { return nil }
     return context.snapshotView.superview!.convert(position, to: container)
   }
+  
+  // MARK: - private
+  
+  private var pausedAnimations: [UIView: [String: CAAnimation]] = [:]
+  private var contexts: [UIView: ViewTransitionContext] = [:]
+  
+  private func pause(view: UIView, animationForKey key: String) {
+    guard pausedAnimations[view]?[key] == nil, let anim = view.layer.animation(forKey: key) else { return }
+    pausedAnimations[view, default: [:]][key] = anim
+    view.layer.removeAnimation(forKey: key)
+  }
+  
+  // MARK: - override
 
   open override func animate() -> (dismissed: () -> Void, presented: () -> Void, completed: (Bool) -> Void) {
     guard let back = backgroundView, let front = foregroundView, let container = transitionContainer else {

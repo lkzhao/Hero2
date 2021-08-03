@@ -7,6 +7,16 @@
 
 import UIKit
 
+public enum SnapshotType {
+  case `default`
+  case none
+}
+
+public enum ContainerType {
+  case parent
+  case global
+}
+
 public enum HeroModifier: Equatable {
   case fade
   case translate(CGPoint)

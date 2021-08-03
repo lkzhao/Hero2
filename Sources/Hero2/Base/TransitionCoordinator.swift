@@ -19,7 +19,7 @@ public class TransitionCoordinator: NSObject {
 }
 
 extension TransitionCoordinator: UIViewControllerTransitioningDelegate {
-  var interactiveTransitioning: UIViewControllerInteractiveTransitioning? {
+  private var interactiveTransitioning: UIViewControllerInteractiveTransitioning? {
     currentTransition
   }
 
