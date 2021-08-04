@@ -25,13 +25,13 @@ func convert(layerTransform: CATransform3D, to container: CALayer) -> CATransfor
   return CATransform3DConcat(layerTransform, CATransform3DInvert(containerTrans))
 }
 
-func viewStateFrom(modifiers: [HeroModifier], isPresenting: Bool, isMatched: Bool, isForeground: Bool) -> ViewState {
+func viewStateFrom(modifiers: [HeroModifier], view: UIView, containerSize: CGSize, ourViews: [String: UIView], otherViews: [String: UIView], isPresenting: Bool, isForeground: Bool) -> ViewState {
   var state = ViewState()
-  process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched, isForeground: isForeground)
+  process(modifiers: modifiers, on: &state, view: view, containerSize: containerSize, ourViews: ourViews, otherViews: otherViews, isPresenting: isPresenting, isForeground: isForeground)
   return state
 }
 
-func process(modifiers: [HeroModifier], on state: inout ViewState, isPresenting: Bool, isMatched: Bool, isForeground: Bool) {
+func process(modifiers: [HeroModifier], on state: inout ViewState, view: UIView, containerSize: CGSize, ourViews: [String: UIView], otherViews: [String: UIView], isPresenting: Bool, isForeground: Bool) {
   for modifier in modifiers {
     switch modifier {
     case .fade:
@@ -39,6 +39,9 @@ func process(modifiers: [HeroModifier], on state: inout ViewState, isPresenting:
     case .translate(let translation):
       state.transform = CATransform3DTranslate(state.transform ?? CATransform3DIdentity,
                                                translation.x, translation.y, 0)
+    case .translatePercentage(let translation):
+      state.transform = CATransform3DTranslate(state.transform ?? CATransform3DIdentity,
+                                               translation.x * containerSize.width, translation.y * containerSize.height, 0)
     case .rotate(let rotation):
       state.transform = CATransform3DRotate(state.transform ?? CATransform3DIdentity, rotation, 0, 0, 1)
     case .scale(let scale):
@@ -59,41 +62,43 @@ func process(modifiers: [HeroModifier], on state: inout ViewState, isPresenting:
       state.containerType = containerType
     case .snapshotType(let snapshotType):
       state.snapshotType = snapshotType
+    case .match(let matchId):
+      state.match = matchId
     case .whenPresenting(let modifiers):
       if isPresenting {
-        process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched, isForeground: isForeground)
+        process(modifiers: modifiers, on: &state, view: view, containerSize: containerSize, ourViews: ourViews, otherViews: otherViews, isPresenting: isPresenting, isForeground: isForeground)
       }
     case .whenDismissing(let modifiers):
       if !isPresenting {
-        process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched, isForeground: isForeground)
+        process(modifiers: modifiers, on: &state, view: view, containerSize: containerSize, ourViews: ourViews, otherViews: otherViews, isPresenting: isPresenting, isForeground: isForeground)
       }
     case .whenMatched(let modifiers):
-      if isMatched {
-        process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched, isForeground: isForeground)
+      if state.match.flatMap({ otherViews[$0] }) != nil {
+        process(modifiers: modifiers, on: &state, view: view, containerSize: containerSize, ourViews: ourViews, otherViews: otherViews, isPresenting: isPresenting, isForeground: isForeground)
       }
     case .whenNotMatched(let modifiers):
-      if !isMatched {
-        process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched, isForeground: isForeground)
+      if state.match.flatMap({ otherViews[$0] }) == nil {
+        process(modifiers: modifiers, on: &state, view: view, containerSize: containerSize, ourViews: ourViews, otherViews: otherViews, isPresenting: isPresenting, isForeground: isForeground)
       }
     case .whenAppearing(let modifiers):
       if isPresenting == isForeground {
-        process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched, isForeground: isForeground)
+        process(modifiers: modifiers, on: &state, view: view, containerSize: containerSize, ourViews: ourViews, otherViews: otherViews, isPresenting: isPresenting, isForeground: isForeground)
       }
     case .whenDisappearing(let modifiers):
       if isPresenting != isForeground {
-        process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched, isForeground: isForeground)
+        process(modifiers: modifiers, on: &state, view: view, containerSize: containerSize, ourViews: ourViews, otherViews: otherViews, isPresenting: isPresenting, isForeground: isForeground)
       }
     case .whenForeground(let modifiers):
       if isForeground {
-        process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched, isForeground: isForeground)
+        process(modifiers: modifiers, on: &state, view: view, containerSize: containerSize, ourViews: ourViews, otherViews: otherViews, isPresenting: isPresenting, isForeground: isForeground)
       }
     case .whenBackground(let modifiers):
       if !isForeground {
-        process(modifiers: modifiers, on: &state, isPresenting: isPresenting, isMatched: isMatched, isForeground: isForeground)
+        process(modifiers: modifiers, on: &state, view: view, containerSize: containerSize, ourViews: ourViews, otherViews: otherViews, isPresenting: isPresenting, isForeground: isForeground)
       }
     case.beginWith(let modifiers):
       var beginState = ViewState()
-      process(modifiers: modifiers, on: &beginState, isPresenting: isPresenting, isMatched: isMatched, isForeground: isForeground)
+      process(modifiers: modifiers, on: &beginState, view: view, containerSize: containerSize, ourViews: ourViews, otherViews: otherViews, isPresenting: isPresenting, isForeground: isForeground)
       state.beginState = (state.beginState ?? ViewState())?.merge(state: beginState)
     }
   }
@@ -104,6 +109,7 @@ func viewStateFrom(view: UIView) -> ViewState {
   result.windowTransform = convertTransformToWindow(layer: view.layer)
   result.windowPosition = view.window!.convert(view.bounds.center, from: view)
   result.size = view.bounds.size
+  result.cornerRadius = view.cornerRadius
   return result
 }
 
@@ -146,12 +152,10 @@ func originalViewStateFrom(view: UIView, sourceState: ViewState, targetState: Vi
 }
 
 func applyViewState(_ viewState: ViewState, to view: UIView) {
-  if let windowPosition = viewState.windowPosition {
-    let container = view.superview!
+  if let windowPosition = viewState.windowPosition, let container = view.superview {
     view.center = container.convert(windowPosition, from: container.window)
   }
-  if let windowTransform = viewState.windowTransform {
-    let container = view.superview!
+  if let windowTransform = viewState.windowTransform, let container = view.superview {
     view.layer.transform = convert(layerTransform: windowTransform, to: container.layer)
   }
   if let size = viewState.size {
@@ -168,6 +172,9 @@ func applyViewState(_ viewState: ViewState, to view: UIView) {
   }
   if let shadowOpacity = viewState.shadowOpacity {
     view.layer.shadowOpacity = Float(shadowOpacity)
+  }
+  if let cornerRadius = viewState.cornerRadius {
+    view.cornerRadius = cornerRadius
   }
   if let overlayColor = viewState.overlayColor {
     view.overlayView?.backgroundColor = overlayColor

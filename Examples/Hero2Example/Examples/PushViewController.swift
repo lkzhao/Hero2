@@ -34,29 +34,54 @@ class PushDetailViewController: ComponentViewController {
       Text("PushDetailViewController")
     }.inset(20)
   }
+  
+  lazy var panGR = UIPanGestureRecognizer(target: self, action: #selector(handlePan(gr:)))
   override func viewDidLoad() {
     super.viewDidLoad()
+    // allow interruptible transition
+    transition.isUserInteractionEnabled = true
+    panGR.delegate = self
     view.shadowRadius = 20
     view.shadowOffset = .zero
     view.backgroundColor = .systemGroupedBackground
-    view.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(handlePan(gr:))))
+    view.addGestureRecognizer(panGR)
+    view.heroModifiers = [.translatePercentage(CGPoint(x: 1, y: 0)), .beginWith([.shadowOpacity(0.5)]), .snapshotType(.none)]
   }
-  override func viewDidLayoutSubviews() {
-    super.viewDidLayoutSubviews()
-    view.heroModifiers = [.translate(CGPoint(x: view.bounds.width, y: 0)), .beginWith([.shadowOpacity(0.5)]), .snapshotType(.none)]
-  }
+  
+  var initialFractionCompleted: CGFloat = 0
   @objc func handlePan(gr: UIPanGestureRecognizer) {
+    func progressFrom(offset: CGPoint) -> CGFloat {
+      let progress = offset.x / view.bounds.width
+      return (transition.isPresenting != transition.isReversed ? -progress : progress)
+    }
     switch gr.state {
     case .began:
       transition.beginInteractiveTransition()
-      dismiss(animated: true, completion: nil)
+      if !isBeingPresented, !isBeingDismissed {
+        dismiss(animated: true, completion: nil)
+      }
+      initialFractionCompleted = transition.fractionCompleted
     case .changed:
       let trans = gr.translation(in: view)
-      transition.fractionCompleted = trans.x / view.bounds.width
-//      transition.pause(view: view, animationForKey: "transform")
-//      view.transform = .identity.translatedBy(x: trans.x, y: trans.y)
+      let progress = progressFrom(offset: trans)
+      transition.fractionCompleted = initialFractionCompleted + progress
     default:
-      transition.endInteractiveTransition(shouldFinish: gr.translation(in: view).x + gr.velocity(in: view).x > view.bounds.width / 4)
+      let combinedOffset = gr.translation(in: view) + gr.velocity(in: view)
+      let progress = progressFrom(offset: combinedOffset)
+      let shouldFinish = progress > 0.3
+      transition.endInteractiveTransition(shouldFinish: shouldFinish)
+      if isBeingPresented != shouldFinish {
+        // dismissing, do not let our view handle touches anymore.
+        // this allows user to swipe on the background view immediately
+        view.isUserInteractionEnabled = false
+      }
     }
+  }
+}
+
+extension PushDetailViewController: UIGestureRecognizerDelegate {
+  func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+    let velocity = panGR.velocity(in: nil)
+    return velocity.x > abs(velocity.y)
   }
 }

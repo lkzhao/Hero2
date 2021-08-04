@@ -20,6 +20,7 @@ public enum ContainerType {
 public enum HeroModifier: Equatable {
   case fade
   case translate(CGPoint)
+  case translatePercentage(CGPoint)
   case rotate(CGFloat)
   case scale(CGFloat)
   case transform(CATransform3D)
@@ -29,6 +30,8 @@ public enum HeroModifier: Equatable {
   case shadowOpacity(CGFloat)
 
   case overlayColor(UIColor)
+  
+  case match(String)
 
   case containerType(ContainerType)
   case snapshotType(SnapshotType)

@@ -70,22 +70,25 @@ open class HeroTransition: Transition {
       }
       return nil
     }
-    func processContext(views: [UIView], otherIdToView: [String: UIView], isFront: Bool) {
+    func processContext(views: [UIView], isFront: Bool) {
       for view in views {
-        let heroID = view.heroID
-        let modifiers = view.heroModifiers ?? []
-        let other = heroID.flatMap { otherIdToView[$0] }
+        let modifiers: [HeroModifier] = (view.heroID.map({ [.match($0)] }) ?? []) + (view.heroModifiers ?? [])
+        let ourViews = isFront ? frontIdToView : backIdToView
+        let otherViews = !isFront ? frontIdToView : backIdToView
         let modifierState = viewStateFrom(modifiers: modifiers,
+                                          view: view,
+                                          containerSize: container.bounds.size,
+                                          ourViews: ourViews,
+                                          otherViews: otherViews,
                                           isPresenting: isPresenting,
-                                          isMatched: other != nil,
                                           isForeground: isFront)
-        if other != nil || modifierState != ViewState() {
+        let other = modifierState.match.flatMap { otherViews[$0] }
+        if other != nil || modifierState != ViewState(match: modifierState.match) {
           let matchedSuperview = (modifierState.containerType ?? .parent) == .parent ? findMatchedSuperview(view: view) : nil
           let sourceState = sourceViewStateFrom(view: view, modifierState: modifierState)
           let targetState = targetViewStateFrom(view: other ?? view, modifierState: modifierState)
           let originalState = originalViewStateFrom(view: view, sourceState: sourceState, targetState: targetState)
-          contexts[view] = ViewTransitionContext(id: heroID,
-                                                 isFront: isFront,
+          contexts[view] = ViewTransitionContext(isFront: isFront,
                                                  targetView: other,
                                                  matchedSuperView: matchedSuperview,
                                                  snapshotView: nil,
@@ -96,18 +99,23 @@ open class HeroTransition: Transition {
         }
       }
     }
-    processContext(views: back.flattendSubviews, otherIdToView: frontIdToView, isFront: false)
-    processContext(views: front.flattendSubviews, otherIdToView: backIdToView, isFront: true)
+    processContext(views: back.flattendSubviews, isFront: false)
+    processContext(views: front.flattendSubviews, isFront: true)
     
     // generate snapshot (must be done in reverse, so that child is hidden before parent's snapshot is taken)
     for view in animatingViews.reversed() {
       if (contexts[view]?.targetState.snapshotType ?? .default) == .default {
+        let cornerRadius = view.cornerRadius
+        view.cornerRadius = 0
         let snap = view.snapshotView(afterScreenUpdates: true)!
         snap.layer.shadowColor = view.layer.shadowColor
         snap.layer.shadowRadius = view.layer.shadowRadius
         snap.layer.shadowOffset = view.layer.shadowOffset
         snap.layer.cornerRadius = view.layer.cornerRadius
         snap.clipsToBounds = view.clipsToBounds
+        snap.contentMode = .scaleAspectFill
+        snap.cornerRadius = cornerRadius
+        view.cornerRadius = cornerRadius
         contexts[view]?.snapshotView = snap
       } else {
         let placeholderView = UIView()

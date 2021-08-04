@@ -15,6 +15,9 @@
 		B1115EEF26B72A030096DB85 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1115EEE26B72A030096DB85 /* Util.swift */; };
 		B121A0A024F8771E00E59F78 /* Hero2 in Frameworks */ = {isa = PBXBuildFile; productRef = B121A09F24F8771E00E59F78 /* Hero2 */; };
 		B154155526AE16F60062E486 /* MatchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B154155426AE16F60062E486 /* MatchViewController.swift */; };
+		B17342DA26B91A0D00062A93 /* InstagramViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B17342D926B91A0D00062A93 /* InstagramViewController.swift */; };
+		B17342DC26B91A2500062A93 /* AsyncImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B17342DB26B91A2500062A93 /* AsyncImage.swift */; };
+		B17342DE26B91A6900062A93 /* ImageData.swift in Sources */ = {isa = PBXBuildFile; fileRef = B17342DD26B91A6900062A93 /* ImageData.swift */; };
 		B1BAEE0726B750D5002F1312 /* ImageGalleryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1BAEE0626B750D5002F1312 /* ImageGalleryViewController.swift */; };
 		B1BAEE0926B750FC002F1312 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = B1BAEE0826B750FC002F1312 /* Kingfisher */; };
 		B1C5DB2C26B27F4000026969 /* DelayViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C5DB2B26B27F4000026969 /* DelayViewController.swift */; };
@@ -47,6 +50,9 @@
 		B10A123124F31EAA0076B038 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		B1115EEE26B72A030096DB85 /* Util.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 		B154155426AE16F60062E486 /* MatchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchViewController.swift; sourceTree = "<group>"; };
+		B17342D926B91A0D00062A93 /* InstagramViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstagramViewController.swift; sourceTree = "<group>"; };
+		B17342DB26B91A2500062A93 /* AsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncImage.swift; sourceTree = "<group>"; };
+		B17342DD26B91A6900062A93 /* ImageData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageData.swift; sourceTree = "<group>"; };
 		B1BAEE0626B750D5002F1312 /* ImageGalleryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageGalleryViewController.swift; sourceTree = "<group>"; };
 		B1C5DB2B26B27F4000026969 /* DelayViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DelayViewController.swift; sourceTree = "<group>"; };
 		B1C5DB2D26B3BE0600026969 /* PushViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushViewController.swift; sourceTree = "<group>"; };
@@ -108,6 +114,8 @@
 			isa = PBXGroup;
 			children = (
 				B1115EEE26B72A030096DB85 /* Util.swift */,
+				B17342DB26B91A2500062A93 /* AsyncImage.swift */,
+				B17342DD26B91A6900062A93 /* ImageData.swift */,
 				A304892721C347010026EDA7 /* AppDelegate.swift */,
 				B1CD861026AE333500481EC8 /* ComponentViewController.swift */,
 				B10A123124F31EAA0076B038 /* Helpers.swift */,
@@ -125,6 +133,7 @@
 				B1C5DB2B26B27F4000026969 /* DelayViewController.swift */,
 				B1C5DB2D26B3BE0600026969 /* PushViewController.swift */,
 				B1BAEE0626B750D5002F1312 /* ImageGalleryViewController.swift */,
+				B17342D926B91A0D00062A93 /* InstagramViewController.swift */,
 			);
 			path = Examples;
 			sourceTree = "<group>";
@@ -211,14 +220,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				B154155526AE16F60062E486 /* MatchViewController.swift in Sources */,
+				B17342DE26B91A6900062A93 /* ImageData.swift in Sources */,
 				B1CD861126AE333500481EC8 /* ComponentViewController.swift in Sources */,
 				B1C5DB2C26B27F4000026969 /* DelayViewController.swift in Sources */,
 				B1115EEF26B72A030096DB85 /* Util.swift in Sources */,
 				B10A123224F31EAA0076B038 /* Helpers.swift in Sources */,
+				B17342DC26B91A2500062A93 /* AsyncImage.swift in Sources */,
 				B1BAEE0726B750D5002F1312 /* ImageGalleryViewController.swift in Sources */,
 				A304892A21C347010026EDA7 /* ViewController.swift in Sources */,
 				A304892821C347010026EDA7 /* AppDelegate.swift in Sources */,
 				B1C5DB2E26B3BE0600026969 /* PushViewController.swift in Sources */,
+				B17342DA26B91A0D00062A93 /* InstagramViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
