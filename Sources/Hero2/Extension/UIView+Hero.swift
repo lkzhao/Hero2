@@ -38,3 +38,9 @@ public extension UIView {
     set { objc_setAssociatedObject(self, &type(of: self).AssociatedKeys.heroModifiers, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
   }
 }
+
+extension UIView {
+  var flattendSubviews: [UIView] {
+    return [self] + subviews.flatMap { $0.flattendSubviews }
+  }
+}

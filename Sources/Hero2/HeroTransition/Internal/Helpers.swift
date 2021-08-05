@@ -109,7 +109,7 @@ func viewStateFrom(view: UIView) -> ViewState {
   result.windowTransform = convertTransformToWindow(layer: view.layer)
   result.windowPosition = view.window!.convert(view.bounds.center, from: view)
   result.size = view.bounds.size
-  result.cornerRadius = view.cornerRadius
+  result.cornerRadius = view.layer.cornerRadius
   return result
 }
 
@@ -174,7 +174,7 @@ func applyViewState(_ viewState: ViewState, to view: UIView) {
     view.layer.shadowOpacity = Float(shadowOpacity)
   }
   if let cornerRadius = viewState.cornerRadius {
-    view.cornerRadius = cornerRadius
+    view.layer.cornerRadius = cornerRadius
   }
   if let overlayColor = viewState.overlayColor {
     view.overlayView?.backgroundColor = overlayColor

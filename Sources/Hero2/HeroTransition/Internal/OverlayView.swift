@@ -18,7 +18,7 @@ extension UIView {
     guard overlayView == nil else { return }
     let overlayView = OverlayView(frame: bounds)
     overlayView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-    overlayView.zPosition = 1000
+    overlayView.layer.zPosition = 1000
     addSubview(overlayView)
   }
   

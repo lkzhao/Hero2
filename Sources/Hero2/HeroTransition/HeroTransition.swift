@@ -105,8 +105,8 @@ open class HeroTransition: Transition {
     // generate snapshot (must be done in reverse, so that child is hidden before parent's snapshot is taken)
     for view in animatingViews.reversed() {
       if (contexts[view]?.targetState.snapshotType ?? .default) == .default {
-        let cornerRadius = view.cornerRadius
-        view.cornerRadius = 0
+        let cornerRadius = view.layer.cornerRadius
+        view.layer.cornerRadius = 0
         let snap = view.snapshotView(afterScreenUpdates: true)!
         snap.layer.shadowColor = view.layer.shadowColor
         snap.layer.shadowRadius = view.layer.shadowRadius
@@ -114,8 +114,8 @@ open class HeroTransition: Transition {
         snap.layer.cornerRadius = view.layer.cornerRadius
         snap.clipsToBounds = view.clipsToBounds
         snap.contentMode = .scaleAspectFill
-        snap.cornerRadius = cornerRadius
-        view.cornerRadius = cornerRadius
+        snap.layer.cornerRadius = cornerRadius
+        view.layer.cornerRadius = cornerRadius
         contexts[view]?.snapshotView = snap
       } else {
         let placeholderView = UIView()
