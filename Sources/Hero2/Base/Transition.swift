@@ -5,11 +5,13 @@ import UIKit
 
 open class Transition: NSObject {
   public private(set) var isPresenting: Bool = true
-  public private(set) var isTransitioning: Bool = false
   public private(set) var isNavigationTransition: Bool = false
   public private(set) var isInteractive = false
   public private(set) var animator: UIViewPropertyAnimator?
   public private(set) var transitionContext: UIViewControllerContextTransitioning?
+  public var isTransitioning: Bool {
+    animator != nil
+  }
   
   public var isUserInteractionEnabled = false
   
@@ -132,7 +134,6 @@ extension Transition: UIViewControllerInteractiveTransitioning {
 extension Transition: UIViewControllerAnimatedTransitioning {
   open func animateTransition(using context: UIViewControllerContextTransitioning) {
     transitionContext = context
-    isTransitioning = true
 
     let fullScreenSnapshot = transitionContainer?.window?.snapshotView(afterScreenUpdates: false) ?? fromView?.snapshotView(afterScreenUpdates: false)
     if let fullScreenSnapshot = fullScreenSnapshot {
@@ -196,13 +197,12 @@ extension Transition: UIViewControllerAnimatedTransitioning {
     if toOverFullScreen || fromOverFullScreen, let destinationView = finished ? toView : fromView {
       transitionContainer?.window?.addSubview(destinationView)
     }
-    isTransitioning = false
     transitionContext?.completeTransition(finished)
   }
 
   open func animationEnded(_ transitionCompleted: Bool) {
     transitionContext = nil
-    isTransitioning = false
+    animator = nil
     isNavigationTransition = false
   }
 }
@@ -211,7 +211,6 @@ extension Transition: UIViewControllerTransitioningDelegate {
   @discardableResult internal func setupTransition(isPresenting: Bool, isNavigationTransition: Bool) -> Self {
     self.isPresenting = isPresenting
     self.isNavigationTransition = isNavigationTransition
-    self.isTransitioning = true
     return self
   }
   
