@@ -30,6 +30,7 @@ public enum HeroModifier: Equatable {
   case shadowOpacity(CGFloat)
 
   case overlayColor(UIColor)
+  case backgroundColor(UIColor)
   
   case match(String)
 

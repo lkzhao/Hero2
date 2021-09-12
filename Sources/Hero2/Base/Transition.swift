@@ -194,8 +194,10 @@ extension Transition: UIViewControllerAnimatedTransitioning {
   }
 
   open func completeTransition(finished: Bool) {
-    if toOverFullScreen || fromOverFullScreen, let destinationView = finished ? toView : fromView {
-      transitionContainer?.window?.addSubview(destinationView)
+    if finished {
+        fromView?.removeFromSuperview()
+    } else {
+        toView?.removeFromSuperview()
     }
     transitionContext?.completeTransition(finished)
   }

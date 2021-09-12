@@ -54,6 +54,8 @@ func process(modifiers: [HeroModifier], on state: inout ViewState, view: UIView,
       state.zPosition = zPosition
     case .overlayColor(let color):
       state.overlayColor = color
+    case .backgroundColor(let color):
+      state.backgroundColor = color
     case .delay(let delay):
       state.delay = delay
     case .duration(let duration):
@@ -63,7 +65,9 @@ func process(modifiers: [HeroModifier], on state: inout ViewState, view: UIView,
     case .snapshotType(let snapshotType):
       state.snapshotType = snapshotType
     case .match(let matchId):
-      state.match = matchId
+        if otherViews[matchId] != nil {
+            state.match = matchId
+        }
     case .whenPresenting(let modifiers):
       if isPresenting {
         process(modifiers: modifiers, on: &state, view: view, containerSize: containerSize, ourViews: ourViews, otherViews: otherViews, isPresenting: isPresenting, isForeground: isForeground)
@@ -130,6 +134,9 @@ func viewStateFrom(view: UIView, ifExistOn modifierState: ViewState) -> ViewStat
   if let color = modifierState.overlayColor {
     viewState.overlayColor = color.withAlphaComponent(0)
   }
+  if modifierState.backgroundColor != nil {
+    viewState.backgroundColor = view.backgroundColor
+  }
   return viewState
 }
 
@@ -178,6 +185,9 @@ func applyViewState(_ viewState: ViewState, to view: UIView) {
   }
   if let overlayColor = viewState.overlayColor {
     view.overlayView?.backgroundColor = overlayColor
+  }
+  if let backgroundColor = viewState.backgroundColor {
+    view.backgroundColor = backgroundColor
   }
 }
 

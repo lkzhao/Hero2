@@ -19,6 +19,11 @@ open class HeroTransition: Transition {
           let position = context.snapshotView.layer.presentation()?.position else { return nil }
     return context.snapshotView.superview!.convert(position, to: container)
   }
+    
+  public func isMatch(view: UIView) -> Bool {
+    guard let context = contexts[view] else { return false }
+    return context.targetView != nil
+  }
   
   // MARK: - private
   
@@ -50,12 +55,12 @@ open class HeroTransition: Transition {
     var frontIdToView: [String: UIView] = [:]
     var backIdToView: [String: UIView] = [:]
     for view in front.flattendSubviews {
-      if let heroID = view.heroID {
+      for heroID in view.heroIDs {
         frontIdToView[heroID] = view
       }
     }
     for view in back.flattendSubviews {
-      if let heroID = view.heroID {
+      for heroID in view.heroIDs {
         backIdToView[heroID] = view
       }
     }
@@ -72,7 +77,7 @@ open class HeroTransition: Transition {
     }
     func processContext(views: [UIView], isFront: Bool) {
       for view in views {
-        let modifiers: [HeroModifier] = (view.heroID.map({ [.match($0)] }) ?? []) + (view.heroModifiers ?? [])
+        let modifiers: [HeroModifier] = view.heroIDs.reversed().map({ .match($0) }) + (view.heroModifiers ?? [])
         let ourViews = isFront ? frontIdToView : backIdToView
         let otherViews = !isFront ? frontIdToView : backIdToView
         let modifierState = viewStateFrom(modifiers: modifiers,

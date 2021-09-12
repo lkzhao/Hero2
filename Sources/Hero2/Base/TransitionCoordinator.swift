@@ -9,6 +9,9 @@ public class TransitionCoordinator: NSObject {
 
   public var defaultTransition: Transition = HeroTransition()
   public private(set) var currentTransition: Transition?
+  public var isTransitioning: Bool {
+    currentTransition?.isTransitioning == true
+  }
 
   private func setupTransition(from: UIViewController, to: UIViewController, isPresenting: Bool, isNavigationTransition: Bool) {
     let transitionProvider = (isPresenting ? to : from) as? TransitionProvider

@@ -25,6 +25,7 @@ struct ViewState: Equatable {
   var shadowOpacity: CGFloat? = nil
   var cornerRadius: CGFloat? = nil
   var overlayColor: UIColor? = nil
+  var backgroundColor: UIColor? = nil
   var zPosition: CGFloat? = nil
   @IndirectOptional var beginState: ViewState? = nil
 }
@@ -44,6 +45,7 @@ extension ViewState {
               shadowOpacity: state.shadowOpacity ?? shadowOpacity,
               cornerRadius: state.cornerRadius ?? cornerRadius,
               overlayColor: state.overlayColor ?? overlayColor,
+              backgroundColor: state.backgroundColor ?? backgroundColor,
               zPosition: state.zPosition ?? zPosition,
               beginState: state.beginState ?? beginState)
   }
