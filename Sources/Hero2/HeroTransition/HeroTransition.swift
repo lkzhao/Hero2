@@ -6,10 +6,10 @@ open class HeroTransition: Transition {
   public func apply(position: CGPoint, to view: UIView) {
     guard let context = contexts[view], let container = view.superview else { return }
     pause(view: context.snapshotView, animationForKey: "position")
-    context.snapshotView.layer.position = container.convert(position, to: context.snapshotView.superview!)
+    context.snapshotView.layer.position = container.layer.convert(position, to: context.snapshotView.superview!.layer.presentation())
     if let otherView = context.targetView, let otherSnap = contexts[otherView]?.snapshotView {
       pause(view: otherSnap, animationForKey: "position")
-      otherSnap.layer.position = container.convert(position, to: otherSnap.superview!)
+      otherSnap.layer.position = container.layer.convert(position, to: otherSnap.superview!.layer.presentation())
     }
   }
   
