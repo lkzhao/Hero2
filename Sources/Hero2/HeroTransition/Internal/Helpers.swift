@@ -25,13 +25,22 @@ func convert(layerTransform: CATransform3D, to container: CALayer) -> CATransfor
   return CATransform3DConcat(layerTransform, CATransform3DInvert(containerTrans))
 }
 
-func viewStateFrom(modifiers: [HeroModifier], view: UIView, containerSize: CGSize, ourViews: [String: UIView], otherViews: [String: UIView], isPresenting: Bool, isForeground: Bool) -> ViewState {
+struct ModifierProcessMetadata {
+  let containerSize: CGSize
+  let ourViews: [String: UIView]
+  let otherViews: [String: UIView]
+  let otherVCType: UIViewController.Type
+  let isPresenting: Bool
+  let isForeground: Bool
+}
+
+func viewStateFrom(modifiers: [HeroModifier], metadata: ModifierProcessMetadata) -> ViewState {
   var state = ViewState()
-  process(modifiers: modifiers, on: &state, view: view, containerSize: containerSize, ourViews: ourViews, otherViews: otherViews, isPresenting: isPresenting, isForeground: isForeground)
+  process(modifiers: modifiers, on: &state, metadata: metadata)
   return state
 }
 
-func process(modifiers: [HeroModifier], on state: inout ViewState, view: UIView, containerSize: CGSize, ourViews: [String: UIView], otherViews: [String: UIView], isPresenting: Bool, isForeground: Bool) {
+func process(modifiers: [HeroModifier], on state: inout ViewState, metadata: ModifierProcessMetadata) {
   for modifier in modifiers {
     switch modifier {
     case .fade:
@@ -41,7 +50,7 @@ func process(modifiers: [HeroModifier], on state: inout ViewState, view: UIView,
                                                translation.x, translation.y, 0)
     case .translatePercentage(let translation):
       state.transform = CATransform3DTranslate(state.transform ?? CATransform3DIdentity,
-                                               translation.x * containerSize.width, translation.y * containerSize.height, 0)
+                                               translation.x * metadata.containerSize.width, translation.y * metadata.containerSize.height, 0)
     case .rotate(let rotation):
       state.transform = CATransform3DRotate(state.transform ?? CATransform3DIdentity, rotation, 0, 0, 1)
     case .scale(let scale):
@@ -69,44 +78,48 @@ func process(modifiers: [HeroModifier], on state: inout ViewState, view: UIView,
     case .skipContainer:
       state.skipContainer = true
     case .match(let matchId):
-        if otherViews[matchId] != nil {
-            state.match = matchId
-        }
+      if metadata.otherViews[matchId] != nil {
+        state.match = matchId
+      }
+    case let .whenOtherVC(type, modifiers):
+      if type == metadata.otherVCType {
+        process(modifiers: modifiers, on: &state, metadata: metadata)
+      }
     case .whenPresenting(let modifiers):
-      if isPresenting {
-        process(modifiers: modifiers, on: &state, view: view, containerSize: containerSize, ourViews: ourViews, otherViews: otherViews, isPresenting: isPresenting, isForeground: isForeground)
+      if metadata.isPresenting {
+        process(modifiers: modifiers, on: &state, metadata: metadata)
       }
     case .whenDismissing(let modifiers):
-      if !isPresenting {
-        process(modifiers: modifiers, on: &state, view: view, containerSize: containerSize, ourViews: ourViews, otherViews: otherViews, isPresenting: isPresenting, isForeground: isForeground)
+      if !metadata.isPresenting {
+        process(modifiers: modifiers, on: &state, metadata: metadata)
       }
     case .whenMatched(let modifiers):
-      if state.match.flatMap({ otherViews[$0] }) != nil {
-        process(modifiers: modifiers, on: &state, view: view, containerSize: containerSize, ourViews: ourViews, otherViews: otherViews, isPresenting: isPresenting, isForeground: isForeground)
+      if state.match.flatMap({ metadata.otherViews[$0] }) != nil {
+        process(modifiers: modifiers, on: &state, metadata: metadata)
       }
     case .whenNotMatched(let modifiers):
-      if state.match.flatMap({ otherViews[$0] }) == nil {
-        process(modifiers: modifiers, on: &state, view: view, containerSize: containerSize, ourViews: ourViews, otherViews: otherViews, isPresenting: isPresenting, isForeground: isForeground)
+      if state.match.flatMap({ metadata.otherViews[$0] }) == nil {
+        process(modifiers: modifiers, on: &state, metadata: metadata)
       }
     case .whenAppearing(let modifiers):
-      if isPresenting == isForeground {
-        process(modifiers: modifiers, on: &state, view: view, containerSize: containerSize, ourViews: ourViews, otherViews: otherViews, isPresenting: isPresenting, isForeground: isForeground)
+      if metadata.isPresenting == metadata.isForeground {
+        process(modifiers: modifiers, on: &state, metadata: metadata)
       }
     case .whenDisappearing(let modifiers):
-      if isPresenting != isForeground {
-        process(modifiers: modifiers, on: &state, view: view, containerSize: containerSize, ourViews: ourViews, otherViews: otherViews, isPresenting: isPresenting, isForeground: isForeground)
+      if metadata.isPresenting != metadata.isForeground {
+        process(modifiers: modifiers, on: &state, metadata: metadata)
       }
     case .whenForeground(let modifiers):
-      if isForeground {
-        process(modifiers: modifiers, on: &state, view: view, containerSize: containerSize, ourViews: ourViews, otherViews: otherViews, isPresenting: isPresenting, isForeground: isForeground)
+      if metadata.isForeground {
+        process(modifiers: modifiers, on: &state, metadata: metadata)
       }
     case .whenBackground(let modifiers):
-      if !isForeground {
-        process(modifiers: modifiers, on: &state, view: view, containerSize: containerSize, ourViews: ourViews, otherViews: otherViews, isPresenting: isPresenting, isForeground: isForeground)
+      if !metadata.isForeground {
+        process(modifiers: modifiers, on: &state, metadata: metadata)
       }
     case.beginWith(let modifiers):
       var beginState = ViewState()
-      process(modifiers: modifiers, on: &beginState, view: view, containerSize: containerSize, ourViews: ourViews, otherViews: otherViews, isPresenting: isPresenting, isForeground: isForeground)
+      process(modifiers: modifiers, on: &beginState, metadata: metadata)
       state.beginState = (state.beginState ?? ViewState())?.merge(state: beginState)
     }
   }

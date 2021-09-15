@@ -75,18 +75,20 @@ open class HeroTransition: Transition {
       }
       return nil
     }
-    func processContext(views: [UIView], isFront: Bool) {
+    func processContext(isFront: Bool) {
+      let views = isFront ? front.flattendSubviews : back.flattendSubviews
+      let otherVCType = isFront ? type(of: backgroundViewController!) :  type(of: foregroundViewController!)
+      let ourViews = isFront ? frontIdToView : backIdToView
+      let otherViews = !isFront ? frontIdToView : backIdToView
+      let metadata = ModifierProcessMetadata(containerSize: container.bounds.size,
+                                             ourViews: ourViews,
+                                             otherViews: otherViews,
+                                             otherVCType: otherVCType,
+                                             isPresenting: isPresenting,
+                                             isForeground: isFront)
       for view in views {
         let modifiers: [HeroModifier] = view.heroIDs.reversed().map({ .match($0) }) + (view.heroModifiers ?? [])
-        let ourViews = isFront ? frontIdToView : backIdToView
-        let otherViews = !isFront ? frontIdToView : backIdToView
-        let modifierState = viewStateFrom(modifiers: modifiers,
-                                          view: view,
-                                          containerSize: container.bounds.size,
-                                          ourViews: ourViews,
-                                          otherViews: otherViews,
-                                          isPresenting: isPresenting,
-                                          isForeground: isFront)
+        let modifierState = viewStateFrom(modifiers: modifiers, metadata: metadata)
         let other = modifierState.match.flatMap { otherViews[$0] }
         if other != nil || modifierState != ViewState(match: modifierState.match) {
           let matchedSuperview = (modifierState.containerType ?? .parent) == .parent ? findMatchedSuperview(view: view) : nil
@@ -104,8 +106,8 @@ open class HeroTransition: Transition {
         }
       }
     }
-    processContext(views: back.flattendSubviews, isFront: false)
-    processContext(views: front.flattendSubviews, isFront: true)
+    processContext(isFront: false)
+    processContext(isFront: true)
     
     // generate snapshot (must be done in reverse, so that child is hidden before parent's snapshot is taken)
     for view in animatingViews.reversed() {

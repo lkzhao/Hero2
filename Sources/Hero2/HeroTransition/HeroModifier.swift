@@ -17,7 +17,7 @@ public enum ContainerType {
   case global
 }
 
-public enum HeroModifier: Equatable {
+public enum HeroModifier {
   case fade
   case translate(CGPoint)
   case translatePercentage(CGPoint)
@@ -47,6 +47,7 @@ public enum HeroModifier: Equatable {
   case containerType(ContainerType)
   case snapshotType(SnapshotType)
   
+  case whenOtherVC(UIViewController.Type, [HeroModifier])
   case whenPresenting([HeroModifier])
   case whenDismissing([HeroModifier])
   case whenAppearing([HeroModifier])
