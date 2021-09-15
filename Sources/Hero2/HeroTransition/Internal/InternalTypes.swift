@@ -27,6 +27,8 @@ struct ViewState: Equatable {
   var overlayColor: UIColor? = nil
   var backgroundColor: UIColor? = nil
   var zPosition: CGFloat? = nil
+  var scaleSize: Bool? = nil
+  var skipContainer: Bool? = nil
   @IndirectOptional var beginState: ViewState? = nil
 }
 
@@ -47,6 +49,8 @@ extension ViewState {
               overlayColor: state.overlayColor ?? overlayColor,
               backgroundColor: state.backgroundColor ?? backgroundColor,
               zPosition: state.zPosition ?? zPosition,
+              scaleSize: state.scaleSize ?? scaleSize,
+              skipContainer: state.skipContainer ?? skipContainer,
               beginState: state.beginState ?? beginState)
   }
 }

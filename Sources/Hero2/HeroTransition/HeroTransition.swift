@@ -68,7 +68,7 @@ open class HeroTransition: Transition {
     func findMatchedSuperview(view: UIView) -> UIView? {
       var current = view
       while let superview = current.superview, !(superview is UIWindow) {
-        if contexts[superview] != nil {
+        if let context = contexts[superview], context.targetState.skipContainer != true {
           return superview
         }
         current = superview

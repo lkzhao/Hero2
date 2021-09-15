@@ -34,6 +34,16 @@ public enum HeroModifier: Equatable {
   
   case match(String)
 
+  // Cause the size change to be a scale transform instead of a bounds.size update.
+  // This could be useful when animating views that don't support size change with UIViewPropertyAnimator.
+  // AVPlayerLayer for example, will stop animating when the animator is paused.
+  case scaleSize
+
+  // Skip treating this view as a container view even if it is being animated.
+  // This is useful when the view is transforming and you don't want the transform
+  // to influence any animating child view
+  case skipContainer
+
   case containerType(ContainerType)
   case snapshotType(SnapshotType)
   

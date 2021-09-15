@@ -64,6 +64,10 @@ func process(modifiers: [HeroModifier], on state: inout ViewState, view: UIView,
       state.containerType = containerType
     case .snapshotType(let snapshotType):
       state.snapshotType = snapshotType
+    case .scaleSize:
+      state.scaleSize = true
+    case .skipContainer:
+      state.skipContainer = true
     case .match(let matchId):
         if otherViews[matchId] != nil {
             state.match = matchId
@@ -165,14 +169,23 @@ func applyViewState(_ viewState: ViewState, to view: UIView) {
   if let windowTransform = viewState.windowTransform, let container = view.superview {
     view.layer.transform = convert(layerTransform: windowTransform, to: container.layer)
   }
+  if let transform = viewState.transform {
+    view.layer.transform = transform
+  }
+  var sizeScale: CGFloat = 1
   if let size = viewState.size {
-    view.bounds.size = size
+    if viewState.scaleSize == true {
+      sizeScale = size.width / view.bounds.size.width
+      view.layer.transform = CATransform3DScale(view.layer.transform,
+                                                size.width / view.bounds.size.width,
+                                                size.height / view.bounds.size.height,
+                                                1)
+    } else {
+      view.bounds.size = size
+    }
   }
   if let targetAlpha = viewState.alpha {
     view.alpha = targetAlpha
-  }
-  if let transform = viewState.transform {
-    view.layer.transform = transform
   }
   if let zPosition = viewState.zPosition {
     view.layer.zPosition = zPosition
@@ -181,7 +194,7 @@ func applyViewState(_ viewState: ViewState, to view: UIView) {
     view.layer.shadowOpacity = Float(shadowOpacity)
   }
   if let cornerRadius = viewState.cornerRadius {
-    view.layer.cornerRadius = cornerRadius
+    view.layer.cornerRadius = cornerRadius / sizeScale
   }
   if let overlayColor = viewState.overlayColor {
     view.overlayView?.backgroundColor = overlayColor
