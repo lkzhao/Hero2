@@ -6,8 +6,8 @@
 //  Copyright © 2018 Luke Zhao. All rights reserved.
 //
 
-import UIKit
 import Hero2
+import UIKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -46,4 +46,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
   }
 }
-

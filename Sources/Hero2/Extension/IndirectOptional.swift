@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Luke Zhao on 7/30/21.
 //
@@ -36,5 +36,5 @@ enum IndirectOptional<T> {
 }
 
 extension IndirectOptional: Equatable where T: Equatable {
-  
+
 }

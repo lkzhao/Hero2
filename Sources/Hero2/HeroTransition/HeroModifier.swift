@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Luke Zhao on 7/25/21.
 //
@@ -31,7 +31,7 @@ public enum HeroModifier {
 
   case overlayColor(UIColor)
   case backgroundColor(UIColor)
-  
+
   case match(String)
 
   // Cause the size change to be a scale transform instead of a bounds.size update.
@@ -46,7 +46,7 @@ public enum HeroModifier {
 
   case containerType(ContainerType)
   case snapshotType(SnapshotType)
-  
+
   case whenOtherVC(UIViewController.Type, [HeroModifier])
   case whenPresenting([HeroModifier])
   case whenDismissing([HeroModifier])
@@ -56,6 +56,6 @@ public enum HeroModifier {
   case whenBackground([HeroModifier])
   case whenMatched([HeroModifier])
   case whenNotMatched([HeroModifier])
-  
+
   case beginWith([HeroModifier])
 }

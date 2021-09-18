@@ -22,25 +22,31 @@
 
 import UIKit
 
-public extension UIView {
+extension UIView {
   fileprivate struct AssociatedKeys {
-    static var heroIDs    = "heroIDs"
+    static var heroIDs = "heroIDs"
     static var heroModifiers = "heroModifers"
   }
-  
-  @IBInspectable var heroID: String? {
+
+  @IBInspectable public var heroID: String? {
     get { heroIDs.first }
     set { heroIDs = [newValue].compactMap { $0 } }
   }
-    
-  @IBInspectable var heroIDs: [String] {
+
+  @IBInspectable public var heroIDs: [String] {
     get { objc_getAssociatedObject(self, &type(of: self).AssociatedKeys.heroIDs) as? [String] ?? [] }
-    set { objc_setAssociatedObject(self, &type(of: self).AssociatedKeys.heroIDs, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+    set {
+      objc_setAssociatedObject(
+        self, &type(of: self).AssociatedKeys.heroIDs, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+    }
   }
 
-  var heroModifiers: [HeroModifier]? {
+  public var heroModifiers: [HeroModifier]? {
     get { objc_getAssociatedObject(self, &type(of: self).AssociatedKeys.heroModifiers) as? [HeroModifier] }
-    set { objc_setAssociatedObject(self, &type(of: self).AssociatedKeys.heroModifiers, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+    set {
+      objc_setAssociatedObject(
+        self, &type(of: self).AssociatedKeys.heroModifiers, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+    }
   }
 }
 

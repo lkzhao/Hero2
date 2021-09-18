@@ -6,9 +6,9 @@
 //  Copyright © 2021 Luke Zhao. All rights reserved.
 //
 
-import UIKit
-import UIComponent
 import Hero2
+import UIComponent
+import UIKit
 
 class MyTestImageView: UIImageView {
   override var alpha: CGFloat {
@@ -32,7 +32,6 @@ class DelayViewController: ComponentViewController {
     }.inset(20)
   }
 }
-
 
 class DelayDetailViewController: ComponentViewController {
   override var component: Component {

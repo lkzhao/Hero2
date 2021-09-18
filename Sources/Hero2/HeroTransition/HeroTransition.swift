@@ -2,40 +2,42 @@ import UIKit
 
 open class HeroTransition: Transition {
   // MARK: - public
-  
+
   public func apply(position: CGPoint, to view: UIView) {
     guard let context = contexts[view], let container = view.superview else { return }
     pause(view: context.snapshotView, animationForKey: "position")
-    context.snapshotView.layer.position = container.layer.convert(position, to: context.snapshotView.superview!.layer.presentation())
+    context.snapshotView.layer.position = container.layer.convert(
+      position, to: context.snapshotView.superview!.layer.presentation())
     if let otherView = context.targetView, let otherSnap = contexts[otherView]?.snapshotView {
       pause(view: otherSnap, animationForKey: "position")
       otherSnap.layer.position = container.layer.convert(position, to: otherSnap.superview!.layer.presentation())
     }
   }
-  
+
   public func position(for view: UIView) -> CGPoint? {
     guard let context = contexts[view],
-          let container = view.superview,
-          let position = context.snapshotView.layer.presentation()?.position else { return nil }
+      let container = view.superview,
+      let position = context.snapshotView.layer.presentation()?.position
+    else { return nil }
     return context.snapshotView.superview!.convert(position, to: container)
   }
-    
+
   public func isMatch(view: UIView) -> Bool {
     guard let context = contexts[view] else { return false }
     return context.targetView != nil
   }
-  
+
   // MARK: - private
-  
+
   private var pausedAnimations: [UIView: [String: CAAnimation]] = [:]
   private var contexts: [UIView: ViewTransitionContext] = [:]
-  
+
   private func pause(view: UIView, animationForKey key: String) {
     guard pausedAnimations[view]?[key] == nil, let anim = view.layer.animation(forKey: key) else { return }
     pausedAnimations[view, default: [:]][key] = anim
     view.layer.removeAnimation(forKey: key)
   }
-  
+
   // MARK: - override
 
   open override func animate() -> (dismissed: () -> Void, presented: () -> Void, completed: (Bool) -> Void) {
@@ -45,13 +47,13 @@ open class HeroTransition: Transition {
     pausedAnimations.removeAll()
     contexts.removeAll()
     let isPresenting = isPresenting
-    
+
     var dismissedOperations: [() -> Void] = []
     var presentedOperations: [() -> Void] = []
     var completionOperations: [(Bool) -> Void] = []
-    
+
     var animatingViews: [UIView] = []
-    
+
     var frontIdToView: [String: UIView] = [:]
     var backIdToView: [String: UIView] = [:]
     for view in front.flattendSubviews {
@@ -64,7 +66,7 @@ open class HeroTransition: Transition {
         backIdToView[heroID] = view
       }
     }
-    
+
     func findMatchedSuperview(view: UIView) -> UIView? {
       var current = view
       while let superview = current.superview, !(superview is UIWindow) {
@@ -77,38 +79,41 @@ open class HeroTransition: Transition {
     }
     func processContext(isFront: Bool) {
       let views = isFront ? front.flattendSubviews : back.flattendSubviews
-      let otherVCType = isFront ? type(of: backgroundViewController!) :  type(of: foregroundViewController!)
+      let otherVCType = isFront ? type(of: backgroundViewController!) : type(of: foregroundViewController!)
       let ourViews = isFront ? frontIdToView : backIdToView
       let otherViews = !isFront ? frontIdToView : backIdToView
-      let metadata = ModifierProcessMetadata(containerSize: container.bounds.size,
-                                             ourViews: ourViews,
-                                             otherViews: otherViews,
-                                             otherVCType: otherVCType,
-                                             isPresenting: isPresenting,
-                                             isForeground: isFront)
+      let metadata = ModifierProcessMetadata(
+        containerSize: container.bounds.size,
+        ourViews: ourViews,
+        otherViews: otherViews,
+        otherVCType: otherVCType,
+        isPresenting: isPresenting,
+        isForeground: isFront)
       for view in views {
         let modifiers: [HeroModifier] = view.heroIDs.reversed().map({ .match($0) }) + (view.heroModifiers ?? [])
         let modifierState = viewStateFrom(modifiers: modifiers, metadata: metadata)
         let other = modifierState.match.flatMap { otherViews[$0] }
         if other != nil || modifierState != ViewState(match: modifierState.match) {
-          let matchedSuperview = (modifierState.containerType ?? .parent) == .parent ? findMatchedSuperview(view: view) : nil
+          let matchedSuperview =
+            (modifierState.containerType ?? .parent) == .parent ? findMatchedSuperview(view: view) : nil
           let sourceState = sourceViewStateFrom(view: view, modifierState: modifierState)
           let targetState = targetViewStateFrom(view: other ?? view, modifierState: modifierState)
           let originalState = originalViewStateFrom(view: view, sourceState: sourceState, targetState: targetState)
-          contexts[view] = ViewTransitionContext(isFront: isFront,
-                                                 targetView: other,
-                                                 matchedSuperView: matchedSuperview,
-                                                 snapshotView: nil,
-                                                 sourceState: sourceState,
-                                                 targetState: targetState,
-                                                 originalState: originalState)
+          contexts[view] = ViewTransitionContext(
+            isFront: isFront,
+            targetView: other,
+            matchedSuperView: matchedSuperview,
+            snapshotView: nil,
+            sourceState: sourceState,
+            targetState: targetState,
+            originalState: originalState)
           animatingViews.append(view)
         }
       }
     }
     processContext(isFront: false)
     processContext(isFront: true)
-    
+
     // generate snapshot (must be done in reverse, so that child is hidden before parent's snapshot is taken)
     for view in animatingViews.reversed() {
       if (contexts[view]?.targetState.snapshotType ?? .default) == .default {
@@ -135,7 +140,7 @@ open class HeroTransition: Transition {
       }
       view.isHidden = true
     }
-    
+
     let duration = animator!.duration
     for view in animatingViews {
       let viewContext = contexts[view]!
@@ -144,10 +149,14 @@ open class HeroTransition: Transition {
       viewContainer.addSubview(viewSnap)
       viewSnap.isHidden = false
       dismissedOperations.append {
-        applyState(viewSnap: viewSnap, presented: false, shouldApplyDelay: !isPresenting, animationDuration: duration, viewContext: viewContext)
+        applyState(
+          viewSnap: viewSnap, presented: false, shouldApplyDelay: !isPresenting, animationDuration: duration,
+          viewContext: viewContext)
       }
       presentedOperations.append {
-        applyState(viewSnap: viewSnap, presented: true, shouldApplyDelay: isPresenting, animationDuration: duration, viewContext: viewContext)
+        applyState(
+          viewSnap: viewSnap, presented: true, shouldApplyDelay: isPresenting, animationDuration: duration,
+          viewContext: viewContext)
       }
       completionOperations.append { _ in
         if let placeholderView = viewContext.placeholderView {
@@ -163,7 +172,7 @@ open class HeroTransition: Transition {
         }
       }
     }
-    
+
     let dismissed: () -> Void = {
       for op in dismissedOperations {
         op()
@@ -175,7 +184,7 @@ open class HeroTransition: Transition {
         op()
       }
     }
-    
+
     let completion: (Bool) -> Void = { finished in
       for op in completionOperations {
         op(finished)
@@ -183,7 +192,7 @@ open class HeroTransition: Transition {
     }
     return (dismissed, presented, completion)
   }
-  
+
   open override func endInteractiveTransition(shouldFinish: Bool) {
     for (view, animations) in pausedAnimations {
       for (key, anim) in animations {
@@ -193,7 +202,7 @@ open class HeroTransition: Transition {
     pausedAnimations.removeAll()
     super.endInteractiveTransition(shouldFinish: shouldFinish)
   }
-  
+
   open override func animationEnded(_ transitionCompleted: Bool) {
     pausedAnimations.removeAll()
     contexts.removeAll()

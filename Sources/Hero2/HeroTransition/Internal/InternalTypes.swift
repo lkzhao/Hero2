@@ -34,23 +34,24 @@ struct ViewState: Equatable {
 
 extension ViewState {
   func merge(state: ViewState) -> ViewState {
-    ViewState(match: state.match ?? match,
-              containerType: state.containerType ?? containerType,
-              snapshotType: state.snapshotType ?? snapshotType,
-              windowTransform: state.windowTransform ?? windowTransform,
-              windowPosition: state.windowPosition ?? windowPosition,
-              size: state.size ?? size,
-              alpha: state.alpha ?? alpha,
-              transform: state.transform ?? transform,
-              delay: state.delay ?? delay,
-              duration: state.duration ?? duration,
-              shadowOpacity: state.shadowOpacity ?? shadowOpacity,
-              cornerRadius: state.cornerRadius ?? cornerRadius,
-              overlayColor: state.overlayColor ?? overlayColor,
-              backgroundColor: state.backgroundColor ?? backgroundColor,
-              zPosition: state.zPosition ?? zPosition,
-              scaleSize: state.scaleSize ?? scaleSize,
-              skipContainer: state.skipContainer ?? skipContainer,
-              beginState: state.beginState ?? beginState)
+    ViewState(
+      match: state.match ?? match,
+      containerType: state.containerType ?? containerType,
+      snapshotType: state.snapshotType ?? snapshotType,
+      windowTransform: state.windowTransform ?? windowTransform,
+      windowPosition: state.windowPosition ?? windowPosition,
+      size: state.size ?? size,
+      alpha: state.alpha ?? alpha,
+      transform: state.transform ?? transform,
+      delay: state.delay ?? delay,
+      duration: state.duration ?? duration,
+      shadowOpacity: state.shadowOpacity ?? shadowOpacity,
+      cornerRadius: state.cornerRadius ?? cornerRadius,
+      overlayColor: state.overlayColor ?? overlayColor,
+      backgroundColor: state.backgroundColor ?? backgroundColor,
+      zPosition: state.zPosition ?? zPosition,
+      scaleSize: state.scaleSize ?? scaleSize,
+      skipContainer: state.skipContainer ?? skipContainer,
+      beginState: state.beginState ?? beginState)
   }
 }

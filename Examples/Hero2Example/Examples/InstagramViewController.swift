@@ -6,10 +6,10 @@
 //  Copyright © 2021 Luke Zhao. All rights reserved.
 //
 
-import UIKit
-import UIComponent
 import Hero2
 import Kingfisher
+import UIComponent
+import UIKit
 
 class InstagramViewController: ComponentViewController {
   let images = ImageData.testImages
@@ -29,12 +29,12 @@ class InstagramViewController: ComponentViewController {
       }
     }
   }
-  
+
   override func viewDidLoad() {
     super.viewDidLoad()
     view.heroModifiers = [.overlayColor(.black.withAlphaComponent(0.5))]
   }
-  
+
   override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     if let image = toBePresentedImage {
@@ -42,7 +42,7 @@ class InstagramViewController: ComponentViewController {
       present(image: image)
     }
   }
-  
+
   var toBePresentedImage: ImageData?
   func didTap(image: ImageData) {
     if presentingViewController != nil {
@@ -51,7 +51,7 @@ class InstagramViewController: ComponentViewController {
       present(image: image)
     }
   }
-  
+
   func present(image: ImageData) {
     let detailVC = InstagramDetailViewController()
     detailVC.image = image
@@ -73,9 +73,11 @@ class InstagramDetailViewController: ComponentViewController {
     VStack {
       HStack(alignItems: .center) {
         Image(systemName: "chevron.left").tintColor(.label)
-      }.size(width: .fill, height: 44).overlay(HStack(justifyContent: .center, alignItems: .center) {
-        Text("Explore", font: .boldSystemFont(ofSize: 16))
-      }.size(width: .fill, height: .fill)).inset(8)
+      }.size(width: .fill, height: 44).overlay(
+        HStack(justifyContent: .center, alignItems: .center) {
+          Text("Explore", font: .boldSystemFont(ofSize: 16))
+        }.size(width: .fill, height: .fill)
+      ).inset(8)
       Separator()
       HStack(spacing: 8, alignItems: .center) {
         Space(size: CGSize(width: 40, height: 40)).view().backgroundColor(.systemGray).cornerRadius(20)
@@ -85,7 +87,7 @@ class InstagramDetailViewController: ComponentViewController {
       imageView.size(width: .fill, height: .aspectPercentage(image.size.height / image.size.width))
     }
   }
-  
+
   override func viewDidLoad() {
     super.viewDidLoad()
     transition.isUserInteractionEnabled = true
@@ -102,7 +104,7 @@ class InstagramDetailViewController: ComponentViewController {
     view.addGestureRecognizer(panGR)
     view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTap)))
   }
-  
+
   override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
     if !componentView.hasReloaded {
@@ -110,7 +112,7 @@ class InstagramDetailViewController: ComponentViewController {
     }
     componentView.heroModifiers = [.match(image.id)]
   }
-  
+
   @objc func didTap() {
     dismiss(animated: true, completion: nil)
   }
@@ -158,4 +160,3 @@ extension InstagramDetailViewController: UIGestureRecognizerDelegate {
     return velocity.x > abs(velocity.y) || velocity.y > abs(velocity.x)
   }
 }
-

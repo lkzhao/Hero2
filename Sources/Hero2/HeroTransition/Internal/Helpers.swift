@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Luke Zhao on 7/29/21.
 //
@@ -46,11 +46,13 @@ func process(modifiers: [HeroModifier], on state: inout ViewState, metadata: Mod
     case .fade:
       state.alpha = 0
     case .translate(let translation):
-      state.transform = CATransform3DTranslate(state.transform ?? CATransform3DIdentity,
-                                               translation.x, translation.y, 0)
+      state.transform = CATransform3DTranslate(
+        state.transform ?? CATransform3DIdentity,
+        translation.x, translation.y, 0)
     case .translatePercentage(let translation):
-      state.transform = CATransform3DTranslate(state.transform ?? CATransform3DIdentity,
-                                               translation.x * metadata.containerSize.width, translation.y * metadata.containerSize.height, 0)
+      state.transform = CATransform3DTranslate(
+        state.transform ?? CATransform3DIdentity,
+        translation.x * metadata.containerSize.width, translation.y * metadata.containerSize.height, 0)
     case .rotate(let rotation):
       state.transform = CATransform3DRotate(state.transform ?? CATransform3DIdentity, rotation, 0, 0, 1)
     case .scale(let scale):
@@ -117,7 +119,7 @@ func process(modifiers: [HeroModifier], on state: inout ViewState, metadata: Mod
       if !metadata.isForeground {
         process(modifiers: modifiers, on: &state, metadata: metadata)
       }
-    case.beginWith(let modifiers):
+    case .beginWith(let modifiers):
       var beginState = ViewState()
       process(modifiers: modifiers, on: &beginState, metadata: metadata)
       state.beginState = (state.beginState ?? ViewState())?.merge(state: beginState)
@@ -189,10 +191,11 @@ func applyViewState(_ viewState: ViewState, to view: UIView) {
   if let size = viewState.size {
     if viewState.scaleSize == true {
       sizeScale = size.width / view.bounds.size.width
-      view.layer.transform = CATransform3DScale(view.layer.transform,
-                                                size.width / view.bounds.size.width,
-                                                size.height / view.bounds.size.height,
-                                                1)
+      view.layer.transform = CATransform3DScale(
+        view.layer.transform,
+        size.width / view.bounds.size.width,
+        size.height / view.bounds.size.height,
+        1)
     } else {
       view.bounds.size = size
     }
@@ -217,20 +220,24 @@ func applyViewState(_ viewState: ViewState, to view: UIView) {
   }
 }
 
-func applyState(viewSnap: UIView, presented: Bool,
-                shouldApplyDelay: Bool, animationDuration: TimeInterval,
-                viewContext: ViewTransitionContext) {
+func applyState(
+  viewSnap: UIView, presented: Bool,
+  shouldApplyDelay: Bool, animationDuration: TimeInterval,
+  viewContext: ViewTransitionContext
+) {
   let targetState = viewContext.targetState
   let state = viewContext.isFront == presented ? viewContext.sourceState : targetState
   let delay = targetState.delay ?? 0
   let duration = targetState.duration ?? 0
   if shouldApplyDelay, delay > 0 || duration > 0 {
     let relativeDuration = duration > 0 ? duration / animationDuration : 1 - delay / animationDuration
-    UIView.animateKeyframes(withDuration: animationDuration, delay: 0, options: [], animations: {
-      UIView.addKeyframe(withRelativeStartTime: delay / animationDuration, relativeDuration: relativeDuration) {
-        applyViewState(state, to: viewSnap)
-      }
-    }, completion: nil)
+    UIView.animateKeyframes(
+      withDuration: animationDuration, delay: 0, options: [],
+      animations: {
+        UIView.addKeyframe(withRelativeStartTime: delay / animationDuration, relativeDuration: relativeDuration) {
+          applyViewState(state, to: viewSnap)
+        }
+      }, completion: nil)
   } else {
     applyViewState(state, to: viewSnap)
   }

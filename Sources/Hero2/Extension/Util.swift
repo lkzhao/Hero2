@@ -2,7 +2,7 @@ import UIKit
 
 extension Array {
   func get(_ index: Int) -> Element? {
-    if (0 ..< count).contains(index) {
+    if (0..<count).contains(index) {
       return self[index]
     }
     return nil
@@ -147,9 +147,9 @@ extension CGRect {
 
   #if swift(>=4.2)
   #else
-  func inset(by insets: UIEdgeInsets) -> CGRect {
-    return UIEdgeInsetsInsetRect(self, insets)
-  }
+    func inset(by insets: UIEdgeInsets) -> CGRect {
+      return UIEdgeInsetsInsetRect(self, insets)
+    }
   #endif
 }
 

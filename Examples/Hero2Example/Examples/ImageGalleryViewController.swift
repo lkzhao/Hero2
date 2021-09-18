@@ -6,10 +6,10 @@
 //  Copyright © 2021 Luke Zhao. All rights reserved.
 //
 
-import UIKit
-import UIComponent
 import Hero2
 import Kingfisher
+import UIComponent
+import UIKit
 
 class ImageGalleryViewController: ComponentViewController {
   let images = ImageData.testImages
@@ -26,7 +26,7 @@ class ImageGalleryViewController: ComponentViewController {
       }
     }
   }
-  
+
   override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     if let image = toBePresentedImage {
@@ -34,7 +34,7 @@ class ImageGalleryViewController: ComponentViewController {
       present(image: image)
     }
   }
-  
+
   var toBePresentedImage: ImageData?
   func didTap(image: ImageData) {
     if presentingViewController != nil {
@@ -43,7 +43,7 @@ class ImageGalleryViewController: ComponentViewController {
       present(image: image)
     }
   }
-  
+
   func present(image: ImageData) {
     let detailVC = ImageDetailViewController()
     detailVC.image = image
@@ -66,11 +66,11 @@ class ImageDetailViewController: ComponentViewController {
       imageView.size(width: .fill, height: .aspectPercentage(image.size.height / image.size.width)).inset(30)
     }
   }
-  
+
   override func viewDidLoad() {
     super.viewDidLoad()
     transition.isUserInteractionEnabled = true
-//    transition.duration = 1
+    //    transition.duration = 1
     imageView.heroModifiers = [.snapshotType(.none)]
     imageView.shadowColor = .black.withAlphaComponent(0.2)
     imageView.shadowRadius = 8
@@ -81,7 +81,7 @@ class ImageDetailViewController: ComponentViewController {
     view.addGestureRecognizer(panGR)
     view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTap)))
   }
-  
+
   @objc func didTap() {
     dismiss(animated: true, completion: nil)
   }

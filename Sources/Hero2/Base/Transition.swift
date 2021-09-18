@@ -12,16 +12,16 @@ open class Transition: NSObject {
   public var isTransitioning: Bool {
     animator != nil
   }
-  
+
   public var isUserInteractionEnabled = false
-  
+
   public var duration: TimeInterval
   public var timingParameters: UITimingCurveProvider
-  
+
   public var isReversed: Bool {
     animator?.isReversed ?? false
   }
-  
+
   public var fractionCompleted: CGFloat {
     get { animator?.fractionComplete ?? 0 }
     set {
@@ -30,19 +30,21 @@ open class Transition: NSObject {
     }
   }
 
-  public init(duration: TimeInterval = 0.4, timingParameters: UITimingCurveProvider = UISpringTimingParameters(dampingRatio: 0.9)) {
+  public init(
+    duration: TimeInterval = 0.4, timingParameters: UITimingCurveProvider = UISpringTimingParameters(dampingRatio: 0.9)
+  ) {
     self.duration = duration
     self.timingParameters = timingParameters
     super.init()
   }
-  
+
   open func beginInteractiveTransition() {
     isInteractive = true
-    
+
     animator?.pauseAnimation()
     transitionContext?.pauseInteractiveTransition()
   }
-  
+
   open func endInteractiveTransition(shouldFinish: Bool) {
     guard isInteractive, let animator = animator else { return }
     isInteractive = false
@@ -59,7 +61,7 @@ open class Transition: NSObject {
       animator.continueAnimation(withTimingParameters: nil, durationFactor: 1)
     }
   }
-  
+
   // MARK: - Subclass Overrides
   open func animate() -> (dismissed: () -> Void, presented: () -> Void, completed: (Bool) -> Void) {
     return ({}, {}, { _ in })
@@ -105,11 +107,13 @@ extension Transition {
   }
 
   public var toOverFullScreen: Bool {
-    toViewController?.modalPresentationStyle == .overFullScreen || toViewController?.modalPresentationStyle == .overCurrentContext
+    toViewController?.modalPresentationStyle == .overFullScreen
+      || toViewController?.modalPresentationStyle == .overCurrentContext
   }
 
   public var fromOverFullScreen: Bool {
-    fromViewController?.modalPresentationStyle == .overFullScreen || fromViewController?.modalPresentationStyle == .overCurrentContext
+    fromViewController?.modalPresentationStyle == .overFullScreen
+      || fromViewController?.modalPresentationStyle == .overCurrentContext
   }
 
   public func isBackground(viewController: UIViewController) -> Bool {
@@ -121,7 +125,7 @@ extension Transition: UIViewControllerInteractiveTransitioning {
   open func interruptibleAnimator(using _: UIViewControllerContextTransitioning) -> UIViewImplicitlyAnimating {
     animator!
   }
-  
+
   open func startInteractiveTransition(_ transitionContext: UIViewControllerContextTransitioning) {
     animateTransition(using: transitionContext)
   }
@@ -135,11 +139,13 @@ extension Transition: UIViewControllerAnimatedTransitioning {
   open func animateTransition(using context: UIViewControllerContextTransitioning) {
     transitionContext = context
 
-    let fullScreenSnapshot = transitionContainer?.window?.snapshotView(afterScreenUpdates: false) ?? fromView?.snapshotView(afterScreenUpdates: false)
+    let fullScreenSnapshot =
+      transitionContainer?.window?.snapshotView(afterScreenUpdates: false)
+      ?? fromView?.snapshotView(afterScreenUpdates: false)
     if let fullScreenSnapshot = fullScreenSnapshot {
       (transitionContainer?.window ?? transitionContainer)?.addSubview(fullScreenSnapshot)
     }
-    
+
     let container = transitionContainer!
     container.addSubview(backgroundView!)
     container.addSubview(foregroundView!)
@@ -152,7 +158,7 @@ extension Transition: UIViewControllerAnimatedTransitioning {
 
     func startAnimation() {
       let (dismissedState, presentedState, completion) = animate()
-      
+
       if isPresenting {
         dismissedState()
         animator!.addAnimations(presentedState)
@@ -160,7 +166,7 @@ extension Transition: UIViewControllerAnimatedTransitioning {
         presentedState()
         animator!.addAnimations(dismissedState)
       }
-      
+
       // flush the current transaction before animation start.
       // otherwise delay animation on dismiss might not be registered.
       CATransaction.flush()
@@ -170,7 +176,7 @@ extension Transition: UIViewControllerAnimatedTransitioning {
         completion(pos == .end)
         self?.completeTransition(finished: pos == .end)
       }
-      
+
       fullScreenSnapshot?.removeFromSuperview()
       animator?.startAnimation()
       if isInteractive {
@@ -195,9 +201,9 @@ extension Transition: UIViewControllerAnimatedTransitioning {
 
   open func completeTransition(finished: Bool) {
     if finished {
-        fromView?.removeFromSuperview()
+      fromView?.removeFromSuperview()
     } else {
-        toView?.removeFromSuperview()
+      toView?.removeFromSuperview()
     }
     transitionContext?.completeTransition(finished)
   }
@@ -215,12 +221,14 @@ extension Transition: UIViewControllerTransitioningDelegate {
     self.isNavigationTransition = isNavigationTransition
     return self
   }
-  
+
   private var interactiveTransitioning: UIViewControllerInteractiveTransitioning? {
     self
   }
 
-  public func animationController(forPresented presented: UIViewController, presenting: UIViewController, source _: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+  public func animationController(
+    forPresented presented: UIViewController, presenting: UIViewController, source _: UIViewController
+  ) -> UIViewControllerAnimatedTransitioning? {
     setupTransition(isPresenting: true, isNavigationTransition: false)
   }
 
@@ -228,21 +236,30 @@ extension Transition: UIViewControllerTransitioningDelegate {
     setupTransition(isPresenting: false, isNavigationTransition: false)
   }
 
-  public func interactionControllerForDismissal(using _: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
+  public func interactionControllerForDismissal(using _: UIViewControllerAnimatedTransitioning)
+    -> UIViewControllerInteractiveTransitioning?
+  {
     interactiveTransitioning
   }
 
-  public func interactionControllerForPresentation(using _: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
+  public func interactionControllerForPresentation(using _: UIViewControllerAnimatedTransitioning)
+    -> UIViewControllerInteractiveTransitioning?
+  {
     interactiveTransitioning
   }
 }
 
 extension Transition: UINavigationControllerDelegate {
-  public func navigationController(_: UINavigationController, interactionControllerFor _: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
+  public func navigationController(
+    _: UINavigationController, interactionControllerFor _: UIViewControllerAnimatedTransitioning
+  ) -> UIViewControllerInteractiveTransitioning? {
     interactiveTransitioning
   }
 
-  public func navigationController(_ navigationController: UINavigationController, animationControllerFor operation: UINavigationController.Operation, from: UIViewController, to: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+  public func navigationController(
+    _ navigationController: UINavigationController, animationControllerFor operation: UINavigationController.Operation,
+    from: UIViewController, to: UIViewController
+  ) -> UIViewControllerAnimatedTransitioning? {
     setupTransition(isPresenting: operation == .push, isNavigationTransition: true)
   }
 }

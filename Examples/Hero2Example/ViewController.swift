@@ -7,8 +7,8 @@
 //
 
 import Hero2
-import UIKit
 import UIComponent
+import UIKit
 
 class ViewController: ComponentViewController {
   override var component: Component {

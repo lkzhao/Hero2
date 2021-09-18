@@ -6,9 +6,9 @@
 //  Copyright © 2021 Luke Zhao. All rights reserved.
 //
 
-import UIKit
-import UIComponent
 import Hero2
+import UIComponent
+import UIKit
 
 class PushViewController: ComponentViewController {
   override var component: Component {
@@ -24,7 +24,6 @@ class PushViewController: ComponentViewController {
   }
 }
 
-
 class PushDetailViewController: ComponentViewController {
   override var component: Component {
     VStack(spacing: 8) {
@@ -34,7 +33,7 @@ class PushDetailViewController: ComponentViewController {
       Text("PushDetailViewController")
     }.inset(20)
   }
-  
+
   lazy var panGR = UIPanGestureRecognizer(target: self, action: #selector(handlePan(gr:)))
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -45,9 +44,11 @@ class PushDetailViewController: ComponentViewController {
     view.shadowOffset = .zero
     view.backgroundColor = .systemGroupedBackground
     view.addGestureRecognizer(panGR)
-    view.heroModifiers = [.translatePercentage(CGPoint(x: 1, y: 0)), .beginWith([.shadowOpacity(0.5)]), .snapshotType(.none)]
+    view.heroModifiers = [
+      .translatePercentage(CGPoint(x: 1, y: 0)), .beginWith([.shadowOpacity(0.5)]), .snapshotType(.none),
+    ]
   }
-  
+
   var initialFractionCompleted: CGFloat = 0
   @objc func handlePan(gr: UIPanGestureRecognizer) {
     func progressFrom(offset: CGPoint) -> CGFloat {
