@@ -10,6 +10,7 @@ import Hero2
 import Kingfisher
 import UIComponent
 import UIKit
+import BaseToolbox
 
 class ImageGalleryViewController: ComponentViewController {
   let images = ImageData.testImages

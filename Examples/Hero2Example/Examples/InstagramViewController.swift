@@ -10,6 +10,7 @@ import Hero2
 import Kingfisher
 import UIComponent
 import UIKit
+import BaseToolbox
 
 class InstagramViewController: ComponentViewController {
   let images = ImageData.testImages

@@ -49,9 +49,3 @@ extension UIView {
     }
   }
 }
-
-extension UIView {
-  var flattendSubviews: [UIView] {
-    return [self] + subviews.flatMap { $0.flattendSubviews }
-  }
-}

@@ -13,11 +13,13 @@ let package = Package(
       targets: ["Hero2"]
     )
   ],
-  dependencies: [],
+  dependencies: [
+    .package(url: "https://github.com/lkzhao/BaseToolbox", from: "0.0.1"),
+  ],
   targets: [
     .target(
       name: "Hero2",
-      dependencies: []
+      dependencies: ["BaseToolbox"]
     )
   ]
 )

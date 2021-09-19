@@ -9,6 +9,7 @@
 import Hero2
 import UIComponent
 import UIKit
+import BaseToolbox
 
 class PushViewController: ComponentViewController {
   override var component: Component {
