@@ -14,7 +14,7 @@ let package = Package(
     )
   ],
   dependencies: [
-    .package(url: "https://github.com/lkzhao/BaseToolbox", from: "0.0.1"),
+    .package(url: "https://github.com/lkzhao/BaseToolbox", from: "0.0.4"),
   ],
   targets: [
     .target(

@@ -12,7 +12,7 @@ func convertTransformToWindow(layer: CALayer) -> CATransform3D {
   var current = layer
   var trans = layer.transform
   while let superlayer = current.superlayer, !(superlayer.delegate is UIWindow) {
-    trans = CATransform3DConcat(superlayer.transform, trans)
+    trans = superlayer.transform.concatenating(trans)
     current = superlayer
   }
   // reset translation, since translation is handled by position
@@ -22,8 +22,7 @@ func convertTransformToWindow(layer: CALayer) -> CATransform3D {
 }
 
 func convert(layerTransform: CATransform3D, to container: CALayer) -> CATransform3D {
-  let containerTrans = convertTransformToWindow(layer: container)
-  return CATransform3DConcat(layerTransform, CATransform3DInvert(containerTrans))
+  layerTransform.concatenating(convertTransformToWindow(layer: container).inverted())
 }
 
 struct ModifierProcessMetadata {
@@ -47,19 +46,15 @@ func process(modifiers: [HeroModifier], on state: inout ViewState, metadata: Mod
     case .fade:
       state.alpha = 0
     case .translate(let translation):
-      state.transform = CATransform3DTranslate(
-        state.transform ?? CATransform3DIdentity,
-        translation.x, translation.y, 0)
+      state.transform = (state.transform ?? .identity).translatedBy(translation)
     case .translatePercentage(let translation):
-      state.transform = CATransform3DTranslate(
-        state.transform ?? CATransform3DIdentity,
-        translation.x * metadata.containerSize.width, translation.y * metadata.containerSize.height, 0)
+      state.transform = (state.transform ?? .identity).translatedBy(translation * metadata.containerSize)
     case .rotate(let rotation):
-      state.transform = CATransform3DRotate(state.transform ?? CATransform3DIdentity, rotation, 0, 0, 1)
+      state.transform = (state.transform ?? .identity).rotatedBy(rotation)
     case .scale(let scale):
-      state.transform = CATransform3DScale(state.transform ?? CATransform3DIdentity, scale, scale, 1)
+      state.transform = (state.transform ?? .identity).scaledBy(scale)
     case .transform(let transform):
-      state.transform = transform
+      state.transform = (state.transform ?? .identity).concatenating(transform)
     case .shadowOpacity(let shadowOpacity):
       state.shadowOpacity = shadowOpacity
     case .zPosition(let zPosition):
@@ -192,11 +187,7 @@ func applyViewState(_ viewState: ViewState, to view: UIView) {
   if let size = viewState.size {
     if viewState.scaleSize == true {
       sizeScale = size.width / view.bounds.size.width
-      view.layer.transform = CATransform3DScale(
-        view.layer.transform,
-        size.width / view.bounds.size.width,
-        size.height / view.bounds.size.height,
-        1)
+      view.layer.transform.scaleBy(size / view.bounds.size)
     } else {
       view.bounds.size = size
     }
@@ -205,13 +196,13 @@ func applyViewState(_ viewState: ViewState, to view: UIView) {
     view.alpha = targetAlpha
   }
   if let zPosition = viewState.zPosition {
-    view.layer.zPosition = zPosition
+    view.zPosition = zPosition
   }
   if let shadowOpacity = viewState.shadowOpacity {
-    view.layer.shadowOpacity = Float(shadowOpacity)
+    view.shadowOpacity = shadowOpacity
   }
   if let cornerRadius = viewState.cornerRadius {
-    view.layer.cornerRadius = cornerRadius / sizeScale
+    view.cornerRadius = cornerRadius / sizeScale
   }
   if let overlayColor = viewState.overlayColor {
     view.overlayView?.backgroundColor = overlayColor
