@@ -57,12 +57,14 @@ open class HeroTransition: Transition {
 
     var frontIdToView: [String: UIView] = [:]
     var backIdToView: [String: UIView] = [:]
-    for view in front.flattendSubviews {
+    let frontViews = [front] + front.flattendSubviews
+    let backViews = [back] + back.flattendSubviews
+    for view in frontViews {
       for heroID in view.heroIDs {
         frontIdToView[heroID] = view
       }
     }
-    for view in back.flattendSubviews {
+    for view in backViews {
       for heroID in view.heroIDs {
         backIdToView[heroID] = view
       }
@@ -79,7 +81,7 @@ open class HeroTransition: Transition {
       return nil
     }
     func processContext(isFront: Bool) {
-      let views = isFront ? front.flattendSubviews : back.flattendSubviews
+      let views = isFront ? frontViews : backViews
       let otherVCType = isFront ? type(of: backgroundViewController!) : type(of: foregroundViewController!)
       let ourViews = isFront ? frontIdToView : backIdToView
       let otherViews = !isFront ? frontIdToView : backIdToView
