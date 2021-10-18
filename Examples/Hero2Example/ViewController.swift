@@ -15,6 +15,10 @@ class ViewController: ComponentViewController {
     VStack {
       Join {
         ExampleItem(name: "Match", viewController: MatchViewController())
+        ExampleItem(name: "Bubble", viewController: BubbleViewController())
+        ExampleItem(name: "Push", viewController: PushViewController())
+        ExampleItem(name: "ImageGallery", viewController: ImageGalleryViewController())
+        ExampleItem(name: "Instagram", viewController: InstagramViewController())
       } separator: {
         Separator()
       }
@@ -33,7 +37,7 @@ struct ExampleItem: ComponentBuilder {
     VStack {
       Text(name)
     }.inset(20).tappableView {
-      $0.present(viewController())
+      $0.push(viewController())
     }
   }
 }

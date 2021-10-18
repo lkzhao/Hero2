@@ -30,8 +30,13 @@ open class Transition: NSObject {
     }
   }
 
+#if targetEnvironment(simulator)
+  public static var defaultDuration: TimeInterval = 0.4 * TimeInterval(UIAnimationDragCoefficient())
+#else
+  public static var defaultDuration: TimeInterval = 0.4
+#endif
   public init(
-    duration: TimeInterval = 0.4, timingParameters: UITimingCurveProvider = UISpringTimingParameters(dampingRatio: 0.9)
+    duration: TimeInterval = defaultDuration, timingParameters: UITimingCurveProvider = UISpringTimingParameters(dampingRatio: 0.9)
   ) {
     self.duration = duration
     self.timingParameters = timingParameters

@@ -34,6 +34,7 @@ class ComponentViewController: UIViewController {
 
   override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
+    guard !transition.isTransitioning else { return } // disable child layout during transition since that might mess up the
     componentView.frame = view.bounds
   }
 
@@ -45,5 +46,11 @@ class ComponentViewController: UIViewController {
     VStack(justifyContent: .center, alignItems: .center) {
       Text("Empty")
     }.size(width: .fill)
+  }
+}
+
+extension ComponentViewController: TransitionProvider {
+  func transitionFor(presenting: Bool, otherViewController: UIViewController) -> Transition? {
+    transition
   }
 }

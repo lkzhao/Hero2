@@ -14,6 +14,10 @@ extension UIView {
   }
 }
 
+#if targetEnvironment(simulator)
+@_silgen_name("UIAnimationDragCoefficient") func UIAnimationDragCoefficient() -> Float
+#endif
+
 func convertTransformToWindow(layer: CALayer) -> CATransform3D {
   var current = layer
   var trans = layer.transform
@@ -135,6 +139,7 @@ func viewStateFrom(view: UIView) -> ViewState {
   result.windowPosition = view.window!.convert(view.bounds.center, from: view)
   result.size = view.bounds.size
   result.cornerRadius = view.layer.cornerRadius
+  result.backgroundColor = view.backgroundColor
   return result
 }
 

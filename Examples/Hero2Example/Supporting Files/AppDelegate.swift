@@ -12,13 +12,12 @@ import UIKit
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
   var window: UIWindow?
-  let trans = HeroTransition()
 
   func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     window = UIWindow()
-    let navVC = UINavigationController(rootViewController: InstagramViewController())
+    let navVC = UINavigationController(rootViewController: ViewController())
     navVC.setNavigationBarHidden(true, animated: false)
-    navVC.delegate = trans
+    navVC.delegate = TransitionCoordinator.shared
     window?.rootViewController = navVC
     window?.makeKeyAndVisible()
     return true

@@ -121,7 +121,9 @@ open class HeroTransition: Transition {
     for view in animatingViews.reversed() {
       if (contexts[view]?.targetState.snapshotType ?? .default) == .default {
         let cornerRadius = view.layer.cornerRadius
+        let backgroundColor = view.backgroundColor
         view.layer.cornerRadius = 0
+        view.backgroundColor = nil
         let snap = view.snapshotView(afterScreenUpdates: true)!
         snap.layer.shadowColor = view.layer.shadowColor
         snap.layer.shadowRadius = view.layer.shadowRadius
@@ -131,6 +133,8 @@ open class HeroTransition: Transition {
         snap.contentMode = .scaleAspectFill
         snap.layer.cornerRadius = cornerRadius
         view.layer.cornerRadius = cornerRadius
+        snap.backgroundColor = backgroundColor
+        view.backgroundColor = backgroundColor
         contexts[view]?.snapshotView = snap
       } else {
         let placeholderView = UIView()
