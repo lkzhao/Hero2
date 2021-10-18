@@ -35,7 +35,7 @@ func convert(layerTransform: CATransform3D, to container: CALayer) -> CATransfor
   layerTransform.concatenating(convertTransformToWindow(layer: container).inverted())
 }
 
-struct ModifierProcessMetadata {
+public struct ModifierProcessMetadata {
   let containerSize: CGSize
   let ourViews: [String: UIView]
   let otherViews: [String: UIView]
@@ -89,16 +89,8 @@ func process(modifiers: [HeroModifier], on state: inout ViewState, metadata: Mod
       if metadata.otherViews[matchId] != nil {
         state.match = matchId
       }
-    case let .whenOtherVC(type, modifiers):
-      if type == metadata.otherVCType {
-        process(modifiers: modifiers, on: &state, metadata: metadata)
-      }
-    case .whenPresenting(let modifiers):
-      if metadata.isPresenting {
-        process(modifiers: modifiers, on: &state, metadata: metadata)
-      }
-    case .whenDismissing(let modifiers):
-      if !metadata.isPresenting {
+    case let .when(checker, modifiers):
+      if checker(metadata) {
         process(modifiers: modifiers, on: &state, metadata: metadata)
       }
     case .whenMatched(let modifiers):
@@ -107,22 +99,6 @@ func process(modifiers: [HeroModifier], on state: inout ViewState, metadata: Mod
       }
     case .whenNotMatched(let modifiers):
       if state.match.flatMap({ metadata.otherViews[$0] }) == nil {
-        process(modifiers: modifiers, on: &state, metadata: metadata)
-      }
-    case .whenAppearing(let modifiers):
-      if metadata.isPresenting == metadata.isForeground {
-        process(modifiers: modifiers, on: &state, metadata: metadata)
-      }
-    case .whenDisappearing(let modifiers):
-      if metadata.isPresenting != metadata.isForeground {
-        process(modifiers: modifiers, on: &state, metadata: metadata)
-      }
-    case .whenForeground(let modifiers):
-      if metadata.isForeground {
-        process(modifiers: modifiers, on: &state, metadata: metadata)
-      }
-    case .whenBackground(let modifiers):
-      if !metadata.isForeground {
         process(modifiers: modifiers, on: &state, metadata: metadata)
       }
     case .beginWith(let modifiers):
