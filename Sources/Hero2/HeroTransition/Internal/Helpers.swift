@@ -8,6 +8,12 @@
 import UIKit
 import BaseToolbox
 
+extension UIView {
+  var viewsInHierarchy: [UIView] {
+    [self] + subviews.flatMap { $0.viewsInHierarchy }
+  }
+}
+
 func convertTransformToWindow(layer: CALayer) -> CATransform3D {
   var current = layer
   var trans = layer.transform
