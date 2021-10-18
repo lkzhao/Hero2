@@ -78,6 +78,8 @@ func process(modifiers: [HeroModifier], on state: inout ViewState, metadata: ino
       state.scaleSize = true
     case .skipContainer:
       state.skipContainer = true
+    case .forceTransition:
+      state.forceTransition = true
     case .match(let matchId):
       if metadata.otherViews[matchId] != nil {
         state.match = matchId

@@ -94,6 +94,7 @@ open class HeroTransition: Transition {
         isForeground: isFront,
         isMatched: false)
       for view in views {
+        metadata.isMatched = false
         let modifiers: [HeroModifier] = view.heroIDs.reversed().map({ .match($0) }) + (view.heroModifiers ?? [])
         let modifierState = viewStateFrom(modifiers: modifiers, metadata: &metadata)
         let other = modifierState.match.flatMap { otherViews[$0] }
@@ -120,7 +121,8 @@ open class HeroTransition: Transition {
 
     // generate snapshot (must be done in reverse, so that child is hidden before parent's snapshot is taken)
     for view in animatingViews.reversed() {
-      if (contexts[view]?.targetState.snapshotType ?? .default) == .default {
+      switch contexts[view]?.targetState.snapshotType ?? .none {
+      case .snapshotView:
         let cornerRadius = view.layer.cornerRadius
         let backgroundColor = view.backgroundColor
         view.layer.cornerRadius = 0
@@ -137,7 +139,7 @@ open class HeroTransition: Transition {
         snap.backgroundColor = backgroundColor
         view.backgroundColor = backgroundColor
         contexts[view]?.snapshotView = snap
-      } else {
+      case .none:
         let placeholderView = UIView()
         view.superview?.insertSubview(placeholderView, aboveSubview: view)
         contexts[view]?.snapshotView = view

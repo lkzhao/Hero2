@@ -41,9 +41,9 @@ class BubbleMaskDetailViewController: ComponentViewController {
     view.heroID = "bubble-mask"
     view.clipsToBounds = true
     view.cornerRadius = 38
-    view.heroModifiers = [.snapshotType(.none), .fade]
+    view.heroModifiers = [.fade]
     view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTap)))
-    componentView.heroModifiers = [.snapshotType(.none)] // this forces componentView to participate in the transition, causing it to be independent and stay in place
+    componentView.heroModifiers = [.forceTransition] // this forces componentView to participate in the transition, causing it to be independent and stay in place
   }
   @objc func didTap() {
     navigationController?.popViewController(animated: true)
@@ -63,7 +63,7 @@ class BubbleScaleDetailViewController: ComponentViewController {
     view.heroID = "bubble-scale"
     view.clipsToBounds = true
     view.cornerRadius = 38
-    view.heroModifiers = [.snapshotType(.none), .fade, .scaleSize]
+    view.heroModifiers = [.fade, .scaleSize]
     view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTap)))
   }
   @objc func didTap() {

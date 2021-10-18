@@ -72,12 +72,11 @@ class ImageDetailViewController: ComponentViewController {
     super.viewDidLoad()
     transition.isUserInteractionEnabled = true
     //    transition.duration = 1
-    imageView.heroModifiers = [.snapshotType(.none)]
     imageView.shadowColor = .black.withAlphaComponent(0.2)
     imageView.shadowRadius = 8
     imageView.shadowOpacity = 1
     imageView.shadowOffset = .zero
-    view.heroModifiers = [.fade, .snapshotType(.none)]
+    view.heroModifiers = [.fade]
     panGR.delegate = self
     view.addGestureRecognizer(panGR)
     view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTap)))

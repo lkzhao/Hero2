@@ -29,6 +29,7 @@ struct ViewState: Equatable {
   var zPosition: CGFloat? = nil
   var scaleSize: Bool? = nil
   var skipContainer: Bool? = nil
+  var forceTransition: Bool? = nil
   @IndirectOptional var beginState: ViewState? = nil
 }
 

@@ -23,7 +23,6 @@ class InstagramViewController: ComponentViewController {
           .clipsToBounds(true)
           .size(width: .fill, height: .aspectPercentage(1))
           .heroID(image.id)
-          .heroModifiers([.whenMatched(.snapshotType(.none))])
           .tappableView { [unowned self] in
             self.didTap(image: image)
           }
@@ -93,13 +92,11 @@ class InstagramDetailViewController: ComponentViewController {
     super.viewDidLoad()
     transition.isUserInteractionEnabled = true
     transition.duration = 5
-    imageView.heroModifiers = [.snapshotType(.none)]
     imageView.contentMode = .scaleAspectFill
     imageView.clipsToBounds = true
     componentView.cornerRadius = 40
     componentView.clipsToBounds = true
     view.backgroundColor = nil
-    view.heroModifiers = [.snapshotType(.none)]
     componentView.backgroundColor = .systemBackground
     panGR.delegate = self
     view.addGestureRecognizer(panGR)
@@ -111,7 +108,7 @@ class InstagramDetailViewController: ComponentViewController {
     if !componentView.hasReloaded {
       componentView.reloadData()
     }
-    componentView.heroModifiers = [.match(image.id)]
+    componentView.heroModifiers = [.match(image.id), .snapshotView]
   }
 
   @objc func didTap() {

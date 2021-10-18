@@ -8,8 +8,8 @@
 import UIKit
 
 public enum SnapshotType {
-  case `default`
   case none
+  case snapshotView
 }
 
 public enum ContainerType {
@@ -43,12 +43,18 @@ public enum HeroModifier {
   // to influence any animating child view
   case skipContainer
 
+  // force the current view to participage in the transition
+  // it will be independent during the transition, and won't be captured by the superview's snapshot.
+  case forceTransition
+
   case containerType(ContainerType)
   case snapshotType(SnapshotType)
 
   case _beginWith([HeroModifier])
   case _process((ModifierProcessMetadata) -> [HeroModifier])
 
+  public static let snapshotView: HeroModifier = .snapshotType(.snapshotView)
+  public static let globalContainer: HeroModifier = .containerType(.global)
   public static func translate(_ point: CGPoint) -> HeroModifier {
     .transform(CATransform3DMakeTranslation(point.x, point.y, 0))
   }

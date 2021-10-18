@@ -21,7 +21,7 @@ class PushViewController: ComponentViewController {
   }
   override func viewDidLoad() {
     super.viewDidLoad()
-    view.heroModifiers = [.overlayColor(UIColor.black.withAlphaComponent(0.2)), .snapshotType(.none)]
+    view.heroModifiers = [.overlayColor(UIColor.black.withAlphaComponent(0.2))]
   }
 }
 
@@ -45,9 +45,7 @@ class PushDetailViewController: ComponentViewController {
     view.shadowOffset = .zero
     view.backgroundColor = .systemGroupedBackground
     view.addGestureRecognizer(panGR)
-    view.heroModifiers = [
-      .translatePercentage(x: 1), .beginWith(.shadowOpacity(0.5)), .snapshotType(.none),
-    ]
+    view.heroModifiers = [.translatePercentage(x: 1), .beginWith(.shadowOpacity(0.5))]
   }
 
   var initialFractionCompleted: CGFloat = 0
