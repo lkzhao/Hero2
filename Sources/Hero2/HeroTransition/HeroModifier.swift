@@ -56,9 +56,17 @@ public enum HeroModifier {
   public static func whenOtherVCTypeMatches(_ type:UIViewController.Type, _ modifiers: [HeroModifier]) -> HeroModifier {
     .when({ $0.otherVCType == type }, modifiers)
   }
+  public static func whenOtherVCTypeDoesntMatch(_ type:UIViewController.Type, _ modifiers: [HeroModifier]) -> HeroModifier {
+    .when({ $0.otherVCType != type }, modifiers)
+  }
   public static func whenAnotherViewIsMatched(_ view: UIView, _ modifiers: [HeroModifier]) -> HeroModifier {
     .when({ [weak view] metadata in
       view?.heroIDs.contains { metadata.otherViews[$0] != nil } == true
+    }, modifiers)
+  }
+  public static func whenAnotherViewIsNotMatched(_ view: UIView, _ modifiers: [HeroModifier]) -> HeroModifier {
+    .when({ [weak view] metadata in
+      view?.heroIDs.contains { metadata.otherViews[$0] != nil } != true
     }, modifiers)
   }
   public static func whenPresenting(_ modifiers: [HeroModifier]) -> HeroModifier {
