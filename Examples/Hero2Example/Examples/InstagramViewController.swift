@@ -23,7 +23,7 @@ class InstagramViewController: ComponentViewController {
           .clipsToBounds(true)
           .size(width: .fill, height: .aspectPercentage(1))
           .heroID(image.id)
-          .heroModifiers([.whenMatched([.snapshotType(.none)])])
+          .heroModifiers([.whenMatched(.snapshotType(.none))])
           .tappableView { [unowned self] in
             self.didTap(image: image)
           }

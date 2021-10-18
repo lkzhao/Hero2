@@ -85,16 +85,17 @@ open class HeroTransition: Transition {
       let otherVCType = isFront ? type(of: backgroundViewController!) : type(of: foregroundViewController!)
       let ourViews = isFront ? frontIdToView : backIdToView
       let otherViews = !isFront ? frontIdToView : backIdToView
-      let metadata = ModifierProcessMetadata(
+      var metadata = ModifierProcessMetadata(
         containerSize: container.bounds.size,
         ourViews: ourViews,
         otherViews: otherViews,
         otherVCType: otherVCType,
         isPresenting: isPresenting,
-        isForeground: isFront)
+        isForeground: isFront,
+        isMatched: false)
       for view in views {
         let modifiers: [HeroModifier] = view.heroIDs.reversed().map({ .match($0) }) + (view.heroModifiers ?? [])
-        let modifierState = viewStateFrom(modifiers: modifiers, metadata: metadata)
+        let modifierState = viewStateFrom(modifiers: modifiers, metadata: &metadata)
         let other = modifierState.match.flatMap { otherViews[$0] }
         if other != nil || modifierState != ViewState(match: modifierState.match) {
           let matchedSuperview =

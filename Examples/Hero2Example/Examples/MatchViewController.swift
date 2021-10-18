@@ -39,7 +39,7 @@ class MatchViewController: ComponentViewController {
       ZStack {
         for shape in shapes {
           Image(shape.image).tintColor(shape.color).contentMode(.scaleAspectFit).heroID(shape.id).heroModifiers([
-            .whenNotMatched([.fade])
+            .whenNotMatched(.fade)
           ]).size(width: .fill, height: .fill).tappableView {
             let vc = MatchDetailViewController()
             vc.shape = shape
@@ -51,7 +51,7 @@ class MatchViewController: ComponentViewController {
       }.size(width: .fill, height: .aspectPercentage(16 / 9)).view()
         .clipsToBounds(true)
         .heroID("canvas")
-        .heroModifiers([.containerType(.global), .zPosition(1), .beginWith([.zPosition(1)])])
+        .heroModifiers([.containerType(.global), .zPosition(1), .beginWith(.zPosition(1))])
         .transform(.identity.rotated(by: 0.1))
         .backgroundColor(.systemGroupedBackground).cornerRadius(20).clipsToBounds(true)
       Spacer()
@@ -62,22 +62,22 @@ class MatchViewController: ComponentViewController {
         Image(systemName: "rectangle").tintColor(.systemBlue)
           .heroModifiers([
             .scale(0.2), .fade,
-            .whenPresenting([.delay(0.0)]),
-            .whenDismissing([.delay(0.2)]),
+            .whenPresenting(.delay(0.0)),
+            .whenDismissing(.delay(0.2)),
             .duration(0.3),
           ])
         Image(systemName: "square").tintColor(.systemBlue)
           .heroModifiers([
             .scale(0.2), .fade,
-            .whenPresenting([.delay(0.1)]),
-            .whenDismissing([.delay(0.1)]),
+            .whenPresenting(.delay(0.1)),
+            .whenDismissing(.delay(0.1)),
             .duration(0.3),
           ])
         Image(systemName: "circle").tintColor(.systemBlue)
           .heroModifiers([
             .scale(0.2), .fade,
-            .whenPresenting([.delay(0.2)]),
-            .whenDismissing([.delay(0.0)]),
+            .whenPresenting(.delay(0.2)),
+            .whenDismissing(.delay(0.0)),
             .duration(0.3),
           ])
       }

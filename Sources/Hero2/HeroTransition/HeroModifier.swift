@@ -19,13 +19,12 @@ public enum ContainerType {
 
 public enum HeroModifier {
   case fade
-  case translate(CGPoint)
-  case translatePercentage(CGPoint)
-  case rotate(CGFloat)
-  case scale(CGFloat)
+
   case transform(CATransform3D)
+
   case delay(TimeInterval)
   case duration(TimeInterval)
+
   case zPosition(CGFloat)
   case shadowOpacity(CGFloat)
 
@@ -47,44 +46,81 @@ public enum HeroModifier {
   case containerType(ContainerType)
   case snapshotType(SnapshotType)
 
-  case when((ModifierProcessMetadata) -> Bool, [HeroModifier])
-  case whenMatched([HeroModifier])
-  case whenNotMatched([HeroModifier])
+  case _beginWith([HeroModifier])
+  case _process((ModifierProcessMetadata) -> [HeroModifier])
 
-  case beginWith([HeroModifier])
-
-  public static func whenOtherVCTypeMatches(_ type:UIViewController.Type, _ modifiers: [HeroModifier]) -> HeroModifier {
+  public static func translate(_ point: CGPoint) -> HeroModifier {
+    .transform(CATransform3DMakeTranslation(point.x, point.y, 0))
+  }
+  public static func translate(x: CGFloat = 0, y: CGFloat = 0, z: CGFloat = 0) -> HeroModifier {
+    .transform(CATransform3DMakeTranslation(x, y, z))
+  }
+  public static func translatePercentage(_ point: CGPoint) -> HeroModifier {
+    ._process {
+      [.transform(CATransform3DMakeTranslation(point.x * $0.containerSize.width, point.y * $0.containerSize.height, 0))]
+    }
+  }
+  public static func translatePercentage(x: CGFloat = 0, y: CGFloat = 0) -> HeroModifier {
+    .translatePercentage(CGPoint(x: x, y: y))
+  }
+  public static func rotate(_ angle: CGFloat, x: CGFloat = 0, y: CGFloat = 0, z: CGFloat = 1) -> HeroModifier {
+    .transform(CATransform3DMakeRotation(angle, x, y, z))
+  }
+  public static func scale(_ amount: CGFloat) -> HeroModifier {
+    .transform(CATransform3DMakeScale(amount, amount, 1))
+  }
+  public static func scale(x: CGFloat = 1, y: CGFloat = 1, z: CGFloat = 1) -> HeroModifier {
+    .transform(CATransform3DMakeScale(x, y, z))
+  }
+  public static func beginWith(_ modifiers: HeroModifier...) -> HeroModifier {
+    ._beginWith(modifiers)
+  }
+  public static func when(_ checker: @escaping (ModifierProcessMetadata) -> Bool, _ modifiers: [HeroModifier]) -> HeroModifier {
+    ._process {
+      checker($0) ? modifiers : []
+    }
+  }
+  public static func when(_ checker: @escaping (ModifierProcessMetadata) -> Bool, _ modifiers: HeroModifier...) -> HeroModifier {
+    .when(checker, modifiers)
+  }
+  public static func whenOtherVCTypeMatches(_ type:UIViewController.Type, _ modifiers: HeroModifier...) -> HeroModifier {
     .when({ $0.otherVCType == type }, modifiers)
   }
-  public static func whenOtherVCTypeDoesntMatch(_ type:UIViewController.Type, _ modifiers: [HeroModifier]) -> HeroModifier {
+  public static func whenOtherVCTypeDoesntMatch(_ type:UIViewController.Type, _ modifiers: HeroModifier...) -> HeroModifier {
     .when({ $0.otherVCType != type }, modifiers)
   }
-  public static func whenAnotherViewIsMatched(_ view: UIView, _ modifiers: [HeroModifier]) -> HeroModifier {
+  public static func whenAnotherViewIsMatched(_ view: UIView, _ modifiers: HeroModifier...) -> HeroModifier {
     .when({ [weak view] metadata in
       view?.heroIDs.contains { metadata.otherViews[$0] != nil } == true
     }, modifiers)
   }
-  public static func whenAnotherViewIsNotMatched(_ view: UIView, _ modifiers: [HeroModifier]) -> HeroModifier {
+  public static func whenAnotherViewIsNotMatched(_ view: UIView, _ modifiers: HeroModifier...) -> HeroModifier {
     .when({ [weak view] metadata in
       view?.heroIDs.contains { metadata.otherViews[$0] != nil } != true
     }, modifiers)
   }
-  public static func whenPresenting(_ modifiers: [HeroModifier]) -> HeroModifier {
+  public static func whenMatched(_ modifiers: HeroModifier...) -> HeroModifier {
+    .when({ $0.isMatched }, modifiers)
+  }
+  public static func whenNotMatched(_ modifiers: HeroModifier...) -> HeroModifier {
+    .when({ !$0.isMatched }, modifiers)
+  }
+  public static func whenPresenting(_ modifiers: HeroModifier...) -> HeroModifier {
     .when({ $0.isPresenting }, modifiers)
   }
-  public static func whenDismissing(_ modifiers: [HeroModifier]) -> HeroModifier {
+  public static func whenDismissing(_ modifiers: HeroModifier...) -> HeroModifier {
     .when({ !$0.isPresenting }, modifiers)
   }
-  public static func whenAppearing(_ modifiers: [HeroModifier]) -> HeroModifier {
+  public static func whenAppearing(_ modifiers: HeroModifier...) -> HeroModifier {
     .when({ $0.isPresenting == $0.isForeground }, modifiers)
   }
-  public static func whenDisappearing(_ modifiers: [HeroModifier]) -> HeroModifier {
+  public static func whenDisappearing(_ modifiers: HeroModifier...) -> HeroModifier {
     .when({ $0.isPresenting != $0.isForeground }, modifiers)
   }
-  public static func whenForeground(_ modifiers: [HeroModifier]) -> HeroModifier {
+  public static func whenForeground(_ modifiers: HeroModifier...) -> HeroModifier {
     .when({ $0.isForeground }, modifiers)
   }
-  public static func whenBackground(_ modifiers: [HeroModifier]) -> HeroModifier {
+  public static func whenBackground(_ modifiers: HeroModifier...) -> HeroModifier {
     .when({ !$0.isForeground }, modifiers)
   }
 }

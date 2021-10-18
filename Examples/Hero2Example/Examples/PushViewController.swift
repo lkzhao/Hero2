@@ -46,7 +46,7 @@ class PushDetailViewController: ComponentViewController {
     view.backgroundColor = .systemGroupedBackground
     view.addGestureRecognizer(panGR)
     view.heroModifiers = [
-      .translatePercentage(CGPoint(x: 1, y: 0)), .beginWith([.shadowOpacity(0.5)]), .snapshotType(.none),
+      .translatePercentage(x: 1), .beginWith(.shadowOpacity(0.5)), .snapshotType(.none),
     ]
   }
 

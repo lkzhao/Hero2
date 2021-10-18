@@ -36,33 +36,26 @@ func convert(layerTransform: CATransform3D, to container: CALayer) -> CATransfor
 }
 
 public struct ModifierProcessMetadata {
-  let containerSize: CGSize
-  let ourViews: [String: UIView]
-  let otherViews: [String: UIView]
-  let otherVCType: UIViewController.Type
-  let isPresenting: Bool
-  let isForeground: Bool
+  public let containerSize: CGSize
+  public let ourViews: [String: UIView]
+  public let otherViews: [String: UIView]
+  public let otherVCType: UIViewController.Type
+  public let isPresenting: Bool
+  public let isForeground: Bool
+  public internal(set) var isMatched: Bool
 }
 
-func viewStateFrom(modifiers: [HeroModifier], metadata: ModifierProcessMetadata) -> ViewState {
+func viewStateFrom(modifiers: [HeroModifier], metadata: inout ModifierProcessMetadata) -> ViewState {
   var state = ViewState()
-  process(modifiers: modifiers, on: &state, metadata: metadata)
+  process(modifiers: modifiers, on: &state, metadata: &metadata)
   return state
 }
 
-func process(modifiers: [HeroModifier], on state: inout ViewState, metadata: ModifierProcessMetadata) {
+func process(modifiers: [HeroModifier], on state: inout ViewState, metadata: inout ModifierProcessMetadata) {
   for modifier in modifiers {
     switch modifier {
     case .fade:
       state.alpha = 0
-    case .translate(let translation):
-      state.transform = (state.transform ?? .identity).translatedBy(translation)
-    case .translatePercentage(let translation):
-      state.transform = (state.transform ?? .identity).translatedBy(translation * metadata.containerSize)
-    case .rotate(let rotation):
-      state.transform = (state.transform ?? .identity).rotatedBy(rotation)
-    case .scale(let scale):
-      state.transform = (state.transform ?? .identity).scaledBy(scale)
     case .transform(let transform):
       state.transform = (state.transform ?? .identity).concatenating(transform)
     case .shadowOpacity(let shadowOpacity):
@@ -88,23 +81,14 @@ func process(modifiers: [HeroModifier], on state: inout ViewState, metadata: Mod
     case .match(let matchId):
       if metadata.otherViews[matchId] != nil {
         state.match = matchId
+        metadata.isMatched = true
       }
-    case let .when(checker, modifiers):
-      if checker(metadata) {
-        process(modifiers: modifiers, on: &state, metadata: metadata)
-      }
-    case .whenMatched(let modifiers):
-      if state.match.flatMap({ metadata.otherViews[$0] }) != nil {
-        process(modifiers: modifiers, on: &state, metadata: metadata)
-      }
-    case .whenNotMatched(let modifiers):
-      if state.match.flatMap({ metadata.otherViews[$0] }) == nil {
-        process(modifiers: modifiers, on: &state, metadata: metadata)
-      }
-    case .beginWith(let modifiers):
+    case ._beginWith(let modifiers):
       var beginState = ViewState()
-      process(modifiers: modifiers, on: &beginState, metadata: metadata)
+      process(modifiers: modifiers, on: &beginState, metadata: &metadata)
       state.beginState = (state.beginState ?? ViewState())?.merge(state: beginState)
+    case ._process(let processor):
+      process(modifiers: processor(metadata), on: &state, metadata: &metadata)
     }
   }
 }
