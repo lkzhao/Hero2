@@ -63,7 +63,12 @@ open class Transition: NSObject {
     if animator.state == .inactive {
       animator.startAnimation()
     } else {
-      animator.continueAnimation(withTimingParameters: nil, durationFactor: 1)
+      if fractionCompleted >= 0.99 {
+        animator.stopAnimation(false)
+        animator.finishAnimation(at: shouldFinish ? .end : .start)
+      } else {
+        animator.continueAnimation(withTimingParameters: nil, durationFactor: 1)
+      }
     }
   }
 
@@ -114,11 +119,13 @@ extension Transition {
   public var toOverFullScreen: Bool {
     toViewController?.modalPresentationStyle == .overFullScreen
       || toViewController?.modalPresentationStyle == .overCurrentContext
+      || toViewController?.modalPresentationStyle == .custom
   }
 
   public var fromOverFullScreen: Bool {
     fromViewController?.modalPresentationStyle == .overFullScreen
       || fromViewController?.modalPresentationStyle == .overCurrentContext
+      || fromViewController?.modalPresentationStyle == .custom
   }
 
   public func isBackground(viewController: UIViewController) -> Bool {
@@ -154,7 +161,7 @@ extension Transition: UIViewControllerAnimatedTransitioning {
     let container = transitionContainer!
     container.addSubview(backgroundView!)
     container.addSubview(foregroundView!)
-    toView!.frame = container.frame
+    toView!.frameWithoutTransform = container.frame
     toView!.layoutIfNeeded()
 
     // Allows the ViewControllers to load their views, and setup the transition during viewDidLoad
