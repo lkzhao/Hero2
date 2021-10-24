@@ -91,7 +91,6 @@ class InstagramDetailViewController: ComponentViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     transition.isUserInteractionEnabled = true
-    transition.duration = 5
     imageView.contentMode = .scaleAspectFill
     imageView.clipsToBounds = true
     componentView.cornerRadius = 40

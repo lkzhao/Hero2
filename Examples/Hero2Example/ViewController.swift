@@ -24,6 +24,11 @@ class ViewController: ComponentViewController {
       }
     }
   }
+
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    title = "Hero2 Examples"
+  }
 }
 
 struct ExampleItem: ComponentBuilder {

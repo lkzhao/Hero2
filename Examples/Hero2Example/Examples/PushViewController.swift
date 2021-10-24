@@ -15,7 +15,7 @@ class PushViewController: ComponentViewController {
   override var component: Component {
     VStack(spacing: 8, justifyContent: .center, alignItems: .center) {
       Text("Present Detail VC").textColor(.systemBlue).tappableView {
-        $0.present(PushDetailViewController())
+        $0.push(PushDetailViewController())
       }
     }.size(width: .fill).inset(20)
   }
@@ -28,9 +28,6 @@ class PushViewController: ComponentViewController {
 class PushDetailViewController: ComponentViewController {
   override var component: Component {
     VStack(spacing: 8) {
-      Image(systemName: "chevron.left").tintColor(.systemBlue).tappableView {
-        $0.dismiss()
-      }
       Text("PushDetailViewController")
     }.inset(20)
   }
@@ -57,8 +54,8 @@ class PushDetailViewController: ComponentViewController {
     switch gr.state {
     case .began:
       transition.beginInteractiveTransition()
-      if !isBeingPresented, !isBeingDismissed {
-        dismiss(animated: true, completion: nil)
+      if !transition.isTransitioning {
+        view.dismiss()
       }
       initialFractionCompleted = transition.fractionCompleted
     case .changed:

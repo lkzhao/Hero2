@@ -16,7 +16,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     window = UIWindow()
     let navVC = UINavigationController(rootViewController: ViewController())
-    navVC.setNavigationBarHidden(true, animated: false)
     navVC.delegate = TransitionCoordinator.shared
     window?.rootViewController = navVC
     window?.makeKeyAndVisible()

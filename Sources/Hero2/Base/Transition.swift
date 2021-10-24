@@ -63,12 +63,7 @@ open class Transition: NSObject {
     if animator.state == .inactive {
       animator.startAnimation()
     } else {
-      if fractionCompleted >= 0.99 {
-        animator.stopAnimation(false)
-        animator.finishAnimation(at: shouldFinish ? .end : .start)
-      } else {
-        animator.continueAnimation(withTimingParameters: nil, durationFactor: 1)
-      }
+      animator.continueAnimation(withTimingParameters: nil, durationFactor: 1)
     }
   }
 
