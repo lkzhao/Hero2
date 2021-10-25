@@ -19,6 +19,7 @@ class ViewController: ComponentViewController {
         ExampleItem(name: "Push", viewController: PushViewController())
         ExampleItem(name: "ImageGallery", viewController: ImageGalleryViewController())
         ExampleItem(name: "Instagram", viewController: InstagramViewController())
+        ExampleItem(name: "Sheet", viewController: SheetViewController())
       } separator: {
         Separator()
       }
@@ -42,7 +43,12 @@ struct ExampleItem: ComponentBuilder {
     VStack {
       Text(name)
     }.inset(20).tappableView {
-      $0.push(viewController())
+      let vc = viewController()
+//      if vc.modalPresentationStyle == .custom {
+        $0.present(vc)
+//      } else {
+//        $0.push(vc)
+//      }
     }
   }
 }

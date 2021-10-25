@@ -154,10 +154,10 @@ extension Transition: UIViewControllerAnimatedTransitioning {
     }
 
     let container = transitionContainer!
-    container.addSubview(backgroundView!)
-    container.addSubview(foregroundView!)
-    toView!.frameWithoutTransform = container.frame
-    toView!.layoutIfNeeded()
+//    container.addSubview(backgroundView!)
+//    container.addSubview(foregroundView!)
+//    toView!.frameWithoutTransform = container.frame
+//    toView!.layoutIfNeeded()
 
     // Allows the ViewControllers to load their views, and setup the transition during viewDidLoad
     container.isUserInteractionEnabled = isUserInteractionEnabled

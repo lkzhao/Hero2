@@ -12,7 +12,11 @@ import UIKit
 
 class ComponentViewController: UIViewController {
   let componentView = ComponentScrollView()
-  let transition = HeroTransition()
+  var transition: Transition = HeroTransition() {
+    didSet {
+      transitioningDelegate = transition
+    }
+  }
 
   override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
     super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)

@@ -24,6 +24,7 @@
 		B1C5DB2E26B3BE0600026969 /* PushViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C5DB2D26B3BE0600026969 /* PushViewController.swift */; };
 		B1CD860F26AE32EF00481EC8 /* UIComponent in Frameworks */ = {isa = PBXBuildFile; productRef = B1CD860E26AE32EF00481EC8 /* UIComponent */; };
 		B1CD861126AE333500481EC8 /* ComponentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1CD861026AE333500481EC8 /* ComponentViewController.swift */; };
+		B1E70DCD27266FB40057663D /* SheetViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1E70DCC27266FB40057663D /* SheetViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -58,6 +59,7 @@
 		B1C5DB2B26B27F4000026969 /* DelayViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DelayViewController.swift; sourceTree = "<group>"; };
 		B1C5DB2D26B3BE0600026969 /* PushViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushViewController.swift; sourceTree = "<group>"; };
 		B1CD861026AE333500481EC8 /* ComponentViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComponentViewController.swift; sourceTree = "<group>"; };
+		B1E70DCC27266FB40057663D /* SheetViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -136,6 +138,7 @@
 				B1BAEE0626B750D5002F1312 /* ImageGalleryViewController.swift */,
 				B17342D926B91A0D00062A93 /* InstagramViewController.swift */,
 				B1A24DEA271CF6200020B728 /* BubbleViewController.swift */,
+				B1E70DCC27266FB40057663D /* SheetViewController.swift */,
 			);
 			path = Examples;
 			sourceTree = "<group>";
@@ -230,6 +233,7 @@
 				B17342DC26B91A2500062A93 /* AsyncImage.swift in Sources */,
 				B1BAEE0726B750D5002F1312 /* ImageGalleryViewController.swift in Sources */,
 				A304892A21C347010026EDA7 /* ViewController.swift in Sources */,
+				B1E70DCD27266FB40057663D /* SheetViewController.swift in Sources */,
 				A304892821C347010026EDA7 /* AppDelegate.swift in Sources */,
 				B1C5DB2E26B3BE0600026969 /* PushViewController.swift in Sources */,
 				B17342DA26B91A0D00062A93 /* InstagramViewController.swift in Sources */,

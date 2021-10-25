@@ -117,6 +117,7 @@ class InstagramDetailViewController: ComponentViewController {
   var initialFractionCompleted: CGFloat = 0
   var initialPosition: CGPoint = .zero
   @objc func handlePan(gr: UIPanGestureRecognizer) {
+    guard let transition = transition as? HeroTransition else { return }
     func progressFrom(offset: CGPoint) -> CGFloat {
       let progress = (offset.x + offset.y) / ((view.bounds.height + view.bounds.width) / 4)
       return (transition.isPresenting != transition.isReversed ? -progress : progress)
