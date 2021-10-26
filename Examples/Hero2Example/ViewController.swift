@@ -19,7 +19,7 @@ class ViewController: ComponentViewController {
         ExampleItem(name: "Push", viewController: PushViewController())
         ExampleItem(name: "ImageGallery", viewController: ImageGalleryViewController())
         ExampleItem(name: "Instagram", viewController: InstagramViewController())
-        ExampleItem(name: "Sheet", viewController: SheetViewController())
+        ExampleItem(name: "Sheet", shouldPresent: true, viewController: SheetViewController())
       } separator: {
         Separator()
       }
@@ -34,9 +34,11 @@ class ViewController: ComponentViewController {
 
 struct ExampleItem: ComponentBuilder {
   let name: String
+  let shouldPresent: Bool
   let viewController: () -> UIViewController
-  init(name: String, viewController: @autoclosure @escaping () -> UIViewController) {
+  init(name: String, shouldPresent: Bool = false, viewController: @autoclosure @escaping () -> UIViewController) {
     self.name = name
+    self.shouldPresent = shouldPresent
     self.viewController = viewController
   }
   func build() -> Component {
@@ -44,11 +46,11 @@ struct ExampleItem: ComponentBuilder {
       Text(name)
     }.inset(20).tappableView {
       let vc = viewController()
-//      if vc.modalPresentationStyle == .custom {
+      if shouldPresent {
         $0.present(vc)
-//      } else {
-//        $0.push(vc)
-//      }
+      } else {
+        $0.push(vc)
+      }
     }
   }
 }

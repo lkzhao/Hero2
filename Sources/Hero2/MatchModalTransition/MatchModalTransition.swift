@@ -8,7 +8,7 @@
 import Foundation
 
 class MatchModalTransition: Transition {
-  override func animate() -> (dismissed: () -> Void, presented: () -> Void, completed: (Bool) -> Void) {
-    return ({}, {}, {_ in })
+  override func animate() {
+    
   }
 }

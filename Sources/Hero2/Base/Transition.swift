@@ -22,6 +22,10 @@ open class Transition: NSObject {
     animator?.isReversed ?? false
   }
 
+  open var automaticallyLayoutToView: Bool {
+    true
+  }
+
   public var fractionCompleted: CGFloat {
     get { animator?.fractionComplete ?? 0 }
     set {
@@ -29,6 +33,11 @@ open class Transition: NSObject {
       animator.fractionComplete = newValue
     }
   }
+
+  private var canAddBlocks: Bool = false
+  private var dismissBlocks: [() -> ()] = []
+  private var presentBlocks: [() -> ()] = []
+  private var completeBlocks: [(Bool) -> ()] = []
 
 #if targetEnvironment(simulator)
   public static var defaultDuration: TimeInterval = 0.4 * TimeInterval(UIAnimationDragCoefficient())
@@ -68,10 +77,23 @@ open class Transition: NSObject {
     }
   }
 
-  // MARK: - Subclass Overrides
-  open func animate() -> (dismissed: () -> Void, presented: () -> Void, completed: (Bool) -> Void) {
-    return ({}, {}, { _ in })
+  public func addDismissStateBlock(_ block: @escaping () -> ()) {
+    assert(canAddBlocks, "Should only add block during the animate() method")
+    dismissBlocks.append(block)
   }
+
+  public func addPresentStateBlock(_ block: @escaping () -> ()) {
+    assert(canAddBlocks, "Should only add block during the animate() method")
+    presentBlocks.append(block)
+  }
+
+  public func addCompletionBlock(_ block: @escaping (Bool) -> ()) {
+    assert(canAddBlocks, "Should only add block during the animate() method")
+    completeBlocks.append(block)
+  }
+
+  // MARK: - Subclass Overrides
+  open func animate() {}
 }
 
 // MARK: - Helper Getters
@@ -155,17 +177,42 @@ extension Transition: UIViewControllerAnimatedTransitioning {
     }
 
     let container = transitionContainer!
-//    container.addSubview(backgroundView!)
-//    container.addSubview(foregroundView!)
-//    toView!.frameWithoutTransform = container.frame
-//    toView!.layoutIfNeeded()
+    container.addSubview(backgroundView!)
+    container.addSubview(foregroundView!)
+    if automaticallyLayoutToView {
+      toView!.frameWithoutTransform = container.frame
+      toView!.layoutIfNeeded()
+    }
 
     // Allows the ViewControllers to load their views, and setup the transition during viewDidLoad
     container.isUserInteractionEnabled = isUserInteractionEnabled
     animator = UIViewPropertyAnimator(duration: duration, timingParameters: timingParameters)
 
     func startAnimation() {
-      let (dismissedState, presentedState, completion) = animate()
+      canAddBlocks = true
+      animate()
+      canAddBlocks = false
+
+      let dismissedState = { [dismissBlocks] in
+        for block in dismissBlocks {
+          block()
+        }
+      }
+
+      let presentedState = { [presentBlocks] in
+        for block in presentBlocks {
+          block()
+        }
+      }
+
+      let completion = { [completeBlocks] (finished: Bool) in
+        for block in completeBlocks {
+          block(finished)
+        }
+      }
+      dismissBlocks = []
+      presentBlocks = []
+      completeBlocks = []
 
       if isPresenting {
         dismissedState()

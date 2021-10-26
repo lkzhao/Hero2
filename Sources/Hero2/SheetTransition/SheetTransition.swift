@@ -222,18 +222,21 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
 
 public class SheetTransition: Transition {
   var presentationController: SheetPresentationController!
-  public override func animate() -> (dismissed: () -> (), presented: () -> (), completed: (Bool) -> ()) {
+
+  public override var automaticallyLayoutToView: Bool {
+    false
+  }
+
+  public override func animate() {
     guard let presentationController = presentationController else {
       fatalError()
     }
-    let dismissed = {
-      presentationController.applyDismissedState()
-    }
-    let presented = {
+    addPresentStateBlock {
       presentationController.applyPresentedState()
     }
-    let completed = { (finished: Bool) in }
-    return (dismissed, presented, completed)
+    addDismissStateBlock {
+      presentationController.applyDismissedState()
+    }
   }
 
   public func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {

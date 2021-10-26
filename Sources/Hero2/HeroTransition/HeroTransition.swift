@@ -41,17 +41,13 @@ open class HeroTransition: Transition {
 
   // MARK: - override
 
-  open override func animate() -> (dismissed: () -> Void, presented: () -> Void, completed: (Bool) -> Void) {
+  open override func animate() {
     guard let back = backgroundView, let front = foregroundView, let container = transitionContainer else {
       fatalError()
     }
     pausedAnimations.removeAll()
     contexts.removeAll()
     let isPresenting = isPresenting
-
-    var dismissedOperations: [() -> Void] = []
-    var presentedOperations: [() -> Void] = []
-    var completionOperations: [(Bool) -> Void] = []
 
     var animatingViews: [UIView] = []
 
@@ -158,17 +154,17 @@ open class HeroTransition: Transition {
       let viewContainer = viewContext.matchedSuperView.flatMap { contexts[$0]?.snapshotView } ?? container
       viewContainer.addSubview(viewSnap)
       viewSnap.isHidden = false
-      dismissedOperations.append {
+      addDismissStateBlock {
         applyState(
           viewSnap: viewSnap, presented: false, shouldApplyDelay: !isPresenting, animationDuration: duration,
           viewContext: viewContext)
       }
-      presentedOperations.append {
+      addPresentStateBlock {
         applyState(
           viewSnap: viewSnap, presented: true, shouldApplyDelay: isPresenting, animationDuration: duration,
           viewContext: viewContext)
       }
-      completionOperations.append { _ in
+      addCompletionBlock { _ in
         if let placeholderView = viewContext.placeholderView {
           if placeholderView.superview != container {
             placeholderView.superview?.insertSubview(viewSnap, belowSubview: placeholderView)
@@ -182,25 +178,6 @@ open class HeroTransition: Transition {
         }
       }
     }
-
-    let dismissed: () -> Void = {
-      for op in dismissedOperations {
-        op()
-      }
-    }
-
-    let presented: () -> Void = {
-      for op in presentedOperations {
-        op()
-      }
-    }
-
-    let completion: (Bool) -> Void = { finished in
-      for op in completionOperations {
-        op(finished)
-      }
-    }
-    return (dismissed, presented, completion)
   }
 
   open override func endInteractiveTransition(shouldFinish: Bool) {
