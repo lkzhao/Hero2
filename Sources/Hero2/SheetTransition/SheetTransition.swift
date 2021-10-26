@@ -20,6 +20,14 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     presentingViewController.presentationController as? SheetPresentationController
   }
 
+  var childSheetPresentationController: SheetPresentationController? {
+    presentedViewController.presentedViewController?.presentationController as? SheetPresentationController
+  }
+
+  var hasChildSheet: Bool {
+    childSheetPresentationController != nil
+  }
+
   var hasParentSheet: Bool {
     parentSheetPresentationController != nil
   }
@@ -121,6 +129,9 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     }
     presentedViewController.view.frameWithoutTransform = sheetFrame
     overlayView.frameWithoutTransform = presentingViewController.view.bounds
+    if !transition.isTransitioning, !hasChildSheet {
+      applyPresentedState()
+    }
   }
   var childScrollView: UIScrollView? {
     guard let vc = (presentedViewController as? UINavigationController)?.topViewController else { return nil }
