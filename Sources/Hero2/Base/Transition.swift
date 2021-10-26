@@ -35,8 +35,9 @@ open class Transition: NSObject {
 #else
   public static var defaultDuration: TimeInterval = 0.4
 #endif
+  public static var defaultTimingParameters: UITimingCurveProvider = UISpringTimingParameters(dampingRatio: 0.95)
   public init(
-    duration: TimeInterval = defaultDuration, timingParameters: UITimingCurveProvider = UISpringTimingParameters(dampingRatio: 0.9)
+    duration: TimeInterval = defaultDuration, timingParameters: UITimingCurveProvider = defaultTimingParameters
   ) {
     self.duration = duration
     self.timingParameters = timingParameters

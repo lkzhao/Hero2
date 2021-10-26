@@ -9,7 +9,7 @@ import UIKit
 import BaseToolbox
 import ScreenCorners
 
-let sheetCornerRadius: CGFloat = 12
+let sheetCornerRadius: CGFloat = 10
 
 class SheetPresentationController: UIPresentationController, UIGestureRecognizerDelegate {
   override var shouldRemovePresentersView: Bool {
@@ -84,20 +84,27 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     guard let container = containerView else { return false }
     return container.bounds.width >= 1024 && container.traitCollection.verticalSizeClass == .regular
   }
+  var isCompactVertical: Bool {
+    guard let container = containerView else { return false }
+    return container.traitCollection.verticalSizeClass == .compact
+  }
   var backTransform: CGAffineTransform {
     guard let container = containerView, let back = presentingViewController.view else { return .identity }
-    if hasParentSheet {
-      return .identity.translatedBy(y: -back.bounds.height * 0.1 / 2 - 10).scaledBy(0.9)
+    let sideInset: CGFloat = isIpadHorizontal ? 20 : 16
+    let scaleSideFactor: CGFloat = sideInset / container.bounds.width
+    let scale: CGFloat = 1 - scaleSideFactor * 2
+    if isCompactVertical {
+      return .identity
+    } else if hasParentSheet {
+      return .identity.translatedBy(y: -back.bounds.height * scaleSideFactor - 10).scaledBy(scale)
+    } else if isIpadHorizontal {
+      return .identity
     } else {
-      if isIpadHorizontal {
-        return .identity
-      } else {
-        return .identity.translatedBy(y: -container.bounds.height * 0.1 / 2 + container.safeAreaInsets.top).scaledBy(0.9)
-      }
+      return .identity.translatedBy(y: -container.bounds.height * scaleSideFactor + container.safeAreaInsets.top).scaledBy(scale)
     }
   }
   var thirdTransform: CGAffineTransform {
-    if isIpadHorizontal, !hasParentSheet {
+    if (isIpadHorizontal && !hasParentSheet) || isCompactVertical {
       return .identity
     } else {
       return backTransform.scaledBy(0.985)
@@ -122,6 +129,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     if let parentSheetPresentationController = parentSheetPresentationController {
       parentSheetPresentationController.presentingViewController.view.transform = parentSheetPresentationController.backTransform
     }
+    back.layer.cornerCurve = .continuous
     if hasParentSheet {
       back.cornerRadius = sheetCornerRadius
     } else {
@@ -137,7 +145,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
       // following default iOS iPad Sheet size
       let sheetSize = CGSize(width: 704, height: container.bounds.inset(by: container.safeAreaInsets).height - 44)
       sheetFrame = CGRect(center: container.bounds.center, size: sheetSize)
-    } else if container.traitCollection.verticalSizeClass == .compact {
+    } else if isCompactVertical {
       sheetFrame = container.bounds
     } else {
       let topInset = container.safeAreaInsets.top + 10
@@ -152,7 +160,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     overlayView.frameWithoutTransform = presentingViewController.view.bounds
     
     presentedViewController.view.frameWithoutTransform = sheetFrame
-    presentedViewController.view.cornerRadius = sheetCornerRadius
+    presentedViewController.view.cornerRadius = isCompactVertical ? UIScreen.main.displayCornerRadius : sheetCornerRadius
     presentedViewController.view.layer.maskedCorners = isIpadHorizontal ? [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMaxXMaxYCorner] : [.layerMinXMinYCorner, .layerMaxXMinYCorner]
     presentedViewController.view.clipsToBounds = true
     if !transition.isTransitioning, !hasChildSheet {

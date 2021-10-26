@@ -12,15 +12,14 @@ import UIKit
 
 class SheetViewController: ComponentViewController {
   override var component: Component {
-    ConstraintReader {
-      Text("\($0.maxSize)").tappableView {
-        $0.present(SheetViewController())
-      }.centered()
-    }
+    Text("Present new sheet").tappableView {
+      $0.present(SheetViewController())
+    }.centered()
   }
 
   init() {
     super.init(nibName: nil, bundle: nil)
+    modalPresentationCapturesStatusBarAppearance = true
     transition = SheetTransition()
     modalPresentationStyle = .custom
 //    transitioningDelegate = nil
@@ -29,5 +28,9 @@ class SheetViewController: ComponentViewController {
 
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
+  }
+
+  override var preferredStatusBarStyle: UIStatusBarStyle {
+    .lightContent
   }
 }
