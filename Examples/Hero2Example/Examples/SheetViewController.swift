@@ -12,9 +12,11 @@ import UIKit
 
 class SheetViewController: ComponentViewController {
   override var component: Component {
-    Text("Present new sheet").tappableView {
-      $0.present(SheetViewController())
-    }.centered()
+    ConstraintReader {
+      Text("\($0.maxSize)").tappableView {
+        $0.present(SheetViewController())
+      }.centered()
+    }
   }
 
   init() {

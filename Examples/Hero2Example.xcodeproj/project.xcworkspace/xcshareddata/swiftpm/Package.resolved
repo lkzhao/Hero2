@@ -20,12 +20,12 @@
         }
       },
       {
-        "package": "UIComponent",
-        "repositoryURL": "https://github.com/lkzhao/UIComponent",
+        "package": "ScreenCorners",
+        "repositoryURL": "https://github.com/kylebshr/ScreenCorners",
         "state": {
           "branch": null,
-          "revision": "cfc1537d6b5dcbb18282fb2c463354464cc2ef2d",
-          "version": "0.9.5"
+          "revision": "1b71897c8d9091cad34bf10a47e3810c0c10e1e8",
+          "version": "1.0.1"
         }
       }
     ]
