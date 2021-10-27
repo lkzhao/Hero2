@@ -30,11 +30,6 @@ class InstagramViewController: ComponentViewController {
     }
   }
 
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    view.heroModifiers = [.overlayColor(.black.withAlphaComponent(0.5))]
-  }
-
   override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     if let image = toBePresentedImage {
@@ -59,11 +54,19 @@ class InstagramViewController: ComponentViewController {
   }
 }
 
+extension InstagramViewController: Matchable {
+  func matchedViewFor(transition: MatchModalTransition, otherViewController: UIViewController) -> UIView? {
+    guard let otherViewController = otherViewController as? InstagramDetailViewController else { return nil }
+    return view.flattendSubviews.first {
+      $0.heroID == otherViewController.image.id
+    }
+  }
+}
+
 class InstagramDetailViewController: ComponentViewController {
   var image: ImageData! {
     didSet {
       imageView.kf.setImage(with: image.url)
-      imageView.heroID = image.id
     }
   }
   let imageView = UIImageView()
@@ -88,15 +91,20 @@ class InstagramDetailViewController: ComponentViewController {
     }
   }
 
+  init() {
+    super.init(nibName: nil, bundle: nil)
+    transition = MatchModalTransition()
+  }
+
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
   override func viewDidLoad() {
     super.viewDidLoad()
-    transition.isUserInteractionEnabled = true
+    view.backgroundColor = .systemBackground
     imageView.contentMode = .scaleAspectFill
     imageView.clipsToBounds = true
-    componentView.cornerRadius = 40
-    componentView.clipsToBounds = true
-    view.backgroundColor = nil
-    componentView.backgroundColor = .systemBackground
     panGR.delegate = self
     view.addGestureRecognizer(panGR)
     view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTap)))
@@ -107,7 +115,6 @@ class InstagramDetailViewController: ComponentViewController {
     if !componentView.hasReloaded {
       componentView.reloadData()
     }
-    componentView.heroModifiers = [.match(image.id), .snapshotView]
   }
 
   @objc func didTap() {
@@ -156,5 +163,11 @@ extension InstagramDetailViewController: UIGestureRecognizerDelegate {
     let velocity = panGR.velocity(in: nil)
     // only allow right and down swipe
     return velocity.x > abs(velocity.y) || velocity.y > abs(velocity.x)
+  }
+}
+
+extension InstagramDetailViewController: Matchable {
+  func matchedViewFor(transition: MatchModalTransition, otherViewController: UIViewController) -> UIView? {
+    return imageView
   }
 }

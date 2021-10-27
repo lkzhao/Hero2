@@ -16,7 +16,7 @@ struct ImageData {
   static let testImages = [
     ImageData(
       url: URL(string: "https://unsplash.com/photos/Yn0l7uwBrpw/download?force=true&w=640")!,
-      size: CGSize(width: 640, height: 360)),
+      size: CGSize(width: 640, height: 427)),
     ImageData(
       url: URL(string: "https://unsplash.com/photos/J4-xolC4CCU/download?force=true&w=640")!,
       size: CGSize(width: 640, height: 800)),
@@ -34,7 +34,7 @@ struct ImageData {
       size: CGSize(width: 640, height: 426)),
     ImageData(
       url: URL(string: "https://unsplash.com/photos/Yn0l7uwBrpw/download?force=true&w=640")!,
-      size: CGSize(width: 640, height: 360)),
+      size: CGSize(width: 640, height: 427)),
     ImageData(
       url: URL(string: "https://unsplash.com/photos/J4-xolC4CCU/download?force=true&w=640")!,
       size: CGSize(width: 640, height: 800)),
