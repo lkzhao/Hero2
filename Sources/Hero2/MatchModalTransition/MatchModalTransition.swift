@@ -9,7 +9,7 @@ import UIKit
 import ScreenCorners
 import BaseToolbox
 
-public protocol Matchable {
+public protocol MatchTransitionDelegate {
   func matchedViewFor(transition: MatchModalTransition, otherViewController: UIViewController) -> UIView?
 }
 
@@ -23,12 +23,13 @@ public class MatchModalTransition: Transition {
     guard let back = backgroundView, let front = foregroundView, let container = transitionContainer else {
       fatalError()
     }
-    let matchDestination = findMatchable(viewController: foregroundViewController!)
-    let matchSource = findMatchable(viewController: backgroundViewController!)
-    let matchedDestinationView = matchDestination?.matchedViewFor(transition: self, otherViewController: backgroundViewController!)
-    let matchedSourceView = matchSource?.matchedViewFor(transition: self, otherViewController: foregroundViewController!)
+    let matchedDestinationView = foregroundViewController?.findObjectMatchType(MatchTransitionDelegate.self)?
+          .matchedViewFor(transition: self, otherViewController: backgroundViewController!)
+    let matchedSourceView = backgroundViewController?.findObjectMatchType(MatchTransitionDelegate.self)?
+          .matchedViewFor(transition: self, otherViewController: foregroundViewController!)
 
     let foregroundContainerView = self.foregroundContainerView
+    foregroundContainerView.autoresizingMask = []
     foregroundContainerView.autoresizesSubviews = false
     foregroundContainerView.cornerRadius = UIScreen.main.displayCornerRadius
     foregroundContainerView.clipsToBounds = true
@@ -97,21 +98,10 @@ public class MatchModalTransition: Transition {
   public override func animateTransition(using context: UIViewControllerContextTransitioning) {
     super.animateTransition(using: context)
     if isInteractive {
+      let position = foregroundContainerView.layer.presentation()?.position ?? foregroundContainerView.layer.position
       pause(view: foregroundContainerView, animationForKey: "position")
+      foregroundContainerView.layer.position = position
     }
-  }
-
-  func findMatchable(viewController: UIViewController) -> Matchable? {
-    if let viewController = viewController as? Matchable {
-      return viewController
-    } else {
-      for child in viewController.children {
-        if let matchable = findMatchable(viewController: child) {
-          return matchable
-        }
-      }
-    }
-    return nil
   }
   
   public override func animationEnded(_ transitionCompleted: Bool) {
@@ -127,8 +117,7 @@ public class MatchModalTransition: Transition {
   @objc func handlePan(gr: UIPanGestureRecognizer) {
     guard let view = gr.view else { return }
     func progressFrom(offset: CGPoint) -> CGFloat {
-      let progress = (offset.x + offset.y) / ((view.bounds.height + view.bounds.width) / 4)
-      return (isPresenting != isReversed ? -progress : progress)
+      return (offset.x + offset.y) / ((view.bounds.height + view.bounds.width) / 4)
     }
     switch gr.state {
     case .began:
@@ -139,13 +128,13 @@ public class MatchModalTransition: Transition {
     case .changed:
       guard isTransitioning, let container = transitionContainer else { return }
       let translation = gr.translation(in: view)
-      let progress = progressFrom(offset: translation)
       if isMatched {
+        let progress = progressFrom(offset: translation)
         foregroundContainerView.center = container.center + translation / 5
+        fractionCompleted = (progress * 0.1).clamp(0, 1)
       } else {
-        foregroundContainerView.center = container.center + CGPoint(x: !isSwipingVertically ? translation.x : 0, y: isSwipingVertically ? translation.y : 0)
+        fractionCompleted = isSwipingVertically ? translation.y / view.bounds.height : translation.x / view.bounds.width
       }
-      fractionCompleted = (progress * 0.1).clamp(0, 1)
     default:
       guard isTransitioning else { return }
       let combinedOffset = gr.translation(in: view) + gr.velocity(in: view)

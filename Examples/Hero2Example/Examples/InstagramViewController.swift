@@ -55,7 +55,7 @@ class InstagramViewController: ComponentViewController {
   }
 }
 
-extension InstagramViewController: Matchable {
+extension InstagramViewController: MatchTransitionDelegate {
   func matchedViewFor(transition: MatchModalTransition, otherViewController: UIViewController) -> UIView? {
     guard let otherViewController = otherViewController as? InstagramDetailViewController else { return nil }
     return view.flattendSubviews.first {
@@ -125,7 +125,7 @@ class InstagramDetailViewController: ComponentViewController {
   }
 }
 
-extension InstagramDetailViewController: Matchable {
+extension InstagramDetailViewController: MatchTransitionDelegate {
   func matchedViewFor(transition: MatchModalTransition, otherViewController: UIViewController) -> UIView? {
     return imageView
   }
