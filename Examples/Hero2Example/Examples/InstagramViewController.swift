@@ -88,6 +88,9 @@ class InstagramDetailViewController: ComponentViewController {
         Text("Follow").textColor(.systemBlue)
       }.inset(8)
       imageView.size(width: .fill, height: .aspectPercentage(image.size.height / image.size.width))
+      for i in 0..<100 {
+        Text("\(i)").inset(16)
+      }
     }
   }
 

@@ -16,6 +16,8 @@ public protocol Matchable {
 public class MatchModalTransition: Transition {
   lazy var panGR = UIPanGestureRecognizer(target: self, action: #selector(handlePan(gr:)))
   let foregroundContainerView = UIView()
+  var isSwipingVertically = false
+  var isMatched = false
   
   public override func animate() {
     guard let back = backgroundView, let front = foregroundView, let container = transitionContainer else {
@@ -33,10 +35,10 @@ public class MatchModalTransition: Transition {
     foregroundContainerView.frame = container.bounds
     container.addSubview(foregroundContainerView)
     foregroundContainerView.addSubview(front)
-    foregroundContainerView.backgroundColor = .red
+    let defaultDismissedFrame = isSwipingVertically ? container.bounds.offsetBy(dx: 0, dy: container.bounds.height) : container.bounds.offsetBy(dx: container.bounds.width, dy: 0)
     let dismissedFrame = matchedSourceView.map {
       container.convert($0.bounds, from: $0)
-    } ?? container.bounds.insetBy(dx: 30, dy: 30)
+    } ?? defaultDismissedFrame
     let presentedFrame = matchedDestinationView.map {
       container.convert($0.bounds, from: $0)
     } ?? container.bounds
@@ -47,22 +49,25 @@ public class MatchModalTransition: Transition {
       matchedSourceView.superview?.insertSubview(sourceViewPlaceholder, aboveSubview: matchedSourceView)
       foregroundContainerView.addSubview(matchedSourceView)
     }
+    isMatched = matchedSourceView != nil
 
     addDismissStateBlock {
       foregroundContainerView.cornerRadius = 0
       foregroundContainerView.frameWithoutTransform = dismissedFrame
-      let scaledSize = presentedFrame.size.size(fill: dismissedFrame.size)
-      let scale = scaledSize.width / container.bounds.width
-      let sizeOffset = -(scaledSize - dismissedFrame.size) / 2
-      let originOffset = -presentedFrame.minY * scale
-      let offsetX = -(1 - scale) / 2 * container.bounds.width
-      let offsetY = -(1 - scale) / 2 * container.bounds.height
-      front.transform = .identity
-        .translatedBy(x: offsetX + sizeOffset.width,
-                      y: offsetY + sizeOffset.height + originOffset)
-        .scaledBy(scale)
-      matchedSourceView?.frameWithoutTransform = dismissedFrame.bounds
-      matchedSourceView?.alpha = 1
+      if let matchedSourceView = matchedSourceView {
+        let scaledSize = presentedFrame.size.size(fill: dismissedFrame.size)
+        let scale = scaledSize.width / container.bounds.width
+        let sizeOffset = -(scaledSize - dismissedFrame.size) / 2
+        let originOffset = -presentedFrame.minY * scale
+        let offsetX = -(1 - scale) / 2 * container.bounds.width
+        let offsetY = -(1 - scale) / 2 * container.bounds.height
+        front.transform = .identity
+          .translatedBy(x: offsetX + sizeOffset.width,
+                        y: offsetY + sizeOffset.height + originOffset)
+          .scaledBy(scale)
+        matchedSourceView.frameWithoutTransform = dismissedFrame.bounds
+        matchedSourceView.alpha = 1
+      }
       back.overlayView?.backgroundColor = .clear
     }
     addPresentStateBlock {
@@ -113,6 +118,8 @@ public class MatchModalTransition: Transition {
       panGR.delegate = self
       foregroundView?.addGestureRecognizer(panGR)
     }
+    isMatched = false
+    isSwipingVertically = false
     super.animationEnded(transitionCompleted)
   }
   
@@ -132,7 +139,11 @@ public class MatchModalTransition: Transition {
       guard isTransitioning, let container = transitionContainer else { return }
       let translation = gr.translation(in: view)
       let progress = progressFrom(offset: translation)
-      foregroundContainerView.center = container.center + translation / 5
+      if isMatched {
+        foregroundContainerView.center = container.center + translation / 5
+      } else {
+        foregroundContainerView.center = container.center + CGPoint(x: !isSwipingVertically ? translation.x : 0, y: isSwipingVertically ? translation.y : 0)
+      }
       fractionCompleted = (progress * 0.1).clamp(0, 1)
     default:
       guard isTransitioning else { return }
@@ -147,7 +158,10 @@ public class MatchModalTransition: Transition {
 extension MatchModalTransition: UIGestureRecognizerDelegate {
   public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
     let velocity = panGR.velocity(in: nil)
+    let horizontal = velocity.x > abs(velocity.y)
+    let vertical = velocity.y > abs(velocity.x)
+    isSwipingVertically = vertical
     // only allow right and down swipe
-    return velocity.x > abs(velocity.y) || velocity.y > abs(velocity.x)
+    return horizontal || vertical
   }
 }
