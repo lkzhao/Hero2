@@ -164,4 +164,11 @@ extension MatchModalTransition: UIGestureRecognizerDelegate {
     // only allow right and down swipe
     return horizontal || vertical
   }
+  
+  public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+    if otherGestureRecognizer is UIPanGestureRecognizer, let scrollView = otherGestureRecognizer.view as? UIScrollView {
+      return scrollView.contentOffset.y <= -scrollView.adjustedContentInset.top
+    }
+    return false
+  }
 }

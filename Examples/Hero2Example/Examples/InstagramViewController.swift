@@ -82,15 +82,17 @@ class InstagramDetailViewController: ComponentViewController {
         }.size(width: .fill, height: .fill)
       ).inset(8)
       Separator()
-      HStack(spacing: 8, alignItems: .center) {
-        Space(size: CGSize(width: 40, height: 40)).view().backgroundColor(.systemGray).cornerRadius(20)
-        Text("Hero Transition")
-        Text("Follow").textColor(.systemBlue)
-      }.inset(8)
-      imageView.size(width: .fill, height: .aspectPercentage(image.size.height / image.size.width))
-      for i in 0..<100 {
-        Text("\(i)").inset(16)
-      }
+      VStack {
+        HStack(spacing: 8, alignItems: .center) {
+          Space(size: CGSize(width: 40, height: 40)).view().backgroundColor(.systemGray).cornerRadius(20)
+          Text("Hero Transition")
+          Text("Follow").textColor(.systemBlue)
+        }.inset(8)
+        imageView.size(width: .fill, height: .aspectPercentage(image.size.height / image.size.width))
+        for i in 0..<100 {
+          Text("\(i)").inset(16)
+        }
+      }.scrollView().flex()
     }
   }
 
