@@ -33,6 +33,7 @@ public class MatchModalTransition: Transition {
     foregroundContainerView.cornerRadius = UIScreen.main.displayCornerRadius
     foregroundContainerView.clipsToBounds = true
     foregroundContainerView.frame = container.bounds
+    foregroundContainerView.backgroundColor = front.backgroundColor
     container.addSubview(foregroundContainerView)
     foregroundContainerView.addSubview(front)
     let defaultDismissedFrame = isSwipingVertically ? container.bounds.offsetBy(dx: 0, dy: container.bounds.height) : container.bounds.offsetBy(dx: container.bounds.width, dy: 0)

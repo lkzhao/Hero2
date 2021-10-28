@@ -13,15 +13,17 @@ import UIKit
 class ViewController: ComponentViewController {
   override var component: Component {
     VStack {
-      Join {
+      ExampleSection(title: "Hero Transition") {
         ExampleItem(name: "Match", viewController: MatchViewController())
         ExampleItem(name: "Bubble", viewController: BubbleViewController())
         ExampleItem(name: "Push", viewController: PushViewController())
         ExampleItem(name: "ImageGallery", viewController: ImageGalleryViewController())
+      }
+      ExampleSection(title: "Match Modal Transition") {
         ExampleItem(name: "Instagram", viewController: InstagramViewController())
+      }
+      ExampleSection(title: "Sheet Transition") {
         ExampleItem(name: "Sheet", shouldPresent: true, viewController: SheetViewController())
-      } separator: {
-        Separator()
       }
     }
   }
@@ -44,12 +46,34 @@ struct ExampleItem: ComponentBuilder {
   func build() -> Component {
     VStack {
       Text(name)
-    }.inset(20).tappableView {
+    }.inset(16).tappableView {
       let vc = viewController()
       if shouldPresent {
         $0.present(vc)
       } else {
         $0.push(vc)
+      }
+    }
+  }
+}
+
+struct ExampleSection: ComponentBuilder {
+  let title: String
+  let children: [Component]
+  init(title: String, @ComponentArrayBuilder _ content: () -> [Component]) {
+    self.title = title
+    self.children = content()
+  }
+  func build() -> Component {
+    VStack {
+      Text(title, font: .boldSystemFont(ofSize: 14)).inset(top: 30, left: 16, bottom: 10, right: 16)
+      Separator()
+      Join {
+        for child in children {
+          child
+        }
+      } separator: {
+        Separator()
       }
     }
   }
