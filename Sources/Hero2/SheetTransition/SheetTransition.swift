@@ -9,7 +9,10 @@ import UIKit
 import BaseToolbox
 import ScreenCorners
 
-let sheetCornerRadius: CGFloat = 10
+public protocol SheetDelegate {
+  func sheetTopInsetFor(sheetTransition: SheetTransition) -> CGFloat
+  func sheetApplyOverlay(sheetTransition: SheetTransition) -> Bool
+}
 
 class SheetPresentationController: UIPresentationController, UIGestureRecognizerDelegate {
   override var shouldRemovePresentersView: Bool {
@@ -50,7 +53,9 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     }
     overlayView.zPosition = 100
 
-    presentingViewController.view.addSubview(overlayView)
+    if presentingViewController.findObjectMatchType(SheetDelegate.self)?.sheetApplyOverlay(sheetTransition: transition) != false {
+      presentingViewController.view.addSubview(overlayView)
+    }
 
     containerView.isUserInteractionEnabled = false
     containerView.addSubview(presentingViewController.view)
@@ -93,6 +98,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     let sideInset: CGFloat = isIpadHorizontal ? 20 : 16
     let scaleSideFactor: CGFloat = sideInset / container.bounds.width
     let scale: CGFloat = 1 - scaleSideFactor * 2
+    let topInset = presentingViewController.findObjectMatchType(SheetDelegate.self)?.sheetTopInsetFor(sheetTransition: transition) ?? 0
     if isCompactVertical {
       return .identity
     } else if hasParentSheet {
@@ -100,7 +106,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     } else if isIpadHorizontal {
       return .identity
     } else {
-      return .identity.translatedBy(y: -container.bounds.height * scaleSideFactor + container.safeAreaInsets.top).scaledBy(scale)
+      return .identity.translatedBy(y: -container.bounds.height * scaleSideFactor + container.safeAreaInsets.top - topInset).scaledBy(scale)
     }
   }
   var thirdTransform: CGAffineTransform {
@@ -118,7 +124,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
       parentSheetPresentationController.presentingViewController.view.transform = parentSheetPresentationController.thirdTransform
     }
     back.transform = backTransform
-    back.cornerRadius = sheetCornerRadius
+    back.cornerRadius = transition.cornerRadius
     overlayView.alpha = 1
   }
 
@@ -131,7 +137,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     }
     back.layer.cornerCurve = .continuous
     if hasParentSheet {
-      back.cornerRadius = sheetCornerRadius
+      back.cornerRadius = transition.cornerRadius
     } else {
       back.cornerRadius = UIScreen.main.displayCornerRadius
     }
@@ -160,7 +166,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     overlayView.frameWithoutTransform = presentingViewController.view.bounds
     
     presentedViewController.view.frameWithoutTransform = sheetFrame
-    presentedViewController.view.cornerRadius = isCompactVertical ? UIScreen.main.displayCornerRadius : sheetCornerRadius
+    presentedViewController.view.cornerRadius = isCompactVertical ? UIScreen.main.displayCornerRadius : transition.cornerRadius
     presentedViewController.view.layer.maskedCorners = isIpadHorizontal ? [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMaxXMaxYCorner] : [.layerMinXMinYCorner, .layerMaxXMinYCorner]
     presentedViewController.view.clipsToBounds = true
     if !transition.isTransitioning, !hasChildSheet {
@@ -222,6 +228,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
 
 public class SheetTransition: Transition {
   var presentationController: SheetPresentationController!
+  public var cornerRadius: CGFloat = 10
 
   public override var automaticallyLayoutToView: Bool {
     false
