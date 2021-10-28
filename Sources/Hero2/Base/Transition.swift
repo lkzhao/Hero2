@@ -38,6 +38,12 @@ open class Transition: NSObject {
   private var dismissBlocks: [() -> ()] = []
   private var presentBlocks: [() -> ()] = []
   private var completeBlocks: [(Bool) -> ()] = []
+  private var pausedAnimations: [UIView: [String: CAAnimation]] = [:]
+  public func pause(view: UIView, animationForKey key: String) {
+    guard pausedAnimations[view]?[key] == nil, let anim = view.layer.animation(forKey: key) else { return }
+    pausedAnimations[view, default: [:]][key] = anim
+    view.layer.removeAnimation(forKey: key)
+  }
 
 #if targetEnvironment(simulator)
   public static var defaultDuration: TimeInterval = 0.4 * TimeInterval(UIAnimationDragCoefficient())
@@ -62,6 +68,12 @@ open class Transition: NSObject {
 
   open func endInteractiveTransition(shouldFinish: Bool) {
     guard isInteractive, let animator = animator else { return }
+    for (view, animations) in pausedAnimations {
+      for (key, anim) in animations {
+        view.layer.add(anim, forKey: key)
+      }
+    }
+    pausedAnimations.removeAll()
     isInteractive = false
     if shouldFinish {
       transitionContext?.finishInteractiveTransition()
@@ -168,6 +180,7 @@ extension Transition: UIViewControllerInteractiveTransitioning {
 extension Transition: UIViewControllerAnimatedTransitioning {
   open func animateTransition(using context: UIViewControllerContextTransitioning) {
     transitionContext = context
+    pausedAnimations.removeAll()
 
     let fullScreenSnapshot =
       transitionContainer?.window?.snapshotView(afterScreenUpdates: false)
@@ -273,6 +286,7 @@ extension Transition: UIViewControllerAnimatedTransitioning {
   }
 
   open func animationEnded(_ transitionCompleted: Bool) {
+    pausedAnimations.removeAll()
     transitionContext = nil
     animator = nil
     isNavigationTransition = false

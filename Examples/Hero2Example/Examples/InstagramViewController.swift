@@ -21,11 +21,12 @@ class InstagramViewController: ComponentViewController {
         AsyncImage(image.url)
           .contentMode(.scaleAspectFill)
           .clipsToBounds(true)
-          .size(width: .fill, height: .aspectPercentage(1))
-          .heroID(image.id)
+          .fill()
           .tappableView { [unowned self] in
             self.didTap(image: image)
           }
+          .size(width: .fill, height: .aspectPercentage(1))
+          .heroID(image.id)
       }
     }
   }
@@ -70,7 +71,6 @@ class InstagramDetailViewController: ComponentViewController {
     }
   }
   let imageView = UIImageView()
-  lazy var panGR = UIPanGestureRecognizer(target: self, action: #selector(handlePan(gr:)))
 
   override var component: Component {
     VStack {
@@ -105,8 +105,6 @@ class InstagramDetailViewController: ComponentViewController {
     view.backgroundColor = .systemBackground
     imageView.contentMode = .scaleAspectFill
     imageView.clipsToBounds = true
-    panGR.delegate = self
-    view.addGestureRecognizer(panGR)
     view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTap)))
   }
 
@@ -119,50 +117,6 @@ class InstagramDetailViewController: ComponentViewController {
 
   @objc func didTap() {
     dismiss(animated: true, completion: nil)
-  }
-
-  var initialFractionCompleted: CGFloat = 0
-  var initialPosition: CGPoint = .zero
-  @objc func handlePan(gr: UIPanGestureRecognizer) {
-    guard let transition = transition as? HeroTransition else { return }
-    func progressFrom(offset: CGPoint) -> CGFloat {
-      let progress = (offset.x + offset.y) / ((view.bounds.height + view.bounds.width) / 4)
-      return (transition.isPresenting != transition.isReversed ? -progress : progress)
-    }
-    switch gr.state {
-    case .began:
-      transition.beginInteractiveTransition()
-      if !isBeingPresented, !isBeingDismissed {
-        dismiss(animated: true, completion: nil)
-      }
-      initialFractionCompleted = transition.fractionCompleted
-      initialPosition = transition.position(for: componentView) ?? view.bounds.center
-    case .changed:
-      guard transition.isTransitioning else { return }
-      let translation = gr.translation(in: view)
-      let progress = progressFrom(offset: translation)
-      transition.apply(position: initialPosition + translation, to: componentView)
-      transition.fractionCompleted = (initialFractionCompleted + progress).clamp(0, 1)
-    default:
-      guard transition.isTransitioning else { return }
-      let combinedOffset = gr.translation(in: view) + gr.velocity(in: view)
-      let progress = progressFrom(offset: combinedOffset)
-      let shouldFinish = progress > 0.5
-      transition.endInteractiveTransition(shouldFinish: shouldFinish)
-      if isBeingPresented != shouldFinish {
-        // dismissing, do not let our view handle touches anymore.
-        // this allows user to swipe on the background view immediately
-        view.isUserInteractionEnabled = false
-      }
-    }
-  }
-}
-
-extension InstagramDetailViewController: UIGestureRecognizerDelegate {
-  func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-    let velocity = panGR.velocity(in: nil)
-    // only allow right and down swipe
-    return velocity.x > abs(velocity.y) || velocity.y > abs(velocity.x)
   }
 }
 
