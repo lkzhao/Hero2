@@ -60,7 +60,9 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     containerView.isUserInteractionEnabled = false
     containerView.addSubview(presentingViewController.view)
     containerView.addSubview(presentedViewController.view)
-    containerView.layoutIfNeeded()
+    presentedViewController.view.frame = containerView.bounds
+    presentedViewController.view.setNeedsLayout()
+    presentedViewController.view.layoutIfNeeded()
   }
   override func presentationTransitionDidEnd(_ completed: Bool) {
     containerView?.isUserInteractionEnabled = true

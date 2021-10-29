@@ -97,7 +97,7 @@ public class MatchModalTransition: Transition {
   
   public override func animateTransition(using context: UIViewControllerContextTransitioning) {
     super.animateTransition(using: context)
-    if isInteractive {
+    if isInteractive, isMatched {
       let position = foregroundContainerView.layer.presentation()?.position ?? foregroundContainerView.layer.position
       pause(view: foregroundContainerView, animationForKey: "position")
       foregroundContainerView.layer.position = position
