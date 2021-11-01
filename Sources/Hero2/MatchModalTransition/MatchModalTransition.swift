@@ -14,10 +14,11 @@ public protocol MatchTransitionDelegate {
 }
 
 public class MatchModalTransition: Transition {
-  lazy var panGR = UIPanGestureRecognizer(target: self, action: #selector(handlePan(gr:)))
   let foregroundContainerView = UIView()
   var isSwipingVertically = false
   var isMatched = false
+  public var automaticallyAddDismissGestureRecognizer: Bool = true
+  public lazy var dismissGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handlePan(gr:)))
   
   public override func animate() {
     guard let back = backgroundView, let front = foregroundView, let container = transitionContainer else {
@@ -106,8 +107,10 @@ public class MatchModalTransition: Transition {
   
   public override func animationEnded(_ transitionCompleted: Bool) {
     if isPresenting, transitionCompleted {
-      panGR.delegate = self
-      foregroundView?.addGestureRecognizer(panGR)
+      dismissGestureRecognizer.delegate = self
+      if automaticallyAddDismissGestureRecognizer {
+        foregroundView?.addGestureRecognizer(dismissGestureRecognizer)
+      }
     }
     isMatched = false
     isSwipingVertically = false
@@ -147,7 +150,7 @@ public class MatchModalTransition: Transition {
 
 extension MatchModalTransition: UIGestureRecognizerDelegate {
   public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-    let velocity = panGR.velocity(in: nil)
+    let velocity = dismissGestureRecognizer.velocity(in: nil)
     let horizontal = velocity.x > abs(velocity.y)
     let vertical = velocity.y > abs(velocity.x)
     isSwipingVertically = vertical
