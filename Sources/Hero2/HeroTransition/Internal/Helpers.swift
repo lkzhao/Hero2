@@ -9,9 +9,8 @@ import UIKit
 import BaseToolbox
 
 extension UIView {
-  var viewsInHierarchy: [UIView] {
-    guard isHeroEnabled else { return [] }
-    return [self] + subviews.flatMap { $0.viewsInHierarchy }
+  @objc open func viewsParticipateIn(transition: HeroTransition) -> [UIView] {
+    [self] + subviews.flatMap { $0.viewsParticipateIn(transition: transition) }
   }
 }
 

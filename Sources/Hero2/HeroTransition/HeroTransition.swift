@@ -43,8 +43,8 @@ open class HeroTransition: Transition {
 
     var frontIdToView: [String: UIView] = [:]
     var backIdToView: [String: UIView] = [:]
-    let frontViews = front.viewsInHierarchy
-    let backViews = back.viewsInHierarchy
+    let frontViews = front.viewsParticipateIn(transition: self)
+    let backViews = back.viewsParticipateIn(transition: self)
     for view in frontViews {
       for heroID in view.heroIDs {
         frontIdToView[heroID] = view
