@@ -10,7 +10,8 @@ import BaseToolbox
 
 extension UIView {
   var viewsInHierarchy: [UIView] {
-    [self] + subviews.flatMap { $0.viewsInHierarchy }
+    guard isHeroEnabled else { return [] }
+    return [self] + subviews.flatMap { $0.viewsInHierarchy }
   }
 }
 
