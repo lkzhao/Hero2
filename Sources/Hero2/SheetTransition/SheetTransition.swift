@@ -224,7 +224,11 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
   }
 
   func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-    return true
+      if let otherPanGR = otherGestureRecognizer as? UIPanGestureRecognizer {
+          return otherPanGR.minimumNumberOfTouches <= 1
+      } else {
+          return false
+      }
   }
 }
 
