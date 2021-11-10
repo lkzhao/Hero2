@@ -160,7 +160,7 @@ extension MatchModalTransition: UIGestureRecognizerDelegate {
   
   public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
     if otherGestureRecognizer is UIPanGestureRecognizer, let scrollView = otherGestureRecognizer.view as? UIScrollView {
-      return scrollView.contentOffset.y <= -scrollView.adjustedContentInset.top
+        return scrollView.contentSize.width > scrollView.bounds.width ? scrollView.contentOffset.x <= -scrollView.adjustedContentInset.left : scrollView.contentOffset.y <= -scrollView.adjustedContentInset.top
     }
     return false
   }
