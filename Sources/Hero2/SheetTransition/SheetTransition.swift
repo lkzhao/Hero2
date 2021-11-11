@@ -9,9 +9,13 @@ import UIKit
 import BaseToolbox
 import ScreenCorners
 
-public protocol SheetDelegate {
+public protocol SheetBackgroundDelegate {
   func sheetTopInsetFor(sheetTransition: SheetTransition) -> CGFloat
   func sheetApplyOverlay(sheetTransition: SheetTransition) -> Bool
+}
+
+public protocol SheetForegroundDelegate {
+  func canInteractivelyDismiss(sheetTransition: SheetTransition) -> Bool
 }
 
 class SheetPresentationController: UIPresentationController, UIGestureRecognizerDelegate {
@@ -53,7 +57,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     }
     overlayView.zPosition = 100
 
-    if presentingViewController.findObjectMatchType(SheetDelegate.self)?.sheetApplyOverlay(sheetTransition: transition) != false {
+    if presentingViewController.findObjectMatchType(SheetBackgroundDelegate.self)?.sheetApplyOverlay(sheetTransition: transition) != false {
       presentingViewController.view.addSubview(overlayView)
     }
 
@@ -100,7 +104,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     let sideInset: CGFloat = isIpadHorizontal ? 20 : 16
     let scaleSideFactor: CGFloat = sideInset / container.bounds.width
     let scale: CGFloat = 1 - scaleSideFactor * 2
-    let topInset = presentingViewController.findObjectMatchType(SheetDelegate.self)?.sheetTopInsetFor(sheetTransition: transition) ?? 0
+    let topInset = presentingViewController.findObjectMatchType(SheetBackgroundDelegate.self)?.sheetTopInsetFor(sheetTransition: transition) ?? 0
     if isCompactVertical {
       return .identity
     } else if hasParentSheet {
@@ -220,7 +224,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
   }
 
   func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-    return true
+    presentedViewController.findObjectMatchType(SheetForegroundDelegate.self)?.canInteractivelyDismiss(sheetTransition: transition) ?? true
   }
 
   func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {

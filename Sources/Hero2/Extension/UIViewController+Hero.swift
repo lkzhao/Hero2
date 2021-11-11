@@ -12,7 +12,7 @@ extension UIView {
     if let view = self as? T {
       return view
     } else {
-      for child in subviews {
+      for child in subviews.reversed() {
         if let match = child.findViewMatchType(type) {
           return match
         }
@@ -37,7 +37,7 @@ extension UIViewController {
     if let viewController = self as? T {
       return viewController
     } else {
-      for child in children {
+      for child in children.reversed() {
         if let match = child.findViewControllerMatchType(type) {
           return match
         }
