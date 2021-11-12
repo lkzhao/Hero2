@@ -217,7 +217,8 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     default:
       lastDraggedScrollView?.disableTopBounce = false
       if transition.isTransitioning {
-        let shouldFinish = (v.y + location) / presentedViewController.view.frameWithoutTransform.height > 0.5
+        let translation = location - startLocation
+        let shouldFinish = (v.y + translation) / presentedViewController.view.frameWithoutTransform.height > 0.5
         transition.endInteractiveTransition(shouldFinish: shouldFinish)
       }
     }
