@@ -13,14 +13,14 @@ public protocol MatchTransitionDelegate {
   func matchedViewFor(transition: MatchModalTransition, otherViewController: UIViewController) -> UIView?
 }
 
-public class MatchModalTransition: Transition {
+open class MatchModalTransition: Transition {
   let foregroundContainerView = UIView()
   var isSwipingVertically = false
   var isMatched = false
-  public var automaticallyAddDismissGestureRecognizer: Bool = true
-  public lazy var dismissGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handlePan(gr:)))
+  open var automaticallyAddDismissGestureRecognizer: Bool = true
+  open lazy var dismissGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handlePan(gr:)))
   
-  public override func animate() {
+  open override func animate() {
     guard let back = backgroundView, let front = foregroundView, let container = transitionContainer else {
       fatalError()
     }
@@ -96,7 +96,7 @@ public class MatchModalTransition: Transition {
     }
   }
   
-  public override func animateTransition(using context: UIViewControllerContextTransitioning) {
+  open override func animateTransition(using context: UIViewControllerContextTransitioning) {
     super.animateTransition(using: context)
     if isInteractive, isMatched {
       let position = foregroundContainerView.layer.presentation()?.position ?? foregroundContainerView.layer.position
@@ -105,7 +105,7 @@ public class MatchModalTransition: Transition {
     }
   }
   
-  public override func animationEnded(_ transitionCompleted: Bool) {
+  open override func animationEnded(_ transitionCompleted: Bool) {
     if isPresenting, transitionCompleted {
       dismissGestureRecognizer.delegate = self
       if automaticallyAddDismissGestureRecognizer {
@@ -149,7 +149,7 @@ public class MatchModalTransition: Transition {
 }
 
 extension MatchModalTransition: UIGestureRecognizerDelegate {
-  public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+  open func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
     let velocity = dismissGestureRecognizer.velocity(in: nil)
     let horizontal = velocity.x > abs(velocity.y)
     let vertical = velocity.y > abs(velocity.x)
@@ -158,7 +158,7 @@ extension MatchModalTransition: UIGestureRecognizerDelegate {
     return horizontal || vertical
   }
   
-  public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+  open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
     if otherGestureRecognizer is UIPanGestureRecognizer, let scrollView = otherGestureRecognizer.view as? UIScrollView {
         return scrollView.contentSize.width > scrollView.bounds.width ? scrollView.contentOffset.x <= -scrollView.adjustedContentInset.left : scrollView.contentOffset.y <= -scrollView.adjustedContentInset.top
     }
