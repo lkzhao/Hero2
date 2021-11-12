@@ -55,7 +55,7 @@ public class MatchModalTransition: Transition {
     isMatched = matchedSourceView != nil
 
     addDismissStateBlock {
-      foregroundContainerView.cornerRadius = 0
+      foregroundContainerView.cornerRadius = matchedSourceView?.cornerRadius ?? 0
       foregroundContainerView.frameWithoutTransform = dismissedFrame
       if let matchedSourceView = matchedSourceView {
         let scaledSize = presentedFrame.size.size(fill: dismissedFrame.size)
