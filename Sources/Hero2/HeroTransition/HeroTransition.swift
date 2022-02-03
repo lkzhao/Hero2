@@ -156,7 +156,7 @@ open class HeroTransition: Transition {
       }
       addCompletionBlock { _ in
         if let placeholderView = viewContext.placeholderView {
-          if placeholderView.superview != container {
+          if placeholderView.superview != container, viewSnap.superview != nil {
             placeholderView.superview?.insertSubview(viewSnap, belowSubview: placeholderView)
           }
           placeholderView.removeFromSuperview()
