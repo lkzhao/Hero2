@@ -238,7 +238,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
 }
 
 public class SheetTransition: Transition {
-  var presentationController: SheetPresentationController!
+  weak var presentationController: SheetPresentationController!
   public var cornerRadius: CGFloat = 10
 
   public override var automaticallyLayoutToView: Bool {
@@ -258,8 +258,9 @@ public class SheetTransition: Transition {
   }
 
   public func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
-    presentationController = SheetPresentationController(presentedViewController: presented, presenting: presenting)
+    let presentationController = SheetPresentationController(presentedViewController: presented, presenting: presenting)
     presentationController.transition = self
+    self.presentationController = presentationController
     return presentationController
   }
 }
