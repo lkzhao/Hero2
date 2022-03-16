@@ -12,6 +12,9 @@ public class TransitionCoordinator: NSObject {
   public var isTransitioning: Bool {
     currentTransition?.isTransitioning == true
   }
+  public var isAnimating: Bool {
+    currentTransition?.isAnimating == true
+  }
 
   private func setupTransition(
     from: UIViewController, to: UIViewController, isPresenting: Bool, isNavigationTransition: Bool

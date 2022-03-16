@@ -103,13 +103,11 @@ class ImageDetailViewController: ComponentViewController {
       initialFractionCompleted = transition.fractionCompleted
       initialPosition = transition.position(for: imageView) ?? view.convert(imageView.bounds.center, from: imageView)
     case .changed:
-      guard transition.isTransitioning else { return }
       let translation = gr.translation(in: view)
       let progress = progressFrom(offset: translation)
       transition.apply(position: initialPosition + translation, to: imageView)
       transition.fractionCompleted = (initialFractionCompleted + progress).clamp(0, 1)
     default:
-      guard transition.isTransitioning else { return }
       let combinedOffset = gr.translation(in: view) + gr.velocity(in: view)
       let progress = progressFrom(offset: combinedOffset)
       let shouldFinish = progress > 0.5

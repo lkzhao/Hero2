@@ -67,13 +67,17 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     presentedViewController.view.frame = containerView.bounds
     presentedViewController.view.setNeedsLayout()
     presentedViewController.view.layoutIfNeeded()
+    panGR.delegate = self
+    presentedViewController.view.addGestureRecognizer(panGR)
   }
   override func presentationTransitionDidEnd(_ completed: Bool) {
     containerView?.isUserInteractionEnabled = true
     super.presentationTransitionDidEnd(completed)
-    if completed {
-      panGR.delegate = self
-      presentedViewController.view.addGestureRecognizer(panGR)
+    if !completed {
+      overlayView.removeFromSuperview()
+      if let originalSuperview = originalSuperview {
+        originalSuperview.addSubview(presentingViewController.view)
+      }
     }
   }
   override func dismissalTransitionWillBegin() {
@@ -175,7 +179,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     presentedViewController.view.cornerRadius = isCompactVertical ? UIScreen.main.displayCornerRadius : transition.cornerRadius
     presentedViewController.view.layer.maskedCorners = isIpadHorizontal ? [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMaxXMaxYCorner] : [.layerMinXMinYCorner, .layerMaxXMinYCorner]
     presentedViewController.view.clipsToBounds = true
-    if !transition.isTransitioning, !hasChildSheet {
+    if !transition.isAnimating, !hasChildSheet {
       applyPresentedState()
     }
   }
@@ -187,6 +191,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
   }
   var startLocation: CGFloat = 0
   var lastDraggedScrollView: UIScrollView?
+  var initialFractionCompleted: CGFloat = 0
   @objc func handlePan(gr: UIPanGestureRecognizer) {
     let v = gr.velocity(in: nil)
     let location = gr.location(in: nil).y
@@ -206,20 +211,29 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
           lastDraggedScrollView.panGestureRecognizer.isEnabled = true
         }
         startLocation = location
-        transition.beginInteractiveTransition()
-        presentedViewController.dismiss(animated: true, completion: nil)
+        if !transition.isTransitioning {
+          transition.beginInteractiveTransition()
+          presentedViewController.dismiss(animated: true, completion: nil)
+        } else {
+          transition.beginInteractiveTransition()
+        }
+        initialFractionCompleted = transition.fractionCompleted
       }
       if transition.isInteractive {
         let translation = location - startLocation
-        let progress = translation / presentedViewController.view.frameWithoutTransform.height
+        var progress = translation / presentedViewController.view.frameWithoutTransform.height
+        progress = transition.isPresenting != transition.isReversed ? -progress : progress
+        progress = (initialFractionCompleted + progress).clamp(0, 1)
         transition.fractionCompleted = progress
       }
     default:
       lastDraggedScrollView?.disableTopBounce = false
-      if transition.isTransitioning {
+      if transition.isInteractive {
         let translation = location - startLocation
-        let shouldFinish = (v.y + translation) / presentedViewController.view.frameWithoutTransform.height > 0.5
-        transition.endInteractiveTransition(shouldFinish: shouldFinish)
+        var progress = (v.y + translation) / presentedViewController.view.frameWithoutTransform.height
+        progress = transition.isPresenting != transition.isReversed ? -progress : progress
+        progress = (initialFractionCompleted + progress).clamp(0, 1)
+        transition.endInteractiveTransition(shouldFinish: progress > 0.5)
       }
     }
   }

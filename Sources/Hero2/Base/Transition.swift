@@ -9,7 +9,8 @@ open class Transition: NSObject {
   public private(set) var isInteractive = false
   public private(set) var animator: UIViewPropertyAnimator?
   public private(set) var transitionContext: UIViewControllerContextTransitioning?
-  public var isTransitioning: Bool {
+  public private(set) var isTransitioning: Bool = false
+  public var isAnimating: Bool {
     animator != nil
   }
 
@@ -61,13 +62,14 @@ open class Transition: NSObject {
 
   open func beginInteractiveTransition() {
     isInteractive = true
+    isTransitioning = true
 
     animator?.pauseAnimation()
     transitionContext?.pauseInteractiveTransition()
   }
 
   open func endInteractiveTransition(shouldFinish: Bool) {
-    guard isInteractive, let animator = animator else { return }
+    guard isInteractive else { return }
     for (view, animations) in pausedAnimations {
       for (key, anim) in animations {
         view.layer.add(anim, forKey: key)
@@ -81,11 +83,13 @@ open class Transition: NSObject {
       transitionContext?.cancelInteractiveTransition()
     }
 
-    animator.isReversed = !shouldFinish
-    if animator.state == .inactive {
-      animator.startAnimation()
-    } else {
-      animator.continueAnimation(withTimingParameters: nil, durationFactor: 1)
+    if let animator = animator {
+      animator.isReversed = !shouldFinish
+      if animator.state == .inactive {
+        animator.startAnimation()
+      } else {
+        animator.continueAnimation(withTimingParameters: nil, durationFactor: 1)
+      }
     }
   }
 
@@ -290,6 +294,8 @@ extension Transition: UIViewControllerAnimatedTransitioning {
     transitionContext = nil
     animator = nil
     isNavigationTransition = false
+    isTransitioning = false
+    isInteractive = false
   }
 }
 
@@ -297,6 +303,7 @@ extension Transition: UIViewControllerTransitioningDelegate {
   @discardableResult internal func setupTransition(isPresenting: Bool, isNavigationTransition: Bool) -> Self {
     self.isPresenting = isPresenting
     self.isNavigationTransition = isNavigationTransition
+    self.isTransitioning = true
     return self
   }
 

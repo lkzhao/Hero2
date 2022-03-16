@@ -54,7 +54,7 @@ class PushDetailViewController: ComponentViewController {
     switch gr.state {
     case .began:
       transition.beginInteractiveTransition()
-      if !transition.isTransitioning {
+      if !isBeingDismissed, !isBeingPresented {
         view.dismiss()
       }
       initialFractionCompleted = transition.fractionCompleted

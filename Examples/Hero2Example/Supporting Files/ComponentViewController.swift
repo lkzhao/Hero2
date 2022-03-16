@@ -38,7 +38,7 @@ class ComponentViewController: UIViewController {
 
   override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
-    guard !transition.isTransitioning else { return } // disable child layout during transition since that might mess up the
+    guard !transition.isAnimating else { return } // disable child layout during transition since that might mess up the
     componentView.frame = view.bounds
   }
 

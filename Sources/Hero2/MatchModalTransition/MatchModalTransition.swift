@@ -127,12 +127,14 @@ open class MatchModalTransition: Transition {
         }
         switch gr.state {
         case .began:
-            beginInteractiveTransition()
             if !isTransitioning {
-                view.dismiss()
+              beginInteractiveTransition()
+              view.dismiss()
+            } else {
+              beginInteractiveTransition()
             }
         case .changed:
-            guard isTransitioning, let container = transitionContainer else { return }
+            guard let container = transitionContainer else { return }
             let translation = gr.translation(in: view)
             if isMatched {
                 let progress = progressFrom(offset: translation)
@@ -142,7 +144,6 @@ open class MatchModalTransition: Transition {
                 fractionCompleted = isSwipingVertically ? translation.y / view.bounds.height : translation.x / view.bounds.width
             }
         default:
-            guard isTransitioning else { return }
             let combinedOffset = gr.translation(in: view) + gr.velocity(in: view)
             let progress = progressFrom(offset: combinedOffset)
             let shouldFinish = progress > 0.5
