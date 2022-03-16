@@ -60,6 +60,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     if presentingViewController.findObjectMatchType(SheetBackgroundDelegate.self)?.sheetApplyOverlay(sheetTransition: transition) != false {
       presentingViewController.view.addSubview(overlayView)
     }
+    presentingViewController.view.clipsToBounds = true
 
     containerView.isUserInteractionEnabled = false
     containerView.addSubview(presentingViewController.view)
