@@ -32,10 +32,12 @@ open class MatchModalTransition: Transition {
         let matchedSourceView = backgroundViewController?.findObjectMatchType(MatchTransitionDelegate.self)?
             .matchedViewFor(transition: self, otherViewController: foregroundViewController!)
         
+        let isFullScreen = container.window?.convert(container.bounds, from: container) == container.window?.bounds
         let foregroundContainerView = self.foregroundContainerView
+        let finalCornerRadius: CGFloat = isFullScreen ? UIScreen.main.displayCornerRadius : foregroundContainerView.cornerRadius
         foregroundContainerView.autoresizingMask = []
         foregroundContainerView.autoresizesSubviews = false
-        foregroundContainerView.cornerRadius = UIScreen.main.displayCornerRadius
+        foregroundContainerView.cornerRadius = finalCornerRadius
         foregroundContainerView.clipsToBounds = true
         foregroundContainerView.frame = container.bounds
         foregroundContainerView.backgroundColor = front.backgroundColor
@@ -77,7 +79,7 @@ open class MatchModalTransition: Transition {
             back.overlayView?.backgroundColor = .clear
         }
         addPresentStateBlock {
-            foregroundContainerView.cornerRadius = UIScreen.main.displayCornerRadius
+            foregroundContainerView.cornerRadius = finalCornerRadius
             foregroundContainerView.frameWithoutTransform = container.bounds
             front.transform = .identity
             matchedSourceView?.frameWithoutTransform = presentedFrame
