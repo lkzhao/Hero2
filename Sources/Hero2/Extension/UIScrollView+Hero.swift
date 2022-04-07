@@ -18,8 +18,8 @@ extension UIScrollView {
             objc_setAssociatedObject(self, &type(of: self).AssociatedKeys.disableTopBounce, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
             if newValue {
                 _ = UIScrollView.swizzleSetContentOffset
-                if contentOffset.y < 0 {
-                    contentOffset.y = 0
+                if contentOffset.y < -adjustedContentInset.top {
+                    contentOffset.y = -adjustedContentInset.top
                 }
             }
         }
@@ -33,7 +33,7 @@ extension UIScrollView {
 
     @objc func swizzled_setContentOffset(_ contentOffset: CGPoint) {
         if disableTopBounce {
-            swizzled_setContentOffset(CGPoint(x: contentOffset.x, y: max(0, contentOffset.y)))
+            swizzled_setContentOffset(CGPoint(x: contentOffset.x, y: max(-adjustedContentInset.top, contentOffset.y)))
         } else {
             swizzled_setContentOffset(contentOffset)
         }
