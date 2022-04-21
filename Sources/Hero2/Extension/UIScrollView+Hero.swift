@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Luke Zhao on 10/24/21.
 //
@@ -9,7 +9,7 @@ import UIKit
 
 extension UIScrollView {
     fileprivate struct AssociatedKeys {
-      static var disableTopBounce = "disableTopBounce"
+        static var disableTopBounce = "disableTopBounce"
     }
 
     var disableTopBounce: Bool {
@@ -26,7 +26,7 @@ extension UIScrollView {
     }
     static let swizzleSetContentOffset: Void = {
         guard let originalMethod = class_getInstanceMethod(UIScrollView.self, NSSelectorFromString("setContentOffset:")),
-              let swizzledMethod = class_getInstanceMethod(UIScrollView.self, #selector(swizzled_setContentOffset))
+            let swizzledMethod = class_getInstanceMethod(UIScrollView.self, #selector(swizzled_setContentOffset))
         else { return }
         method_exchangeImplementations(originalMethod, swizzledMethod)
     }()

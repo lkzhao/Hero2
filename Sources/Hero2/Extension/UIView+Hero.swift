@@ -23,29 +23,37 @@
 import UIKit
 
 extension UIView {
-  fileprivate struct AssociatedKeys {
-    static var heroIDs = "heroIDs"
-    static var heroModifiers = "heroModifers"
-  }
-
-  @IBInspectable public var heroID: String? {
-    get { heroIDs.first }
-    set { heroIDs = [newValue].compactMap { $0 } }
-  }
-
-  @IBInspectable public var heroIDs: [String] {
-    get { objc_getAssociatedObject(self, &type(of: self).AssociatedKeys.heroIDs) as? [String] ?? [] }
-    set {
-      objc_setAssociatedObject(
-        self, &type(of: self).AssociatedKeys.heroIDs, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+    fileprivate struct AssociatedKeys {
+        static var heroIDs = "heroIDs"
+        static var heroModifiers = "heroModifers"
     }
-  }
 
-  public var heroModifiers: [HeroModifier]? {
-    get { objc_getAssociatedObject(self, &type(of: self).AssociatedKeys.heroModifiers) as? [HeroModifier] }
-    set {
-      objc_setAssociatedObject(
-        self, &type(of: self).AssociatedKeys.heroModifiers, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+    @IBInspectable public var heroID: String? {
+        get { heroIDs.first }
+        set { heroIDs = [newValue].compactMap { $0 } }
     }
-  }
+
+    @IBInspectable public var heroIDs: [String] {
+        get { objc_getAssociatedObject(self, &type(of: self).AssociatedKeys.heroIDs) as? [String] ?? [] }
+        set {
+            objc_setAssociatedObject(
+                self,
+                &type(of: self).AssociatedKeys.heroIDs,
+                newValue,
+                .OBJC_ASSOCIATION_RETAIN_NONATOMIC
+            )
+        }
+    }
+
+    public var heroModifiers: [HeroModifier]? {
+        get { objc_getAssociatedObject(self, &type(of: self).AssociatedKeys.heroModifiers) as? [HeroModifier] }
+        set {
+            objc_setAssociatedObject(
+                self,
+                &type(of: self).AssociatedKeys.heroModifiers,
+                newValue,
+                .OBJC_ASSOCIATION_RETAIN_NONATOMIC
+            )
+        }
+    }
 }

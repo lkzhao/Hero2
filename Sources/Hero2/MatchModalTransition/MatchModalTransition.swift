@@ -5,9 +5,9 @@
 //  Created by Luke Zhao on 10/24/21.
 //
 
-import UIKit
-import ScreenCorners
 import BaseToolbox
+import ScreenCorners
+import UIKit
 
 public protocol MatchTransitionDelegate {
     func matchedViewFor(transition: MatchModalTransition, otherViewController: UIViewController) -> UIView?
@@ -17,12 +17,12 @@ open class MatchModalTransition: Transition {
     let foregroundContainerView = UIView()
     var isSwipingVertically = false
     var isMatched = false
-    
+
     open var canDismissVertically = true
     open var canDismissHorizontally = true
     open var automaticallyAddDismissGestureRecognizer: Bool = true
     open lazy var dismissGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handlePan(gr:)))
-    
+
     open override func animate() {
         guard let back = backgroundView, let front = foregroundView, let container = transitionContainer else {
             fatalError()
@@ -31,7 +31,7 @@ open class MatchModalTransition: Transition {
             .matchedViewFor(transition: self, otherViewController: backgroundViewController!)
         let matchedSourceView = backgroundViewController?.findObjectMatchType(MatchTransitionDelegate.self)?
             .matchedViewFor(transition: self, otherViewController: foregroundViewController!)
-        
+
         let isFullScreen = container.window?.convert(container.bounds, from: container) == container.window?.bounds
         let foregroundContainerView = self.foregroundContainerView
         let finalCornerRadius: CGFloat = isFullScreen ? UIScreen.main.displayCornerRadius : foregroundContainerView.cornerRadius
@@ -43,14 +43,17 @@ open class MatchModalTransition: Transition {
         foregroundContainerView.backgroundColor = front.backgroundColor
         container.addSubview(foregroundContainerView)
         foregroundContainerView.addSubview(front)
-        let defaultDismissedFrame = isSwipingVertically ? container.bounds.offsetBy(dx: 0, dy: container.bounds.height) : container.bounds.offsetBy(dx: container.bounds.width, dy: 0)
-        let dismissedFrame = matchedSourceView.map {
-            container.convert($0.bounds, from: $0)
-        } ?? defaultDismissedFrame
-        let presentedFrame = matchedDestinationView.map {
-            container.convert($0.bounds, from: $0)
-        } ?? container.bounds
-        
+        let defaultDismissedFrame =
+            isSwipingVertically ? container.bounds.offsetBy(dx: 0, dy: container.bounds.height) : container.bounds.offsetBy(dx: container.bounds.width, dy: 0)
+        let dismissedFrame =
+            matchedSourceView.map {
+                container.convert($0.bounds, from: $0)
+            } ?? defaultDismissedFrame
+        let presentedFrame =
+            matchedDestinationView.map {
+                container.convert($0.bounds, from: $0)
+            } ?? container.bounds
+
         back.addOverlayView()
         let sourceViewPlaceholder = UIView()
         if let matchedSourceView = matchedSourceView {
@@ -58,7 +61,7 @@ open class MatchModalTransition: Transition {
             foregroundContainerView.addSubview(matchedSourceView)
         }
         isMatched = matchedSourceView != nil
-        
+
         addDismissStateBlock {
             foregroundContainerView.cornerRadius = matchedSourceView?.cornerRadius ?? 0
             foregroundContainerView.frameWithoutTransform = dismissedFrame
@@ -70,8 +73,10 @@ open class MatchModalTransition: Transition {
                 let offsetX = -(1 - scale) / 2 * container.bounds.width
                 let offsetY = -(1 - scale) / 2 * container.bounds.height
                 front.transform = .identity
-                    .translatedBy(x: offsetX + sizeOffset.width,
-                                  y: offsetY + sizeOffset.height + originOffset)
+                    .translatedBy(
+                        x: offsetX + sizeOffset.width,
+                        y: offsetY + sizeOffset.height + originOffset
+                    )
                     .scaledBy(scale)
                 matchedSourceView.frameWithoutTransform = dismissedFrame.bounds
                 matchedSourceView.alpha = 1
@@ -90,8 +95,9 @@ open class MatchModalTransition: Transition {
             back.removeOverlayView()
             container.addSubview(front)
             if let sourceSuperView = sourceViewPlaceholder.superview,
-               sourceSuperView != container,
-               let matchedSourceView = matchedSourceView {
+                sourceSuperView != container,
+                let matchedSourceView = matchedSourceView
+            {
                 matchedSourceView.frameWithoutTransform = sourceSuperView.convert(dismissedFrame, from: container)
                 sourceViewPlaceholder.superview?.insertSubview(matchedSourceView, belowSubview: sourceViewPlaceholder)
             }
@@ -100,7 +106,7 @@ open class MatchModalTransition: Transition {
             foregroundContainerView.removeFromSuperview()
         }
     }
-    
+
     open override func animateTransition(using context: UIViewControllerContextTransitioning) {
         super.animateTransition(using: context)
         if isInteractive, isMatched {
@@ -109,7 +115,7 @@ open class MatchModalTransition: Transition {
             foregroundContainerView.layer.position = position
         }
     }
-    
+
     open override func animationEnded(_ transitionCompleted: Bool) {
         if isPresenting, transitionCompleted {
             dismissGestureRecognizer.delegate = self
@@ -121,7 +127,7 @@ open class MatchModalTransition: Transition {
         isSwipingVertically = false
         super.animationEnded(transitionCompleted)
     }
-    
+
     @objc func handlePan(gr: UIPanGestureRecognizer) {
         guard let view = gr.view else { return }
         func progressFrom(offset: CGPoint) -> CGFloat {
@@ -130,10 +136,10 @@ open class MatchModalTransition: Transition {
         switch gr.state {
         case .began:
             if !isTransitioning {
-              beginInteractiveTransition()
-              view.dismiss()
+                beginInteractiveTransition()
+                view.dismiss()
             } else {
-              beginInteractiveTransition()
+                beginInteractiveTransition()
             }
         case .changed:
             guard let container = transitionContainer else { return }
@@ -163,10 +169,11 @@ extension MatchModalTransition: UIGestureRecognizerDelegate {
         // only allow right and down swipe
         return horizontal || vertical
     }
-    
+
     open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         if otherGestureRecognizer is UIPanGestureRecognizer, let scrollView = otherGestureRecognizer.view as? UIScrollView {
-            return scrollView.contentSize.width > scrollView.bounds.width ? scrollView.contentOffset.x <= -scrollView.adjustedContentInset.left : scrollView.contentOffset.y <= -scrollView.adjustedContentInset.top
+            return scrollView.contentSize.width > scrollView.bounds.width
+                ? scrollView.contentOffset.x <= -scrollView.adjustedContentInset.left : scrollView.contentOffset.y <= -scrollView.adjustedContentInset.top
         }
         return false
     }

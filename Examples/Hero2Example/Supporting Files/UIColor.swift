@@ -10,11 +10,11 @@ import Hero2
 import UIKit
 
 extension UIColor {
-  static let systemColors: [UIColor] = [
-    .systemRed, .systemBlue, .systemPink, .systemTeal, .systemGray, .systemFill, .systemGreen, .systemGreen,
-    .systemYellow, .systemPurple, .systemOrange,
-  ]
-  static func randomSystemColor() -> UIColor {
-    systemColors.randomElement()!
-  }
+    static let systemColors: [UIColor] = [
+        .systemRed, .systemBlue, .systemPink, .systemTeal, .systemGray, .systemFill, .systemGreen, .systemGreen,
+        .systemYellow, .systemPurple, .systemOrange,
+    ]
+    static func randomSystemColor() -> UIColor {
+        systemColors.randomElement()!
+    }
 }

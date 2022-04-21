@@ -11,26 +11,28 @@ import UIComponent
 import UIKit
 
 class SheetViewController: ComponentViewController {
-  override var component: Component {
-    Text("Present new sheet").tappableView {
-      $0.present(SheetViewController())
-    }.centered()
-  }
+    override var component: Component {
+        Text("Present new sheet")
+            .tappableView {
+                $0.present(SheetViewController())
+            }
+            .centered()
+    }
 
-  init() {
-    super.init(nibName: nil, bundle: nil)
-    modalPresentationCapturesStatusBarAppearance = true
-    transition = SheetTransition()
-    modalPresentationStyle = .custom
-//    transitioningDelegate = nil
-//    modalPresentationStyle = .automatic
-  }
+    init() {
+        super.init(nibName: nil, bundle: nil)
+        modalPresentationCapturesStatusBarAppearance = true
+        transition = SheetTransition()
+        modalPresentationStyle = .custom
+        //    transitioningDelegate = nil
+        //    modalPresentationStyle = .automatic
+    }
 
-  required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
-  override var preferredStatusBarStyle: UIStatusBarStyle {
-    .lightContent
-  }
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        .lightContent
+    }
 }

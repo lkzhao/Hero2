@@ -10,20 +10,21 @@ import UIComponent
 import UIKit
 
 public struct AsyncImage: ViewComponentBuilder {
-  public let url: URL
+    public let url: URL
 
-  public init(_ url: URL) {
-    self.url = url
-  }
-
-  public init?(_ urlString: String) {
-    guard let url = URL(string: urlString) else { return nil }
-    self.url = url
-  }
-
-  public func build() -> ViewUpdateComponent<SimpleViewComponent<UIImageView>> {
-    SimpleViewComponent<UIImageView>().update {
-      $0.kf.setImage(with: url)
+    public init(_ url: URL) {
+        self.url = url
     }
-  }
+
+    public init?(_ urlString: String) {
+        guard let url = URL(string: urlString) else { return nil }
+        self.url = url
+    }
+
+    public func build() -> ViewUpdateComponent<SimpleViewComponent<UIImageView>> {
+        SimpleViewComponent<UIImageView>()
+            .update {
+                $0.kf.setImage(with: url)
+            }
+    }
 }
