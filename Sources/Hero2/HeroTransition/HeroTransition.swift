@@ -142,6 +142,7 @@ open class HeroTransition: Transition {
         }
 
         let duration = animator!.duration
+        let isOverCurrentContext = transitionContext?.presentationStyle == .overFullScreen || transitionContext?.presentationStyle == .overCurrentContext
         for view in animatingViews {
             let viewContext = contexts[view]!
             let viewSnap = viewContext.snapshotView!
@@ -166,7 +167,8 @@ open class HeroTransition: Transition {
                     viewContext: viewContext
                 )
             }
-            addCompletionBlock { _ in
+            
+            let resetBlock = {
                 if let placeholderView = viewContext.placeholderView {
                     if placeholderView.superview != container, viewSnap.superview != nil {
                         placeholderView.superview?.insertSubview(viewSnap, belowSubview: placeholderView)
@@ -177,6 +179,15 @@ open class HeroTransition: Transition {
                 } else {
                     viewSnap.removeFromSuperview()
                     view.isHidden = false
+                }
+            }
+            
+            addCompletionBlock { finished in
+                if isOverCurrentContext, finished == isPresenting, isPresenting {
+                    // skip reseting the views until dismiss
+                    self.addPrepareBlock(resetBlock)
+                } else {
+                    resetBlock()
                 }
             }
         }

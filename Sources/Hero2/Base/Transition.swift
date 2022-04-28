@@ -39,6 +39,7 @@ open class Transition: NSObject {
     private var dismissBlocks: [() -> Void] = []
     private var presentBlocks: [() -> Void] = []
     private var completeBlocks: [(Bool) -> Void] = []
+    private var prepareBlocks: [() -> Void] = []
     private var pausedAnimations: [UIView: [String: CAAnimation]] = [:]
     public func pause(view: UIView, animationForKey key: String) {
         guard pausedAnimations[view]?[key] == nil, let anim = view.layer.animation(forKey: key) else { return }
@@ -107,6 +108,10 @@ open class Transition: NSObject {
     public func addCompletionBlock(_ block: @escaping (Bool) -> Void) {
         assert(canAddBlocks, "Should only add block during the animate() method")
         completeBlocks.append(block)
+    }
+    
+    public func addPrepareBlock(_ block: @escaping () -> Void) {
+        prepareBlocks.append(block)
     }
 
     // MARK: - Subclass Overrides
@@ -193,8 +198,16 @@ extension Transition: UIViewControllerAnimatedTransitioning {
         if let fullScreenSnapshot = fullScreenSnapshot {
             (transitionContainer?.window ?? transitionContainer)?.addSubview(fullScreenSnapshot)
         }
+        
+        for prepareBlock in prepareBlocks {
+            prepareBlock()
+        }
+        prepareBlocks.removeAll()
 
         let container = transitionContainer!
+        if !isUserInteractionEnabled {
+            container.isUserInteractionEnabled = isUserInteractionEnabled
+        }
         container.addSubview(backgroundView!)
         container.addSubview(foregroundView!)
         if automaticallyLayoutToView {
@@ -203,7 +216,6 @@ extension Transition: UIViewControllerAnimatedTransitioning {
         }
 
         // Allows the ViewControllers to load their views, and setup the transition during viewDidLoad
-        container.isUserInteractionEnabled = isUserInteractionEnabled
         animator = UIViewPropertyAnimator(duration: duration, timingParameters: timingParameters)
 
         func startAnimation() {
