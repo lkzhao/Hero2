@@ -189,75 +189,86 @@ extension Transition: UIViewControllerAnimatedTransitioning {
     open func animateTransition(using context: UIViewControllerContextTransitioning) {
         transitionContext = context
         pausedAnimations.removeAll()
-        
+
         animator = UIViewPropertyAnimator(duration: duration, timingParameters: timingParameters)
-        
-        navigationController?.view.layoutIfNeeded()
-        
-        for prepareBlock in prepareBlocks {
-            prepareBlock()
-        }
-        prepareBlocks.removeAll()
-        
-        let container = transitionContainer!
-        if !isUserInteractionEnabled {
-            container.isUserInteractionEnabled = isUserInteractionEnabled
-        }
-        container.addSubview(backgroundView!)
-        container.addSubview(foregroundView!)
-        if automaticallyLayoutToView {
-            toView!.frameWithoutTransform = container.frame
-            toView!.layoutIfNeeded()
-        }
-        
-        isAnimating = true
-        
-        canAddBlocks = true
-        animate()
-        canAddBlocks = false
-        
-        let dismissedState = { [dismissBlocks] in
-            for block in dismissBlocks {
-                block()
+
+        func startAnimation() {
+            for prepareBlock in prepareBlocks {
+                prepareBlock()
+            }
+            prepareBlocks.removeAll()
+
+            let container = transitionContainer!
+            if !isUserInteractionEnabled {
+                container.isUserInteractionEnabled = isUserInteractionEnabled
+            }
+            container.addSubview(backgroundView!)
+            container.addSubview(foregroundView!)
+            if automaticallyLayoutToView {
+                toView!.frameWithoutTransform = container.frame
+                toView!.layoutIfNeeded()
+            }
+            
+            isAnimating = true
+
+            canAddBlocks = true
+            animate()
+            canAddBlocks = false
+
+            let dismissedState = { [dismissBlocks] in
+                for block in dismissBlocks {
+                    block()
+                }
+            }
+
+            let presentedState = { [presentBlocks] in
+                for block in presentBlocks {
+                    block()
+                }
+            }
+
+            let completion = { [completeBlocks] (finished: Bool) in
+                for block in completeBlocks {
+                    block(finished)
+                }
+            }
+            dismissBlocks = []
+            presentBlocks = []
+            completeBlocks = []
+
+            if isPresenting {
+                dismissedState()
+                animator!.addAnimations(presentedState)
+            } else {
+                presentedState()
+                animator!.addAnimations(dismissedState)
+            }
+
+            // flush the current transaction before animation start.
+            // otherwise delay animation on dismiss might not be registered.
+            CATransaction.flush()
+
+            animator!
+                .addCompletion { [weak self] pos in
+                    container.isUserInteractionEnabled = true
+                    completion(pos == .end)
+                    self?.completeTransition(finished: pos == .end)
+                }
+
+            animator?.startAnimation()
+            if isInteractive {
+                animator?.pauseAnimation()
             }
         }
-        
-        let presentedState = { [presentBlocks] in
-            for block in presentBlocks {
-                block()
+
+        if navigationController != nil {
+            // When animating within navigationController, we have to dispatch later into the main queue.
+            // otherwise snapshots will be pure white. Possibly a bug with UIKit
+            DispatchQueue.main.async {
+                startAnimation()
             }
-        }
-        
-        let completion = { [completeBlocks] (finished: Bool) in
-            for block in completeBlocks {
-                block(finished)
-            }
-        }
-        dismissBlocks = []
-        presentBlocks = []
-        completeBlocks = []
-        
-        if isPresenting {
-            dismissedState()
-            animator!.addAnimations(presentedState)
         } else {
-            presentedState()
-            animator!.addAnimations(dismissedState)
-        }
-        
-        // flush the current transaction before animation start.
-        // otherwise delay animation on dismiss might not be registered.
-        CATransaction.flush()
-        
-        animator!.addCompletion { [weak self] pos in
-            container.isUserInteractionEnabled = true
-            completion(pos == .end)
-            self?.completeTransition(finished: pos == .end)
-        }
-        
-        animator?.startAnimation()
-        if isInteractive {
-            animator?.pauseAnimation()
+            startAnimation()
         }
     }
 
