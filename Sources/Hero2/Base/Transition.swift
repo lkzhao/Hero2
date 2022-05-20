@@ -5,17 +5,15 @@ import UIKit
 
 open class Transition: NSObject {
     public private(set) var isPresenting: Bool = true
-    public private(set) var isNavigationTransition: Bool = false
     public private(set) var isInteractive = false
     public private(set) var animator: UIViewPropertyAnimator?
+    public private(set) weak var navigationController: UINavigationController?
     public private(set) var transitionContext: UIViewControllerContextTransitioning?
     public private(set) var isTransitioning: Bool = false
-    public var isAnimating: Bool {
-        animator != nil
-    }
+    public var isAnimating: Bool = false
 
     public var isUserInteractionEnabled = false
-
+    
     public var duration: TimeInterval
     public var timingParameters: UITimingCurveProvider
 
@@ -191,19 +189,16 @@ extension Transition: UIViewControllerAnimatedTransitioning {
     open func animateTransition(using context: UIViewControllerContextTransitioning) {
         transitionContext = context
         pausedAnimations.removeAll()
-
-        let fullScreenSnapshot =
-            transitionContainer?.window?.snapshotView(afterScreenUpdates: false)
-            ?? fromView?.snapshotView(afterScreenUpdates: false)
-        if let fullScreenSnapshot = fullScreenSnapshot {
-            (transitionContainer?.window ?? transitionContainer)?.addSubview(fullScreenSnapshot)
-        }
+        
+        animator = UIViewPropertyAnimator(duration: duration, timingParameters: timingParameters)
+        
+        navigationController?.view.layoutIfNeeded()
         
         for prepareBlock in prepareBlocks {
             prepareBlock()
         }
         prepareBlocks.removeAll()
-
+        
         let container = transitionContainer!
         if !isUserInteractionEnabled {
             container.isUserInteractionEnabled = isUserInteractionEnabled
@@ -214,70 +209,55 @@ extension Transition: UIViewControllerAnimatedTransitioning {
             toView!.frameWithoutTransform = container.frame
             toView!.layoutIfNeeded()
         }
-
-        // Allows the ViewControllers to load their views, and setup the transition during viewDidLoad
-        animator = UIViewPropertyAnimator(duration: duration, timingParameters: timingParameters)
-
-        func startAnimation() {
-            canAddBlocks = true
-            animate()
-            canAddBlocks = false
-
-            let dismissedState = { [dismissBlocks] in
-                for block in dismissBlocks {
-                    block()
-                }
-            }
-
-            let presentedState = { [presentBlocks] in
-                for block in presentBlocks {
-                    block()
-                }
-            }
-
-            let completion = { [completeBlocks] (finished: Bool) in
-                for block in completeBlocks {
-                    block(finished)
-                }
-            }
-            dismissBlocks = []
-            presentBlocks = []
-            completeBlocks = []
-
-            if isPresenting {
-                dismissedState()
-                animator!.addAnimations(presentedState)
-            } else {
-                presentedState()
-                animator!.addAnimations(dismissedState)
-            }
-
-            // flush the current transaction before animation start.
-            // otherwise delay animation on dismiss might not be registered.
-            CATransaction.flush()
-
-            animator!
-                .addCompletion { [weak self] pos in
-                    container.isUserInteractionEnabled = true
-                    completion(pos == .end)
-                    self?.completeTransition(finished: pos == .end)
-                }
-
-            fullScreenSnapshot?.removeFromSuperview()
-            animator?.startAnimation()
-            if isInteractive {
-                animator?.pauseAnimation()
+        
+        isAnimating = true
+        
+        canAddBlocks = true
+        animate()
+        canAddBlocks = false
+        
+        let dismissedState = { [dismissBlocks] in
+            for block in dismissBlocks {
+                block()
             }
         }
-
-        if isNavigationTransition {
-            // When animating within navigationController, we have to dispatch later into the main queue.
-            // otherwise snapshots will be pure white. Possibly a bug with UIKit
-            DispatchQueue.main.async {
-                startAnimation()
+        
+        let presentedState = { [presentBlocks] in
+            for block in presentBlocks {
+                block()
             }
+        }
+        
+        let completion = { [completeBlocks] (finished: Bool) in
+            for block in completeBlocks {
+                block(finished)
+            }
+        }
+        dismissBlocks = []
+        presentBlocks = []
+        completeBlocks = []
+        
+        if isPresenting {
+            dismissedState()
+            animator!.addAnimations(presentedState)
         } else {
-            startAnimation()
+            presentedState()
+            animator!.addAnimations(dismissedState)
+        }
+        
+        // flush the current transaction before animation start.
+        // otherwise delay animation on dismiss might not be registered.
+        CATransaction.flush()
+        
+        animator!.addCompletion { [weak self] pos in
+            container.isUserInteractionEnabled = true
+            completion(pos == .end)
+            self?.completeTransition(finished: pos == .end)
+        }
+        
+        animator?.startAnimation()
+        if isInteractive {
+            animator?.pauseAnimation()
         }
     }
 
@@ -307,17 +287,18 @@ extension Transition: UIViewControllerAnimatedTransitioning {
         pausedAnimations.removeAll()
         transitionContext = nil
         animator = nil
-        isNavigationTransition = false
+        isAnimating = false
+        navigationController = nil
         isTransitioning = false
         isInteractive = false
     }
 }
 
 extension Transition: UIViewControllerTransitioningDelegate {
-    @discardableResult internal func setupTransition(isPresenting: Bool, isNavigationTransition: Bool) -> Self {
+    @discardableResult internal func setupTransition(isPresenting: Bool, navigationController: UINavigationController? = nil) -> Self {
         self.isPresenting = isPresenting
-        self.isNavigationTransition = isNavigationTransition
         self.isTransitioning = true
+        self.navigationController = navigationController
         return self
     }
 
@@ -325,45 +306,29 @@ extension Transition: UIViewControllerTransitioningDelegate {
         self
     }
 
-    public func animationController(
-        forPresented presented: UIViewController,
-        presenting: UIViewController,
-        source _: UIViewController
-    ) -> UIViewControllerAnimatedTransitioning? {
-        setupTransition(isPresenting: true, isNavigationTransition: false)
+    public func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        setupTransition(isPresenting: true)
     }
 
     public func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        setupTransition(isPresenting: false, isNavigationTransition: false)
+        setupTransition(isPresenting: false)
     }
 
-    public func interactionControllerForDismissal(using _: UIViewControllerAnimatedTransitioning)
-        -> UIViewControllerInteractiveTransitioning?
-    {
+    public func interactionControllerForDismissal(using _: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
         interactiveTransitioning
     }
 
-    public func interactionControllerForPresentation(using _: UIViewControllerAnimatedTransitioning)
-        -> UIViewControllerInteractiveTransitioning?
-    {
+    public func interactionControllerForPresentation(using _: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
         interactiveTransitioning
     }
 }
 
 extension Transition: UINavigationControllerDelegate {
-    public func navigationController(
-        _: UINavigationController,
-        interactionControllerFor _: UIViewControllerAnimatedTransitioning
-    ) -> UIViewControllerInteractiveTransitioning? {
+    public func navigationController(_: UINavigationController, interactionControllerFor _: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
         interactiveTransitioning
     }
 
-    public func navigationController(
-        _ navigationController: UINavigationController,
-        animationControllerFor operation: UINavigationController.Operation,
-        from: UIViewController,
-        to: UIViewController
-    ) -> UIViewControllerAnimatedTransitioning? {
-        setupTransition(isPresenting: operation == .push, isNavigationTransition: true)
+    public func navigationController(_ navigationController: UINavigationController, animationControllerFor operation: UINavigationController.Operation, from: UIViewController, to: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        setupTransition(isPresenting: operation == .push, navigationController: navigationController)
     }
 }

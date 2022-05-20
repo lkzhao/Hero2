@@ -20,14 +20,14 @@ public class TransitionCoordinator: NSObject {
         from: UIViewController,
         to: UIViewController,
         isPresenting: Bool,
-        isNavigationTransition: Bool
+        navigationController: UINavigationController?
     ) {
         let transitionProvider = (isPresenting ? to : from) as? TransitionProvider
         let transition =
             transitionProvider?.transitionFor(presenting: isPresenting, otherViewController: isPresenting ? from : to)
             ?? defaultTransition
         self.currentTransition = transition
-        transition.setupTransition(isPresenting: isPresenting, isNavigationTransition: isNavigationTransition)
+        transition.setupTransition(isPresenting: isPresenting, navigationController: navigationController)
     }
 }
 
@@ -41,13 +41,13 @@ extension TransitionCoordinator: UIViewControllerTransitioningDelegate {
         presenting: UIViewController,
         source _: UIViewController
     ) -> UIViewControllerAnimatedTransitioning? {
-        setupTransition(from: presenting, to: presented, isPresenting: true, isNavigationTransition: false)
+        setupTransition(from: presenting, to: presented, isPresenting: true, navigationController: nil)
         return currentTransition
     }
 
     public func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         guard let toVC = dismissed.presentingViewController else { return nil }
-        setupTransition(from: dismissed, to: toVC, isPresenting: false, isNavigationTransition: false)
+        setupTransition(from: dismissed, to: toVC, isPresenting: false, navigationController: nil)
         return currentTransition
     }
 
@@ -73,12 +73,12 @@ extension TransitionCoordinator: UINavigationControllerDelegate {
     }
 
     public func navigationController(
-        _: UINavigationController,
+        _ navigationController: UINavigationController,
         animationControllerFor operation: UINavigationController.Operation,
         from: UIViewController,
         to: UIViewController
     ) -> UIViewControllerAnimatedTransitioning? {
-        setupTransition(from: from, to: to, isPresenting: operation == .push, isNavigationTransition: true)
+        setupTransition(from: from, to: to, isPresenting: operation == .push, navigationController: navigationController)
         return currentTransition
     }
 }
