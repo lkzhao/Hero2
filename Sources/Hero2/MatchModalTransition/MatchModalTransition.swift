@@ -21,7 +21,9 @@ open class MatchModalTransition: Transition {
     open var canDismissVertically = true
     open var canDismissHorizontally = true
     open var automaticallyAddDismissGestureRecognizer: Bool = true
-    open lazy var dismissGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handlePan(gr:)))
+    open lazy var dismissGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handlePan(gr:))).then {
+        $0.delegate = self
+    }
 
     open override func animate() {
         guard let back = backgroundView, let front = foregroundView, let container = transitionContainer else {
@@ -117,11 +119,8 @@ open class MatchModalTransition: Transition {
     }
 
     open override func animationEnded(_ transitionCompleted: Bool) {
-        if isPresenting, transitionCompleted {
-            dismissGestureRecognizer.delegate = self
-            if automaticallyAddDismissGestureRecognizer {
-                foregroundView?.addGestureRecognizer(dismissGestureRecognizer)
-            }
+        if isPresenting, transitionCompleted, automaticallyAddDismissGestureRecognizer {
+            foregroundView?.addGestureRecognizer(dismissGestureRecognizer)
         }
         isMatched = false
         isSwipingVertically = false
