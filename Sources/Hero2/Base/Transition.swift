@@ -286,6 +286,9 @@ extension Transition: UIViewControllerAnimatedTransitioning {
                 toView?.removeFromSuperview()
             }
         }
+        if automaticallyLayoutToView, let container = transitionContainer, toView?.frame != container.bounds {
+            toView?.frameWithoutTransform = container.bounds
+        }
         if !isPresenting, fromOverFullScreen, finished, let toView = toView, let transitionContainerSuperview = transitionContainer?.superview {
             transitionContext?.completeTransition(finished)
             transitionContainerSuperview.addSubview(toView)  // UIKit will remove the entire transitionContainer when fromOverFullscreen is set. We need to manually add it back.
