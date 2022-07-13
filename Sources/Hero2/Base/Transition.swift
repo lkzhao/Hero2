@@ -104,7 +104,6 @@ open class Transition: NSObject {
     }
 
     public func addCompletionBlock(_ block: @escaping (Bool) -> Void) {
-        assert(canAddBlocks, "Should only add block during the animate() method")
         completeBlocks.append(block)
     }
     
