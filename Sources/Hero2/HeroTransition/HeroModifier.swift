@@ -37,6 +37,9 @@ public enum HeroModifier {
     // This could be useful when animating views that don't support size change with UIViewPropertyAnimator.
     // AVPlayerLayer for example, will stop animating when the animator is paused.
     case scaleSize
+    
+    // Cause the size change to only match width, and keep the original aspect ratio
+    case matchWidthOnly
 
     // Skip treating this view as a container view even if it is being animated.
     // This is useful when the view is transforming and you don't want the transform

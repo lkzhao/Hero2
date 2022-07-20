@@ -76,6 +76,8 @@ func process(modifiers: [HeroModifier], on state: inout ViewState, metadata: ino
             state.snapshotType = snapshotType
         case .scaleSize:
             state.scaleSize = true
+        case .matchWidthOnly:
+            state.matchWidthOnly = true
         case .skipContainer:
             state.skipContainer = true
         case .forceTransition:
@@ -157,7 +159,10 @@ func applyViewState(_ viewState: ViewState, to view: UIView) {
         view.layer.transform = transform
     }
     var sizeScale: CGFloat = 1
-    if let size = viewState.size {
+    if var size = viewState.size {
+        if viewState.matchWidthOnly == true {
+            size = CGSize(width: size.width, height: size.width / view.bounds.width * view.bounds.height)
+        }
         if viewState.scaleSize == true {
             sizeScale = size.width / view.bounds.size.width
             view.layer.transform.scaleBy(size / view.bounds.size)
