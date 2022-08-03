@@ -16,6 +16,7 @@ public protocol SheetBackgroundDelegate {
 
 public protocol SheetForegroundDelegate {
     func canInteractivelyDismiss(sheetTransition: SheetTransition) -> Bool
+    func preferredSheetSize(sheetTransition: SheetTransition, boundingSize: CGSize) -> CGSize?
 }
 
 class SheetPresentationController: UIPresentationController, UIGestureRecognizerDelegate {
@@ -45,14 +46,14 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     weak var originalSuperview: UIView?
     override func presentationTransitionWillBegin() {
         super.presentationTransitionWillBegin()
-        guard let containerView = containerView else { return }
+        guard let container = containerView else { return }
         originalSuperview = presentingViewController.view.superview
 
         overlayView.backgroundColor = UIColor {
             if $0.userInterfaceStyle == .dark {
                 return UIColor(white: $0.userInterfaceLevel == .elevated ? 0.0 : 0.4, alpha: 0.2)
             } else {
-                return UIColor(white: 0.3, alpha: 0.2)
+                return UIColor(white: 0.3, alpha: 0.15)
             }
         }
         overlayView.zPosition = 100
@@ -62,12 +63,9 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
         }
         presentingViewController.view.clipsToBounds = true
 
-        containerView.isUserInteractionEnabled = false
-        containerView.addSubview(presentingViewController.view)
-        containerView.addSubview(presentedViewController.view)
-        presentedViewController.view.frame = containerView.bounds
-        presentedViewController.view.setNeedsLayout()
-        presentedViewController.view.layoutIfNeeded()
+        container.isUserInteractionEnabled = false
+        container.addSubview(presentingViewController.view)
+        container.addSubview(presentedViewController.view)
         panGR.delegate = self
         presentedViewController.view.addGestureRecognizer(panGR)
     }
@@ -96,32 +94,25 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
             }
         }
     }
-    var isIpadHorizontal: Bool {
-        guard let container = containerView else { return false }
-        return container.bounds.width >= 1024 && container.traitCollection.verticalSizeClass == .regular
-    }
-    var isCompactVertical: Bool {
-        guard let container = containerView else { return false }
-        return container.traitCollection.verticalSizeClass == .compact
-    }
     var backTransform: CGAffineTransform {
         guard let container = containerView, let back = presentingViewController.view else { return .identity }
-        let sideInset: CGFloat = isIpadHorizontal ? 20 : 16
+        let sideInset: CGFloat = container.isIpadLayout ? 20 : 16
         let scaleSideFactor: CGFloat = sideInset / container.bounds.width
         let scale: CGFloat = 1 - scaleSideFactor * 2
         let topInset = presentingViewController.findObjectMatchType(SheetBackgroundDelegate.self)?.sheetTopInsetFor(sheetTransition: transition) ?? 0
-        if isCompactVertical {
+        if container.isCompactVertical {
             return .identity
         } else if hasParentSheet {
             return .identity.translatedBy(y: -back.bounds.height * scaleSideFactor - 10).scaledBy(scale)
-        } else if isIpadHorizontal {
+        } else if container.isIpadLayout {
             return .identity
         } else {
             return .identity.translatedBy(y: -container.bounds.height * scaleSideFactor + container.safeAreaInsets.top - topInset).scaledBy(scale)
         }
     }
     var thirdTransform: CGAffineTransform {
-        if (isIpadHorizontal && !hasParentSheet) || isCompactVertical {
+        guard let container = containerView else { return .identity }
+        if (container.isIpadLayout && !hasParentSheet) || container.isCompactVertical {
             return .identity
         } else {
             return backTransform.scaledBy(0.985)
@@ -157,29 +148,18 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     override func containerViewDidLayoutSubviews() {
         super.containerViewDidLayoutSubviews()
         guard let container = containerView else { return }
-        let sheetFrame: CGRect
-        if isIpadHorizontal {
-            // following default iOS iPad Sheet size
-            let sheetSize = CGSize(width: 704, height: container.bounds.inset(by: container.safeAreaInsets).height - 44)
-            sheetFrame = CGRect(center: container.bounds.center, size: sheetSize)
-        } else if isCompactVertical {
-            sheetFrame = container.bounds
-        } else {
-            let topInset = container.safeAreaInsets.top + 10
-            sheetFrame = CGRect(x: 0, y: topInset, width: container.bounds.width, height: container.bounds.height - topInset)
-        }
         if hasParentSheet {
-            presentingViewController.view.frameWithoutTransform = sheetFrame
+            presentingViewController.view.frameWithoutTransform = presentingViewController.sheetFrame(transition: transition, container: container)
         } else {
             presentingViewController.view.frameWithoutTransform = container.bounds
         }
 
         overlayView.frameWithoutTransform = presentingViewController.view.bounds
 
-        presentedViewController.view.frameWithoutTransform = sheetFrame
-        presentedViewController.view.cornerRadius = isCompactVertical ? UIScreen.main.displayCornerRadius : transition.cornerRadius
+        presentedViewController.view.frameWithoutTransform = presentedViewController.sheetFrame(transition: transition, container: container)
+        presentedViewController.view.cornerRadius = container.isCompactVertical ? UIScreen.main.displayCornerRadius : transition.cornerRadius
         presentedViewController.view.layer.maskedCorners =
-            isIpadHorizontal ? [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMaxXMaxYCorner] : [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        container.isIpadLayout ? [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMaxXMaxYCorner] : [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         presentedViewController.view.clipsToBounds = true
         if !transition.isAnimating, !hasChildSheet {
             applyPresentedState()
@@ -188,7 +168,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     var childScrollView: UIScrollView? {
         guard let vc = (presentedViewController as? UINavigationController)?.topViewController else { return nil }
         return vc.view.flattendSubviews.first { view in
-            (view is UIScrollView) && view.bounds.width == vc.view.bounds.width
+            (view is UIScrollView) && view.bounds.height == vc.view.bounds.height
         } as? UIScrollView
     }
     var startLocation: CGFloat = 0
@@ -278,5 +258,28 @@ open class SheetTransition: HeroTransition {
         presentationController.transition = self
         self.presentationController = presentationController
         return presentationController
+    }
+}
+
+private extension UIView {
+    var isIpadLayout: Bool {
+        bounds.width >= 512 && traitCollection.verticalSizeClass != .compact
+    }
+    var isCompactVertical: Bool {
+        traitCollection.verticalSizeClass == .compact
+    }
+}
+
+private extension UIViewController {
+    func sheetFrame(transition: SheetTransition, container: UIView) -> CGRect {
+        if container.isIpadLayout {
+            let sheetSize = findObjectMatchType(SheetForegroundDelegate.self)?.preferredSheetSize(sheetTransition: transition, boundingSize: container.bounds.size) ?? CGSize(width: 704, height: 600)
+            return CGRect(center: container.bounds.center, size: sheetSize)
+        } else if container.isCompactVertical {
+            return container.bounds
+        } else {
+            let topInset = container.safeAreaInsets.top + 10
+            return CGRect(x: 0, y: topInset, width: container.bounds.width, height: container.bounds.height - topInset)
+        }
     }
 }
