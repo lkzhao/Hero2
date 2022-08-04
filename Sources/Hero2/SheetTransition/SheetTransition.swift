@@ -71,6 +71,9 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
         container.isUserInteractionEnabled = false
         container.addSubview(presentingViewController.view)
         container.addSubview(presentedViewController.view)
+        presentedViewController.view.frame = presentedViewController.sheetFrame(transition: transition, container: container)
+        presentedViewController.view.setNeedsLayout()
+        presentedViewController.view.layoutIfNeeded()
         panGR.delegate = self
         presentedViewController.view.addGestureRecognizer(panGR)
     }

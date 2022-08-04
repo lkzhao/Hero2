@@ -3,7 +3,7 @@
 
 import UIKit
 
-open class Transition: NSObject {
+open class Transition: NSObject, TransitionStateProvider {
     public private(set) var isPresenting: Bool = true
     public private(set) var isInteractive = false
     public private(set) var animator: UIViewPropertyAnimator?
