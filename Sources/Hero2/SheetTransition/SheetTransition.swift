@@ -54,6 +54,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     }
 
     let overlayView = UIView()
+    let backgroundView = UIView()
     var transition: SheetTransition!
     weak var originalSuperview: UIView?
     override func presentationTransitionWillBegin() {
@@ -67,8 +68,12 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
             presentingViewController.view.addSubview(overlayView)
         }
         presentingViewController.view.clipsToBounds = true
+        
+        backgroundView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapBackground)))
+        overlayView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapBackground)))
 
         container.isUserInteractionEnabled = false
+        container.addSubview(backgroundView)
         container.addSubview(presentingViewController.view)
         container.addSubview(presentedViewController.view)
         presentedViewController.view.frame = presentedViewController.sheetFrame(transition: transition, container: container)
@@ -101,6 +106,9 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
                 originalSuperview.addSubview(presentingViewController.view)
             }
         }
+    }
+    @objc func didTapBackground() {
+        presentedViewController.dismiss(animated: true, completion: nil)
     }
     var backTransform: CGAffineTransform {
         guard let container = containerView, let back = presentingViewController.view else { return .identity }
@@ -156,6 +164,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     override func containerViewDidLayoutSubviews() {
         super.containerViewDidLayoutSubviews()
         guard let container = containerView else { return }
+        backgroundView.frame = container.bounds
         if container.isIpadLayout || container.isCompactVertical {
             overlayView.backgroundColor = hasParentSheet ? .secondLevelFullscreenSheetOverlay : .firstLevelFullscreenSheetOverlay
         } else {
