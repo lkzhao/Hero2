@@ -19,6 +19,18 @@ public protocol SheetForegroundDelegate {
     func preferredSheetSize(sheetTransition: SheetTransition, boundingSize: CGSize) -> CGSize?
 }
 
+extension UIColor {
+    static let firstLevelSheetOverlay = UIColor {
+        if $0.userInterfaceStyle == .dark {
+            return UIColor(white: $0.userInterfaceLevel == .elevated ? 0.0 : 0.4, alpha: 0.2)
+        } else {
+            return UIColor(white: 0.3, alpha: 0.2)
+        }
+    }
+    static let firstLevelFullscreenSheetOverlay = UIColor(white: 0.0, alpha: 0.35)
+    static let secondLevelFullscreenSheetOverlay = UIColor(white: 0.0, alpha: 0.15)
+}
+
 class SheetPresentationController: UIPresentationController, UIGestureRecognizerDelegate {
     override var shouldRemovePresentersView: Bool {
         return false
@@ -49,13 +61,6 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
         guard let container = containerView else { return }
         originalSuperview = presentingViewController.view.superview
 
-        overlayView.backgroundColor = UIColor {
-            if $0.userInterfaceStyle == .dark {
-                return UIColor(white: $0.userInterfaceLevel == .elevated ? 0.0 : 0.4, alpha: 0.2)
-            } else {
-                return UIColor(white: 0.3, alpha: 0.15)
-            }
-        }
         overlayView.zPosition = 100
 
         if presentingViewController.findObjectMatchType(SheetBackgroundDelegate.self)?.sheetApplyOverlay(sheetTransition: transition) != false {
@@ -148,6 +153,11 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     override func containerViewDidLayoutSubviews() {
         super.containerViewDidLayoutSubviews()
         guard let container = containerView else { return }
+        if container.isIpadLayout || container.isCompactVertical {
+            overlayView.backgroundColor = hasParentSheet ? .secondLevelFullscreenSheetOverlay : .firstLevelFullscreenSheetOverlay
+        } else {
+            overlayView.backgroundColor = .firstLevelSheetOverlay
+        }
         if hasParentSheet {
             presentingViewController.view.frameWithoutTransform = presentingViewController.sheetFrame(transition: transition, container: container)
         } else {
@@ -258,6 +268,11 @@ open class SheetTransition: HeroTransition {
         presentationController.transition = self
         self.presentationController = presentationController
         return presentationController
+    }
+    
+    public var preferLightContentStatusBar: Bool {
+        guard let container = presentationController?.containerView else { return false }
+        return !container.isIpadLayout && !container.isCompactVertical
     }
 }
 
