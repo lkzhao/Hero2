@@ -3,6 +3,10 @@
 
 import UIKit
 
+extension Notification.Name {
+    public static let transitionDidUpdateIsAnimating = Notification.Name("transitionDidUpdateIsAnimating")
+}
+
 open class Transition: NSObject, TransitionStateProvider {
     public private(set) var isPresenting: Bool = true
     public private(set) var isInteractive = false
@@ -10,7 +14,12 @@ open class Transition: NSObject, TransitionStateProvider {
     public private(set) weak var navigationController: UINavigationController?
     public private(set) var transitionContext: UIViewControllerContextTransitioning?
     public private(set) var isTransitioning: Bool = false
-    public var isAnimating: Bool = false
+    public var isAnimating: Bool = false {
+        didSet {
+            guard isAnimating != oldValue else { return }
+            NotificationCenter.default.post(name: .transitionDidUpdateIsAnimating, object: nil, userInfo: ["transition": self, "isAnimating": isAnimating])
+        }
+    }
 
     public var isUserInteractionEnabled = false
     
@@ -300,10 +309,10 @@ extension Transition: UIViewControllerAnimatedTransitioning {
         pausedAnimations.removeAll()
         transitionContext = nil
         animator = nil
-        isAnimating = false
         navigationController = nil
         isTransitioning = false
         isInteractive = false
+        isAnimating = false
     }
 }
 
