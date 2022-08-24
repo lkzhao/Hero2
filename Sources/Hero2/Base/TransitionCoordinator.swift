@@ -4,12 +4,7 @@ public protocol TransitionProvider: UIViewController {
     func transitionFor(presenting: Bool, otherViewController: UIViewController) -> Transition?
 }
 
-public protocol TransitionStateProvider {
-    var isTransitioning: Bool { get }
-    var isAnimating: Bool { get }
-}
-
-public class TransitionCoordinator: NSObject, TransitionStateProvider {
+public class TransitionCoordinator: NSObject {
     public static let shared = TransitionCoordinator()
 
     public var defaultTransition: Transition = HeroTransition()

@@ -7,7 +7,7 @@ extension Notification.Name {
     public static let transitionDidUpdateIsAnimating = Notification.Name("transitionDidUpdateIsAnimating")
 }
 
-open class Transition: NSObject, TransitionStateProvider {
+open class Transition: NSObject {
     public private(set) var isPresenting: Bool = true
     public private(set) var isInteractive = false
     public private(set) var animator: UIViewPropertyAnimator?
