@@ -15,9 +15,9 @@ public protocol MatchTransitionDelegate {
 
 open class MatchModalTransition: Transition {
     let foregroundContainerView = UIView()
-    var isSwipingVertically = false
     var isMatched = false
 
+    public var transitionVertically = false
     open var canDismissVertically = true
     open var canDismissHorizontally = true
     open var automaticallyAddDismissGestureRecognizer: Bool = true
@@ -46,7 +46,7 @@ open class MatchModalTransition: Transition {
         container.addSubview(foregroundContainerView)
         foregroundContainerView.addSubview(front)
         let defaultDismissedFrame =
-            isSwipingVertically ? container.bounds.offsetBy(dx: 0, dy: container.bounds.height) : container.bounds.offsetBy(dx: container.bounds.width, dy: 0)
+            transitionVertically ? container.bounds.offsetBy(dx: 0, dy: container.bounds.height) : container.bounds.offsetBy(dx: container.bounds.width, dy: 0)
         let dismissedFrame =
             matchedSourceView.map {
                 container.convert($0.bounds, from: $0)
@@ -123,7 +123,7 @@ open class MatchModalTransition: Transition {
             foregroundView?.addGestureRecognizer(dismissGestureRecognizer)
         }
         isMatched = false
-        isSwipingVertically = false
+        transitionVertically = false
         super.animationEnded(transitionCompleted)
     }
 
@@ -148,7 +148,7 @@ open class MatchModalTransition: Transition {
                 foregroundContainerView.center = container.center + translation / 5
                 fractionCompleted = (progress * 0.1).clamp(0, 1)
             } else {
-                fractionCompleted = isSwipingVertically ? translation.y / view.bounds.height : translation.x / view.bounds.width
+                fractionCompleted = transitionVertically ? translation.y / view.bounds.height : translation.x / view.bounds.width
             }
         default:
             let combinedOffset = gr.translation(in: view) + gr.velocity(in: view)
@@ -164,7 +164,7 @@ extension MatchModalTransition: UIGestureRecognizerDelegate {
         let velocity = dismissGestureRecognizer.velocity(in: nil)
         let horizontal = canDismissHorizontally && velocity.x > abs(velocity.y)
         let vertical = canDismissVertically && velocity.y > abs(velocity.x)
-        isSwipingVertically = vertical
+        transitionVertically = vertical
         // only allow right and down swipe
         return horizontal || vertical
     }
