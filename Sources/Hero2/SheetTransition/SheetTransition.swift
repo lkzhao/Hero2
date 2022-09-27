@@ -188,7 +188,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     var childScrollView: UIScrollView? {
         guard let vc = (presentedViewController as? UINavigationController)?.topViewController else { return nil }
         return vc.view.flattendSubviews.first { view in
-            if let view = view as? UIScrollView, view.isTracking, view.contentSize.height > view.bounds.height {
+            if let view = view as? UIScrollView, view.isTracking, view.contentSize.inset(by: -view.adjustedContentInset).height > view.bounds.height {
                 return true
             } else {
                 return false

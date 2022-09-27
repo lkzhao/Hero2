@@ -299,10 +299,11 @@ extension Transition: UIViewControllerAnimatedTransitioning {
         }
         if !isPresenting, finished, let toView = toView {
             let presentationController = toView.parentViewController?.presentationController
+            let containerView = presentationController?.containerView ?? (fromOverFullScreen ? transitionContainer?.superview : nil)
             transitionContext?.completeTransition(finished)
             // UIKit will remove the view from the view hierarchy for custom presentation controller. We need to manually add it back.
-            presentationController?.containerView?.addSubview(toView)
-            presentationController?.containerView?.setNeedsLayout()
+            containerView?.addSubview(toView)
+            containerView?.setNeedsLayout()
         } else {
             transitionContext?.completeTransition(finished)
         }
