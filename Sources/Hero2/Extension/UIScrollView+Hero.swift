@@ -12,7 +12,7 @@ extension UIScrollView {
         static var disableTopBounce = "disableTopBounce"
     }
 
-    var disableTopBounce: Bool {
+    public var disableTopBounce: Bool {
         get { objc_getAssociatedObject(self, &type(of: self).AssociatedKeys.disableTopBounce) as? Bool ?? false }
         set {
             objc_setAssociatedObject(self, &type(of: self).AssociatedKeys.disableTopBounce, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
