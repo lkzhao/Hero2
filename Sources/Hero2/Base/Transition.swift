@@ -8,6 +8,7 @@ extension Notification.Name {
 }
 
 open class Transition: NSObject {
+    public static var animatingTransitionCount: Int = 0
     public private(set) var isPresenting: Bool = true
     public private(set) var isInteractive = false
     public private(set) var animator: UIViewPropertyAnimator?
@@ -17,6 +18,8 @@ open class Transition: NSObject {
     public var isAnimating: Bool = false {
         didSet {
             guard isAnimating != oldValue else { return }
+            Self.animatingTransitionCount += isAnimating ? 1 : -1
+            assert(Self.animatingTransitionCount >= 0)
             NotificationCenter.default.post(name: .transitionDidUpdateIsAnimating, object: nil, userInfo: ["transition": self, "isAnimating": isAnimating])
         }
     }
