@@ -15,7 +15,8 @@ public protocol SheetBackgroundDelegate {
 }
 
 public protocol SheetForegroundDelegate {
-    func canInteractivelyDismiss(sheetTransition: SheetTransition) -> Bool
+    func canDismiss(sheetTransition: SheetTransition) -> Bool
+    func didTryToDismiss(sheetTransition: SheetTransition)
     func preferredSheetSize(sheetTransition: SheetTransition, boundingSize: CGSize) -> CGSize?
 }
 
@@ -105,6 +106,10 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
         }
     }
     @objc func didTapBackground() {
+        if let foregroundDelegate = presentedViewController.findObjectMatchType(SheetForegroundDelegate.self), !foregroundDelegate.canDismiss(sheetTransition: transition) {
+            foregroundDelegate.didTryToDismiss(sheetTransition: transition)
+            return
+        }
         presentedViewController.dismiss(animated: true, completion: nil)
     }
     var backTransform: CGAffineTransform {
@@ -197,6 +202,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     var startLocation: CGFloat = 0
     var lastDraggedScrollView: UIScrollView?
     var initialFractionCompleted: CGFloat = 0
+    var canDismiss: Bool = true
     @objc func handlePan(gr: UIPanGestureRecognizer) {
         let v = gr.velocity(in: nil)
         let location = gr.location(in: nil).y
@@ -218,6 +224,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
                 startLocation = location
                 if !transition.isTransitioning {
                     transition.beginInteractiveTransition()
+                    canDismiss = presentedViewController.findObjectMatchType(SheetForegroundDelegate.self)?.canDismiss(sheetTransition: transition) ?? true
                     presentedViewController.dismiss(animated: true, completion: nil)
                 } else {
                     transition.beginInteractiveTransition()
@@ -228,7 +235,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
                 let translation = location - startLocation
                 var progress = translation / presentedViewController.view.frameWithoutTransform.height
                 progress = transition.isPresenting != transition.isReversed ? -progress : progress
-                progress = (initialFractionCompleted + progress).clamp(0, 1)
+                progress = (initialFractionCompleted + progress * (canDismiss ? 1.0 : 0.1)).clamp(0, 1)
                 transition.fractionCompleted = progress
             }
         default:
@@ -238,13 +245,18 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
                 var progress = (v.y + translation) / presentedViewController.view.frameWithoutTransform.height
                 progress = transition.isPresenting != transition.isReversed ? -progress : progress
                 progress = (initialFractionCompleted + progress).clamp(0, 1)
-                transition.endInteractiveTransition(shouldFinish: progress > 0.5)
+                if progress > 0.5, !canDismiss {
+                    transition.endInteractiveTransition(shouldFinish: false)
+                    presentedViewController.findObjectMatchType(SheetForegroundDelegate.self)?.didTryToDismiss(sheetTransition: transition)
+                } else {
+                    transition.endInteractiveTransition(shouldFinish: progress > 0.5)
+                }
             }
         }
     }
 
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        presentedViewController.findObjectMatchType(SheetForegroundDelegate.self)?.canInteractivelyDismiss(sheetTransition: transition) ?? true
+        true
     }
 
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
