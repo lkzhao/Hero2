@@ -92,10 +92,10 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     }
     override func dismissalTransitionWillBegin() {
         super.dismissalTransitionWillBegin()
-        presentedViewController.view.isUserInteractionEnabled = false
+        containerView?.isUserInteractionEnabled = false
     }
     override func dismissalTransitionDidEnd(_ completed: Bool) {
-        presentedViewController.view.isUserInteractionEnabled = true
+        containerView?.isUserInteractionEnabled = true
         super.dismissalTransitionDidEnd(completed)
         if completed {
             overlayView.removeFromSuperview()
