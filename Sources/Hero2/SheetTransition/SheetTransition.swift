@@ -56,6 +56,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
 
     let overlayView = UIView()
     let backgroundView = UIView()
+    let touchBlockingView = UIView()
     var transition: SheetTransition!
     weak var originalSuperview: UIView?
     override func presentationTransitionWillBegin() {
@@ -93,11 +94,14 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     }
     override func dismissalTransitionWillBegin() {
         super.dismissalTransitionWillBegin()
-        containerView?.isUserInteractionEnabled = false
+        delay {
+            // need to delay until the next run loop because the transition will be inserting the view again.
+            self.containerView?.insertSubview(self.touchBlockingView, aboveSubview: self.presentingViewController.view)
+        }
     }
     override func dismissalTransitionDidEnd(_ completed: Bool) {
-        containerView?.isUserInteractionEnabled = true
         super.dismissalTransitionDidEnd(completed)
+        touchBlockingView.removeFromSuperview()
         if completed {
             overlayView.removeFromSuperview()
             if let originalSuperview = originalSuperview {
@@ -167,6 +171,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
         super.containerViewDidLayoutSubviews()
         guard let container = containerView else { return }
         backgroundView.frame = container.bounds
+        touchBlockingView.frame = container.bounds
         if container.isIpadLayout || container.isCompactVertical {
             overlayView.backgroundColor = hasParentSheet ? .secondLevelFullscreenSheetOverlay : .firstLevelFullscreenSheetOverlay
         } else {
