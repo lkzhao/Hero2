@@ -57,3 +57,15 @@ extension UIView {
         }
     }
 }
+
+internal extension UIView {
+    var canBeDismissed: Bool {
+        guard let parentViewController else { return false }
+        if let navVC = parentViewController.navigationController, navVC.viewControllers.count > 1 {
+            return true
+        } else if parentViewController.presentingViewController != nil {
+            return true
+        }
+        return false
+    }
+}

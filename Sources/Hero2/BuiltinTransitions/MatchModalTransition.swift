@@ -23,6 +23,9 @@ open class MatchModalTransition: Transition {
     open var automaticallyAddDismissGestureRecognizer: Bool = true
     open lazy var dismissGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handlePan(gr:))).then {
         $0.delegate = self
+        if #available(iOS 13.4, *) {
+            $0.allowedScrollTypesMask = .all
+        }
     }
 
     open override func animate() {
@@ -161,6 +164,7 @@ open class MatchModalTransition: Transition {
 
 extension MatchModalTransition: UIGestureRecognizerDelegate {
     open func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard gestureRecognizer.view?.canBeDismissed == true else { return false }
         let velocity = dismissGestureRecognizer.velocity(in: nil)
         let horizontal = canDismissHorizontally && velocity.x > abs(velocity.y)
         let vertical = canDismissVertically && velocity.y > abs(velocity.x)
