@@ -216,7 +216,13 @@ extension Transition: UIViewControllerAnimatedTransitioning {
             container.addSubview(backgroundView!)
             container.addSubview(foregroundView!)
             if automaticallyLayoutToView {
-                toView!.frameWithoutTransform = container.frame
+                if !isPresenting {
+                    toViewController?.presentationController?.containerViewWillLayoutSubviews()
+                    container.layoutSubviews()
+                    toViewController?.presentationController?.containerViewDidLayoutSubviews()
+                } else {
+                    toView!.frameWithoutTransform = container.frame
+                }
                 toView!.layoutIfNeeded()
             }
             
