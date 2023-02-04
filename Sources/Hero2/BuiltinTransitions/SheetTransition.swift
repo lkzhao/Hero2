@@ -148,7 +148,9 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
             parentSheetPresentationController.presentingViewController.view.transform = parentSheetPresentationController.thirdTransform
         }
         back.transform = backTransform
+#if !targetEnvironment(macCatalyst)
         back.cornerRadius = transition.cornerRadius
+#endif
         overlayView.alpha = 1
     }
 
@@ -159,12 +161,14 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
         if let parentSheetPresentationController = parentSheetPresentationController {
             parentSheetPresentationController.presentingViewController.view.transform = parentSheetPresentationController.backTransform
         }
+#if !targetEnvironment(macCatalyst)
         back.layer.cornerCurve = .continuous
         if hasParentSheet {
             back.cornerRadius = transition.cornerRadius
         } else {
             back.cornerRadius = UIScreen.main.displayCornerRadius
         }
+#endif
         overlayView.alpha = 0
     }
     override func containerViewDidLayoutSubviews() {
