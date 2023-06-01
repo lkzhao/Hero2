@@ -11,7 +11,7 @@ open class Transition: NSObject {
     public static var animatingTransitionCount: Int = 0
     public private(set) var isPresenting: Bool = true
     public private(set) var isInteractive = false
-    public private(set) var animator: UIViewPropertyAnimator?
+    public private(set) var animator: UIViewPropertyAnimator
     public private(set) weak var navigationController: UINavigationController?
     public private(set) var transitionContext: UIViewControllerContextTransitioning?
     public private(set) var isTransitioning: Bool = false
@@ -30,7 +30,7 @@ open class Transition: NSObject {
     public var timingParameters: UITimingCurveProvider
 
     public var isReversed: Bool {
-        animator?.isReversed ?? false
+        animator.isReversed
     }
 
     open var automaticallyLayoutToView: Bool {
@@ -38,9 +38,9 @@ open class Transition: NSObject {
     }
 
     public var fractionCompleted: CGFloat {
-        get { animator?.fractionComplete ?? 0 }
+        get { animator.fractionComplete }
         set {
-            guard let animator = animator, animator.state == .active else { return }
+            guard animator.state == .active else { return }
             animator.fractionComplete = newValue
         }
     }
@@ -69,6 +69,7 @@ open class Transition: NSObject {
     ) {
         self.duration = duration
         self.timingParameters = timingParameters
+        self.animator = UIViewPropertyAnimator(duration: duration, timingParameters: timingParameters)
         super.init()
     }
 
@@ -76,7 +77,7 @@ open class Transition: NSObject {
         isInteractive = true
         isTransitioning = true
 
-        animator?.pauseAnimation()
+        animator.pauseAnimation()
         transitionContext?.pauseInteractiveTransition()
     }
 
@@ -95,13 +96,11 @@ open class Transition: NSObject {
             transitionContext?.cancelInteractiveTransition()
         }
 
-        if let animator = animator {
-            animator.isReversed = !shouldFinish
-            if animator.state == .inactive {
-                animator.startAnimation()
-            } else {
-                animator.continueAnimation(withTimingParameters: nil, durationFactor: 1)
-            }
+        animator.isReversed = !shouldFinish
+        if animator.state == .inactive {
+            animator.startAnimation()
+        } else {
+            animator.continueAnimation(withTimingParameters: nil, durationFactor: 1)
         }
     }
 
@@ -184,7 +183,7 @@ extension Transition {
 
 extension Transition: UIViewControllerInteractiveTransitioning {
     open func interruptibleAnimator(using _: UIViewControllerContextTransitioning) -> UIViewImplicitlyAnimating {
-        animator!
+        animator
     }
 
     open func startInteractiveTransition(_ transitionContext: UIViewControllerContextTransitioning) {
@@ -209,21 +208,26 @@ extension Transition: UIViewControllerAnimatedTransitioning {
             }
             prepareBlocks.removeAll()
 
-            let container = transitionContainer!
-            if !isUserInteractionEnabled {
-                container.isUserInteractionEnabled = isUserInteractionEnabled
-            }
-            container.addSubview(backgroundView!)
-            container.addSubview(foregroundView!)
-            if automaticallyLayoutToView {
-                if !isPresenting {
-                    toViewController?.presentationController?.containerViewWillLayoutSubviews()
-                    container.layoutSubviews()
-                    toViewController?.presentationController?.containerViewDidLayoutSubviews()
-                } else {
-                    toView!.frameWithoutTransform = container.frame
+            if let container = transitionContainer {
+                if !isUserInteractionEnabled {
+                    container.isUserInteractionEnabled = isUserInteractionEnabled
                 }
-                toView!.layoutIfNeeded()
+                if let backgroundView {
+                    container.addSubview(backgroundView)
+                }
+                if let foregroundView {
+                    container.addSubview(foregroundView)
+                }
+                if automaticallyLayoutToView {
+                    if !isPresenting {
+                        toViewController?.presentationController?.containerViewWillLayoutSubviews()
+                        container.layoutSubviews()
+                        toViewController?.presentationController?.containerViewDidLayoutSubviews()
+                    } else {
+                        toView?.frameWithoutTransform = container.frame
+                    }
+                    toView?.layoutIfNeeded()
+                }
             }
             
             isAnimating = true
@@ -255,26 +259,26 @@ extension Transition: UIViewControllerAnimatedTransitioning {
 
             if isPresenting {
                 dismissedState()
-                animator!.addAnimations(presentedState)
+                animator.addAnimations(presentedState)
             } else {
                 presentedState()
-                animator!.addAnimations(dismissedState)
+                animator.addAnimations(dismissedState)
             }
 
             // flush the current transaction before animation start.
             // otherwise delay animation on dismiss might not be registered.
             CATransaction.flush()
 
-            animator!
+            animator
                 .addCompletion { [weak self] pos in
-                    container.isUserInteractionEnabled = true
+                    self?.transitionContainer?.isUserInteractionEnabled = true
                     completion(pos == .end)
                     self?.completeTransition(finished: pos == .end)
                 }
 
-            animator?.startAnimation()
+            animator.startAnimation()
             if isInteractive {
-                animator?.pauseAnimation()
+                animator.pauseAnimation()
             }
         }
 
@@ -293,7 +297,7 @@ extension Transition: UIViewControllerAnimatedTransitioning {
         duration
     }
 
-    open func completeTransition(finished: Bool) {
+    @objc open func completeTransition(finished: Bool) {
         if finished {
             if !toOverFullScreen {
                 fromView?.removeFromSuperview()
@@ -321,7 +325,6 @@ extension Transition: UIViewControllerAnimatedTransitioning {
     open func animationEnded(_ transitionCompleted: Bool) {
         pausedAnimations.removeAll()
         transitionContext = nil
-        animator = nil
         navigationController = nil
         isTransitioning = false
         isInteractive = false

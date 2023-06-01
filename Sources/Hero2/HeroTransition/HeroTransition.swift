@@ -141,7 +141,7 @@ open class HeroTransition: Transition {
             view.isHidden = true
         }
 
-        let duration = animator!.duration
+        let duration = animator.duration
         let isOverCurrentContext = transitionContext?.presentationStyle == .overFullScreen || transitionContext?.presentationStyle == .overCurrentContext
         for view in animatingViews {
             let viewContext = contexts[view]!
