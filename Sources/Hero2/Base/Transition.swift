@@ -48,6 +48,7 @@ open class Transition: NSObject {
     private var canAddBlocks: Bool = false
     private var dismissBlocks: [() -> Void] = []
     private var presentBlocks: [() -> Void] = []
+    private var startBlocks: [() -> Void] = []
     private var completeBlocks: [(Bool) -> Void] = []
     private var prepareBlocks: [() -> Void] = []
     private var pausedAnimations: [UIView: [String: CAAnimation]] = [:]
@@ -120,6 +121,10 @@ open class Transition: NSObject {
     
     public func addPrepareBlock(_ block: @escaping () -> Void) {
         prepareBlocks.append(block)
+    }
+
+    public func addStartBlock(_ block: @escaping () -> Void) {
+        startBlocks.append(block)
     }
 
     // MARK: - Subclass Overrides
@@ -277,6 +282,12 @@ extension Transition: UIViewControllerAnimatedTransitioning {
                 }
 
             animator.startAnimation()
+
+            for block in startBlocks {
+                block()
+            }
+            startBlocks = []
+
             if isInteractive {
                 animator.pauseAnimation()
             }

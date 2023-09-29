@@ -110,15 +110,17 @@ open class MatchModalTransition: Transition {
             sourceViewPlaceholder.removeFromSuperview()
             foregroundContainerView.removeFromSuperview()
         }
+        addStartBlock {
+            if self.isInteractive, self.isMatched {
+                self.pauseForegroundView()
+            }
+        }
     }
 
-    open override func animateTransition(using context: UIViewControllerContextTransitioning) {
-        super.animateTransition(using: context)
-        if isInteractive, isMatched {
-            let position = foregroundContainerView.layer.presentation()?.position ?? foregroundContainerView.layer.position
-            pause(view: foregroundContainerView, animationForKey: "position")
-            foregroundContainerView.layer.position = position
-        }
+    func pauseForegroundView() {
+        let position = foregroundContainerView.layer.presentation()?.position ?? foregroundContainerView.layer.position
+        self.pause(view: foregroundContainerView, animationForKey: "position")
+        foregroundContainerView.layer.position = position
     }
 
     open override func animationEnded(_ transitionCompleted: Bool) {
