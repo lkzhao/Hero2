@@ -132,10 +132,12 @@ open class MatchModalTransition: Transition {
         super.animationEnded(transitionCompleted)
     }
 
+    var accumulatedProgress: CGFloat = 0
     @objc func handlePan(gr: UIPanGestureRecognizer) {
         guard let view = gr.view else { return }
         func progressFrom(offset: CGPoint) -> CGFloat {
-            return (offset.x + offset.y) / ((view.bounds.height + view.bounds.width) / 4)
+            let progress = (offset.x + offset.y) / ((view.bounds.height + view.bounds.width) / 4)
+            return isPresenting ? -progress : progress
         }
         switch gr.state {
         case .began:
@@ -144,21 +146,29 @@ open class MatchModalTransition: Transition {
                 view.dismiss()
             } else {
                 beginInteractiveTransition()
+                pause(view: foregroundContainerView, animationForKey: "position")
             }
+            accumulatedProgress = 0
         case .changed:
-            guard let container = transitionContainer else { return }
-            let translation = gr.translation(in: view)
+            let translation = gr.translation(in: nil)
+            gr.setTranslation(.zero, in: nil)
             if isMatched {
                 let progress = progressFrom(offset: translation)
-                foregroundContainerView.center = container.center + translation / 5
-                fractionCompleted = (progress * 0.1).clamp(0, 1)
+                foregroundContainerView.center = foregroundContainerView.center + translation * 0.5
+                fractionCompleted = (fractionCompleted + progress * 0.1).clamp(0, 1)
+                accumulatedProgress += progress
             } else {
-                fractionCompleted = transitionVertically ? translation.y / view.bounds.height : translation.x / view.bounds.width
+                let progress = transitionVertically ? translation.y / view.bounds.height : translation.x / view.bounds.width
+                fractionCompleted = (fractionCompleted + progress).clamp(0, 1)
+                accumulatedProgress += progress
             }
         default:
-            let combinedOffset = gr.translation(in: view) + gr.velocity(in: view)
-            let progress = progressFrom(offset: combinedOffset)
+            let progress = accumulatedProgress + progressFrom(offset: gr.velocity(in: nil)) * 0.3
             let shouldFinish = progress > 0.5
+            if isPresenting != shouldFinish {
+                foregroundContainerView.isUserInteractionEnabled = false
+                backgroundView?.overlayView?.isUserInteractionEnabled = false
+            }
             endInteractiveTransition(shouldFinish: shouldFinish)
         }
     }

@@ -101,10 +101,12 @@ class InstagramDetailViewController: ComponentViewController {
             .scrollView().flex()
         }
     }
+    let matchTransition = MatchModalTransition()
 
     init() {
         super.init(nibName: nil, bundle: nil)
-        transition = MatchModalTransition()
+        transition = matchTransition
+        matchTransition.isUserInteractionEnabled = true
     }
 
     required init?(coder: NSCoder) {
@@ -113,21 +115,10 @@ class InstagramDetailViewController: ComponentViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.addGestureRecognizer(matchTransition.dismissGestureRecognizer)
         view.backgroundColor = .systemBackground
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
-        view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTap)))
-    }
-
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        if !componentView.hasReloaded {
-            componentView.reloadData()
-        }
-    }
-
-    @objc func didTap() {
-        dismiss(animated: true, completion: nil)
     }
 }
 
