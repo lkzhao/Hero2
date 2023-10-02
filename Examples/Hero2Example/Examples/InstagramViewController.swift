@@ -15,7 +15,7 @@ import UIKit
 class InstagramViewController: ComponentViewController {
     let images = ImageData.testImages
 
-    override var component: Component {
+    override var component: any Component {
         Waterfall(columns: 3, spacing: 1) {
             for image in images {
                 AsyncImage(image.url)
@@ -72,7 +72,7 @@ class InstagramDetailViewController: ComponentViewController {
     }
     let imageView = UIImageView()
 
-    override var component: Component {
+    override var component: any Component {
         VStack {
             HStack(alignItems: .center) {
                 Image(systemName: "chevron.left").tintColor(.label)

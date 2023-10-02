@@ -41,7 +41,7 @@ class MatchViewController: ComponentViewController {
         ),
         Shape(name: "star", color: .systemOrange, transform: .identity.translatedBy(x: -50, y: 0).rotated(by: 0.2)),
     ]
-    override var component: Component {
+    override var component: any Component {
         VStack(spacing: 8) {
             ZStack {
                 for shape in shapes {
@@ -102,7 +102,7 @@ class MatchViewController: ComponentViewController {
 
 class MatchDetailViewController: ComponentViewController {
     var shape: Shape!
-    override var component: Component {
+    override var component: any Component {
         VStack(spacing: 20) {
             ZStack {
                 Image(shape.image).size(width: 200, height: 200).heroID(shape.id).tintColor(shape.color)

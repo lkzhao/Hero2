@@ -46,7 +46,7 @@ class ComponentViewController: UIViewController {
         componentView.component = component
     }
 
-    var component: Component {
+  var component: any Component {
         VStack(justifyContent: .center, alignItems: .center) {
             Text("Empty")
         }

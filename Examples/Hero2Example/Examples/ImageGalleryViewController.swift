@@ -15,7 +15,7 @@ import UIKit
 class ImageGalleryViewController: ComponentViewController {
     let images = ImageData.testImages
 
-    override var component: Component {
+    override var component: any Component {
         Waterfall(columns: 2, spacing: 1) {
             for image in images {
                 AsyncImage(image.url)
@@ -62,7 +62,7 @@ class ImageDetailViewController: ComponentViewController {
     let imageView = UIImageView()
     lazy var panGR = UIPanGestureRecognizer(target: self, action: #selector(handlePan(gr:)))
 
-    override var component: Component {
+    override var component: any Component {
         VStack(justifyContent: .center) {
             imageView.size(width: .fill, height: .aspectPercentage(image.size.height / image.size.width)).inset(30)
         }

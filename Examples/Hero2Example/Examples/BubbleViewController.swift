@@ -11,7 +11,7 @@ import UIComponent
 import UIKit
 
 class BubbleViewController: ComponentViewController {
-    override var component: Component {
+    override var component: any Component {
         VStack {
             Spacer()
             HStack(justifyContent: .spaceEvenly) {
@@ -34,7 +34,7 @@ class BubbleViewController: ComponentViewController {
 }
 
 class BubbleMaskDetailViewController: ComponentViewController {
-    override var component: Component {
+    override var component: any Component {
         VStack(spacing: 20, alignItems: .center) {
             Text("Bubble Transition", font: .boldSystemFont(ofSize: 26))
             Text("Content is masked", font: .systemFont(ofSize: 22))
@@ -57,7 +57,7 @@ class BubbleMaskDetailViewController: ComponentViewController {
 }
 
 class BubbleScaleDetailViewController: ComponentViewController {
-    override var component: Component {
+    override var component: any Component {
         VStack(spacing: 20, alignItems: .center) {
             Text("Bubble Transition", font: .boldSystemFont(ofSize: 26))
             Text("Content is scaled", font: .systemFont(ofSize: 22))

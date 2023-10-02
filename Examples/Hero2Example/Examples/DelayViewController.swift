@@ -23,7 +23,7 @@ class DelayViewController: ComponentViewController {
         super.viewDidLoad()
         imageView.heroModifiers = [.scale(0.2), .fade, .delay(0.3)]
     }
-    override var component: Component {
+    override var component: any Component {
         VStack(spacing: 8) {
             imageView
             Image(systemName: "chevron.right").tintColor(.systemBlue)
@@ -36,7 +36,7 @@ class DelayViewController: ComponentViewController {
 }
 
 class DelayDetailViewController: ComponentViewController {
-    override var component: Component {
+    override var component: any Component {
         VStack(spacing: 8) {
             Space(height: 100)
             Image(systemName: "chevron.left").tintColor(.systemBlue)

@@ -9,7 +9,7 @@
 import UIComponent
 import UIKit
 
-public struct AsyncImage: ViewComponentBuilder {
+public struct AsyncImage: ComponentBuilder {
     public let url: URL
 
     public init(_ url: URL) {
@@ -21,8 +21,8 @@ public struct AsyncImage: ViewComponentBuilder {
         self.url = url
     }
 
-    public func build() -> ViewUpdateComponent<SimpleViewComponent<UIImageView>> {
-        SimpleViewComponent<UIImageView>()
+    public func build() -> UpdateComponent<ViewComponent<UIImageView>> {
+        ViewComponent<UIImageView>()
             .update {
                 $0.kf.setImage(with: url)
             }

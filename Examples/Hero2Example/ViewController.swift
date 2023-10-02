@@ -11,7 +11,7 @@ import UIComponent
 import UIKit
 
 class ViewController: ComponentViewController {
-    override var component: Component {
+    override var component: any Component {
         VStack {
             ExampleSection(title: "Hero Transition") {
                 ExampleItem(name: "Match", viewController: MatchViewController())
@@ -27,7 +27,7 @@ class ViewController: ComponentViewController {
             }
         }
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Hero2 Examples"
@@ -43,7 +43,7 @@ struct ExampleItem: ComponentBuilder {
         self.shouldPresent = shouldPresent
         self.viewController = viewController
     }
-    func build() -> Component {
+    func build() -> some Component {
         VStack {
             Text(name)
         }
@@ -61,12 +61,12 @@ struct ExampleItem: ComponentBuilder {
 
 struct ExampleSection: ComponentBuilder {
     let title: String
-    let children: [Component]
-    init(title: String, @ComponentArrayBuilder _ content: () -> [Component]) {
+    let children: [any Component]
+    init(title: String, @ComponentArrayBuilder _ content: () -> [any Component]) {
         self.title = title
         self.children = content()
     }
-    func build() -> Component {
+    func build() -> some Component {
         VStack {
             Text(title, font: .boldSystemFont(ofSize: 14)).inset(top: 30, left: 16, bottom: 10, right: 16)
             Separator()

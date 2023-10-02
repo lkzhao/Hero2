@@ -11,7 +11,7 @@ import UIComponent
 import UIKit
 
 class SheetViewController: ComponentViewController {
-    override var component: Component {
+    override var component: any Component {
         Text("Present new sheet")
             .tappableView {
                 $0.present(SheetViewController())

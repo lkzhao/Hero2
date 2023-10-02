@@ -12,7 +12,7 @@ import UIComponent
 import UIKit
 
 class PushViewController: ComponentViewController {
-    override var component: Component {
+    override var component: any Component {
         VStack(spacing: 8, justifyContent: .center, alignItems: .center) {
             Text("Present Detail VC").textColor(.systemBlue)
                 .tappableView {
@@ -28,7 +28,7 @@ class PushViewController: ComponentViewController {
 }
 
 class PushDetailViewController: ComponentViewController {
-    override var component: Component {
+    override var component: any Component {
         VStack(spacing: 8) {
             Text("PushDetailViewController")
         }
