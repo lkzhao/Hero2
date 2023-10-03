@@ -9,18 +9,43 @@ import BaseToolbox
 import ScreenCorners
 import UIKit
 
+/// Foreground ViewController and Background ViewController can implement this protocol to provide
+/// a matching view for the transition to animate. This can also be implemented on the View level.
 public protocol MatchTransitionDelegate {
-    func matchedViewFor(transition: MatchModalTransition, otherViewController: UIViewController) -> UIView?
+    /// Provide the matched view from the current object's own view hierarchy for the match transition
+    func matchedViewFor(transition: MatchTransition, otherViewController: UIViewController) -> UIView?
 }
 
-open class MatchModalTransition: Transition {
-    let foregroundContainerView = UIView()
-    var isMatched = false
+public struct MatchTransitionOptions {
+    /// Allow the transition to dismiss vertically via its `dismissGestureRecognizer`
+    public var canDismissVertically = true
 
-    public var transitionVertically = false
-    open var canDismissVertically = true
-    open var canDismissHorizontally = true
-    open var automaticallyAddDismissGestureRecognizer: Bool = true
+    /// Allow the transition to dismiss horizontally via its `dismissGestureRecognizer`
+    public var canDismissHorizontally = true
+
+    /// If `true`, the `dismissGestureRecognizer` will be automatically added to the foreground view during presentation
+    public var automaticallyAddDismissGestureRecognizer: Bool = true
+
+    /// How much the foreground container moves when user drag across screen. This can be any value above or equal to 0.
+    /// Default is 0.5, which means when user drag across the screen from left to right, the container move 50% of the screen.
+    public var dragTranslationFactor: CGPoint = CGPoint(x: 0.5, y: 0.5)
+
+    public var onDragStart: ((MatchTransition) -> ())?
+}
+
+/// A Transition that matches two items and transitions between them.
+///
+/// The foreground view will be masked to the item and expand as the transition
+/// progress. This transition is interruptible if `isUserInteractionEnabled` is set to true.
+///
+open class MatchTransition: Transition {
+    /// Global transition options
+    public static var defaultOptions = MatchTransitionOptions()
+
+    /// Transition options
+    open var options = MatchTransition.defaultOptions
+
+    /// Dismiss gesture recognizer, add this to your view to support drag to dismiss
     open lazy var dismissGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handlePan(gr:))).then {
         $0.delegate = self
         if #available(iOS 13.4, *) {
@@ -28,28 +53,40 @@ open class MatchModalTransition: Transition {
         }
     }
 
+    private let foregroundContainerView = MatchTransitionContainerView()
+    private var isMatched = false
+    private(set) open var isTransitioningVertically = false
+
     open override func animate() {
         guard let back = backgroundView, let front = foregroundView, let container = transitionContainer else {
             fatalError()
         }
+
         let matchedDestinationView = foregroundViewController?.findObjectMatchType(MatchTransitionDelegate.self)?
             .matchedViewFor(transition: self, otherViewController: backgroundViewController!)
         let matchedSourceView = backgroundViewController?.findObjectMatchType(MatchTransitionDelegate.self)?
             .matchedViewFor(transition: self, otherViewController: foregroundViewController!)
 
+        isMatched = matchedSourceView != nil
+
+        if isPresenting {
+            if options.automaticallyAddDismissGestureRecognizer {
+                front.addGestureRecognizer(dismissGestureRecognizer)
+            }
+        }
+
         let isFullScreen = container.window?.convert(container.bounds, from: container) == container.window?.bounds
         let foregroundContainerView = self.foregroundContainerView
-        let finalCornerRadius: CGFloat = isFullScreen ? UIScreen.main.displayCornerRadius : foregroundContainerView.cornerRadius
-        foregroundContainerView.autoresizingMask = []
-        foregroundContainerView.autoresizesSubviews = false
+        let finalCornerRadius: CGFloat = isFullScreen ? UIScreen.main.displayCornerRadius : 0
         foregroundContainerView.cornerRadius = finalCornerRadius
-        foregroundContainerView.clipsToBounds = true
         foregroundContainerView.frame = container.bounds
         foregroundContainerView.backgroundColor = front.backgroundColor
+        foregroundContainerView.shadowColor = .black
         container.addSubview(foregroundContainerView)
-        foregroundContainerView.addSubview(front)
+        foregroundContainerView.contentView.addSubview(front)
+
         let defaultDismissedFrame =
-            transitionVertically ? container.bounds.offsetBy(dx: 0, dy: container.bounds.height) : container.bounds.offsetBy(dx: container.bounds.width, dy: 0)
+            isTransitioningVertically ? container.bounds.offsetBy(dx: 0, dy: container.bounds.height) : container.bounds.offsetBy(dx: container.bounds.width, dy: 0)
         let dismissedFrame =
             matchedSourceView.map {
                 container.convert($0.bounds, from: $0)
@@ -63,13 +100,21 @@ open class MatchModalTransition: Transition {
         let sourceViewPlaceholder = UIView()
         if let matchedSourceView = matchedSourceView {
             matchedSourceView.superview?.insertSubview(sourceViewPlaceholder, aboveSubview: matchedSourceView)
-            foregroundContainerView.addSubview(matchedSourceView)
+            foregroundContainerView.contentView.addSubview(matchedSourceView)
         }
-        isMatched = matchedSourceView != nil
 
         addDismissStateBlock {
             foregroundContainerView.cornerRadius = matchedSourceView?.cornerRadius ?? 0
             foregroundContainerView.frameWithoutTransform = dismissedFrame
+
+            // UIKit Bug: If we add a shadowPath animation, when the UIViewPropertyAnimator pauses,
+            // the animation will jump directly to the end. fractionCompleted value seem to be messed up.
+            // commenting out this line until it gets fixed.
+            //
+            // foregroundContainerView.recalculateShadowPath()
+
+            foregroundContainerView.shadowOpacity = 0.0
+            foregroundContainerView.shadowRadius = 8
             if let matchedSourceView = matchedSourceView {
                 let scaledSize = presentedFrame.size.size(fill: dismissedFrame.size)
                 let scale = scaledSize.width / container.bounds.width
@@ -91,6 +136,15 @@ open class MatchModalTransition: Transition {
         addPresentStateBlock {
             foregroundContainerView.cornerRadius = finalCornerRadius
             foregroundContainerView.frameWithoutTransform = container.bounds
+
+            // UIKit Bug: If we add a shadowPath animation, when the UIViewPropertyAnimator pauses,
+            // the animation will jump directly to the end. fractionCompleted value seem to be messed up.
+            // commenting out this line until it gets fixed.
+            //
+            // foregroundContainerView.recalculateShadowPath()
+
+            foregroundContainerView.shadowOpacity = 0.4
+            foregroundContainerView.shadowRadius = 32
             front.transform = .identity
             matchedSourceView?.frameWithoutTransform = presentedFrame
             matchedSourceView?.alpha = 0
@@ -117,30 +171,35 @@ open class MatchModalTransition: Transition {
         }
     }
 
+    open override func animationEnded(_ transitionCompleted: Bool) {
+        isMatched = false
+        isTransitioningVertically = false
+        super.animationEnded(transitionCompleted)
+    }
+
     func pauseForegroundView() {
         let position = foregroundContainerView.layer.presentation()?.position ?? foregroundContainerView.layer.position
         self.pause(view: foregroundContainerView, animationForKey: "position")
         foregroundContainerView.layer.position = position
     }
 
-    open override func animationEnded(_ transitionCompleted: Bool) {
-        if isPresenting, transitionCompleted, automaticallyAddDismissGestureRecognizer {
-            foregroundView?.addGestureRecognizer(dismissGestureRecognizer)
-        }
-        isMatched = false
-        transitionVertically = false
-        super.animationEnded(transitionCompleted)
-    }
-
-    var accumulatedProgress: CGFloat = 0
+    var totalTranslation: CGPoint = .zero
     @objc func handlePan(gr: UIPanGestureRecognizer) {
         guard let view = gr.view else { return }
         func progressFrom(offset: CGPoint) -> CGFloat {
-            let progress = (offset.x + offset.y) / ((view.bounds.height + view.bounds.width) / 4)
-            return isPresenting ? -progress : progress
+            guard let container = transitionContainer else { return 0 }
+            if isMatched {
+                let maxAxis = max(container.bounds.width, container.bounds.height)
+                let progress = (offset.x / maxAxis + offset.y / maxAxis) * 1.0
+                return isPresenting ? -progress : progress
+            } else {
+                let progress = isTransitioningVertically ? offset.y / container.bounds.height : offset.x / container.bounds.width
+                return isPresenting ? -progress : progress
+            }
         }
         switch gr.state {
         case .began:
+            options.onDragStart?(self)
             if !isTransitioning {
                 beginInteractiveTransition()
                 view.dismiss()
@@ -148,24 +207,21 @@ open class MatchModalTransition: Transition {
                 beginInteractiveTransition()
                 pause(view: foregroundContainerView, animationForKey: "position")
             }
-            accumulatedProgress = 0
+            totalTranslation = .zero
         case .changed:
             let translation = gr.translation(in: nil)
             gr.setTranslation(.zero, in: nil)
+            totalTranslation += translation
+            let progress = progressFrom(offset: translation)
             if isMatched {
-                let progress = progressFrom(offset: translation)
-                foregroundContainerView.center = foregroundContainerView.center + translation * 0.5
-                fractionCompleted = (fractionCompleted + progress * 0.1).clamp(0, 1)
-                accumulatedProgress += progress
-            } else {
-                let progress = transitionVertically ? translation.y / view.bounds.height : translation.x / view.bounds.width
-                fractionCompleted = (fractionCompleted + progress).clamp(0, 1)
-                accumulatedProgress += progress
+                foregroundContainerView.center = foregroundContainerView.center + translation * options.dragTranslationFactor
             }
+            fractionCompleted = (fractionCompleted + progress).clamp(0, 1)
         default:
-            let progress = accumulatedProgress + progressFrom(offset: gr.velocity(in: nil)) * 0.3
-            let shouldFinish = progress > 0.5
-            if isPresenting != shouldFinish {
+            let translationPlusVelocity = totalTranslation + gr.velocity(in: nil)
+            let shouldDismiss = translationPlusVelocity.x + translationPlusVelocity.y > 80
+            let shouldFinish = isPresenting ? !shouldDismiss : shouldDismiss
+            if shouldDismiss {
                 foregroundContainerView.isUserInteractionEnabled = false
                 backgroundView?.overlayView?.isUserInteractionEnabled = false
             }
@@ -174,13 +230,13 @@ open class MatchModalTransition: Transition {
     }
 }
 
-extension MatchModalTransition: UIGestureRecognizerDelegate {
+extension MatchTransition: UIGestureRecognizerDelegate {
     open func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         guard gestureRecognizer.view?.canBeDismissed == true else { return false }
         let velocity = dismissGestureRecognizer.velocity(in: nil)
-        let horizontal = canDismissHorizontally && velocity.x > abs(velocity.y)
-        let vertical = canDismissVertically && velocity.y > abs(velocity.x)
-        transitionVertically = vertical
+        let horizontal = options.canDismissHorizontally && velocity.x > abs(velocity.y)
+        let vertical = options.canDismissVertically && velocity.y > abs(velocity.x)
+        isTransitioningVertically = vertical
         // only allow right and down swipe
         return horizontal || vertical
     }
@@ -191,5 +247,39 @@ extension MatchModalTransition: UIGestureRecognizerDelegate {
                 ? scrollView.contentOffset.x <= -scrollView.adjustedContentInset.left : scrollView.contentOffset.y <= -scrollView.adjustedContentInset.top
         }
         return false
+    }
+}
+
+
+private class MatchTransitionContainerView: UIView {
+    let contentView = UIView()
+
+    override var cornerRadius: CGFloat {
+        didSet {
+            contentView.cornerRadius = cornerRadius
+        }
+    }
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        addSubview(contentView)
+        cornerCurve = .continuous
+        contentView.cornerCurve = .continuous
+        contentView.autoresizingMask = []
+        contentView.autoresizesSubviews = false
+        contentView.clipsToBounds = true
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        contentView.frame = bounds
+    }
+
+    func recalculateShadowPath() {
+        shadowPath = UIBezierPath(roundedRect: bounds, cornerRadius: cornerRadius)
     }
 }

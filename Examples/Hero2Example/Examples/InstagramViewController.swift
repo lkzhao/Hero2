@@ -56,7 +56,7 @@ class InstagramViewController: ComponentViewController {
 }
 
 extension InstagramViewController: MatchTransitionDelegate {
-    func matchedViewFor(transition: MatchModalTransition, otherViewController: UIViewController) -> UIView? {
+    func matchedViewFor(transition: MatchTransition, otherViewController: UIViewController) -> UIView? {
         guard let otherViewController = otherViewController as? InstagramDetailViewController else { return nil }
         return view.flattendSubviews.first {
             $0.heroID == otherViewController.image.id
@@ -75,7 +75,9 @@ class InstagramDetailViewController: ComponentViewController {
     override var component: any Component {
         VStack {
             HStack(alignItems: .center) {
-                Image(systemName: "chevron.left").tintColor(.label)
+                Image(systemName: "chevron.left").tintColor(.label).tappableView { [weak self] in
+                    self?.dismiss(animated: true)
+                }
             }
             .size(width: .fill, height: 44)
             .overlay(
@@ -101,11 +103,12 @@ class InstagramDetailViewController: ComponentViewController {
             .scrollView().flex()
         }
     }
-    let matchTransition = MatchModalTransition()
+    let matchTransition = MatchTransition()
 
     init() {
         super.init(nibName: nil, bundle: nil)
         transition = matchTransition
+        matchTransition.timingParameters = UISpringTimingParameters(dampingRatio: 0.9)
         matchTransition.isUserInteractionEnabled = true
     }
 
@@ -123,7 +126,7 @@ class InstagramDetailViewController: ComponentViewController {
 }
 
 extension InstagramDetailViewController: MatchTransitionDelegate {
-    func matchedViewFor(transition: MatchModalTransition, otherViewController: UIViewController) -> UIView? {
+    func matchedViewFor(transition: MatchTransition, otherViewController: UIViewController) -> UIView? {
         return imageView
     }
 }
