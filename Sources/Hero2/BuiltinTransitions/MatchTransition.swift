@@ -77,7 +77,7 @@ open class MatchTransition: Transition {
 
         let isFullScreen = container.window?.convert(container.bounds, from: container) == container.window?.bounds
         let foregroundContainerView = self.foregroundContainerView
-        let finalCornerRadius: CGFloat = isFullScreen ? UIScreen.main.displayCornerRadius : 0
+        let finalCornerRadius: CGFloat = isFullScreen ? displayCornerRadius : 0
         foregroundContainerView.cornerRadius = finalCornerRadius
         foregroundContainerView.frame = container.bounds
         foregroundContainerView.backgroundColor = front.backgroundColor

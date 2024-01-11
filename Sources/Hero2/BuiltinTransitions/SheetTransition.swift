@@ -166,7 +166,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
         if hasParentSheet {
             back.cornerRadius = transition.cornerRadius
         } else {
-            back.cornerRadius = UIScreen.main.displayCornerRadius
+            back.cornerRadius = transition.displayCornerRadius
         }
 #endif
         overlayView.alpha = 0
@@ -190,7 +190,7 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
         overlayView.frameWithoutTransform = presentingViewController.view.bounds
 
         presentedViewController.view.frameWithoutTransform = presentedViewController.sheetFrame(transition: transition, container: container)
-        presentedViewController.view.cornerRadius = container.isCompactVertical ? UIScreen.main.displayCornerRadius : transition.cornerRadius
+        presentedViewController.view.cornerRadius = container.isCompactVertical ? transition.displayCornerRadius : transition.cornerRadius
         presentedViewController.view.layer.maskedCorners =
         container.isIpadLayout ? [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMaxXMaxYCorner] : [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         presentedViewController.view.clipsToBounds = true
@@ -330,5 +330,24 @@ private extension UIViewController {
             let topInset = container.safeAreaInsets.top + 10
             return CGRect(x: 0, y: topInset, width: container.bounds.width, height: container.bounds.height - topInset)
         }
+    }
+}
+
+extension Transition {
+    private static let cornerRadiusKey: String = {
+        let components = ["Radius", "Corner", "display", "_"]
+        return components.reversed().joined()
+    }()
+
+    public var displayCornerRadius: CGFloat {
+        #if os(iOS)
+        guard let cornerRadius = UIScreen.main.value(forKey: Self.cornerRadiusKey) as? CGFloat else {
+            return 0
+        }
+
+        return cornerRadius
+        #else
+        return 0
+        #endif
     }
 }
