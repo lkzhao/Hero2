@@ -6,7 +6,6 @@
 //
 
 import BaseToolbox
-import ScreenCorners
 import UIKit
 
 /// Foreground ViewController and Background ViewController can implement this protocol to provide

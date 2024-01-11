@@ -6,7 +6,6 @@
 //
 
 import BaseToolbox
-import ScreenCorners
 import UIKit
 
 public protocol SheetBackgroundDelegate {
