@@ -268,8 +268,14 @@ class SheetPresentationController: UIPresentationController, UIGestureRecognizer
     }
 
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        if let otherPanGR = otherGestureRecognizer as? UIPanGestureRecognizer {
-            return otherPanGR.minimumNumberOfTouches <= 1
+        if let otherGestureRecognizer = otherGestureRecognizer as? UIPanGestureRecognizer,
+            let scrollView = otherGestureRecognizer.view as? UIScrollView,
+            otherGestureRecognizer.minimumNumberOfTouches <= 1,
+            otherGestureRecognizer == scrollView.panGestureRecognizer,
+            scrollView.isScrollEnabled,
+            scrollView.contentSize.height > scrollView.bounds.inset(by: scrollView.adjustedContentInset).height
+        {
+            return true
         } else {
             return false
         }
