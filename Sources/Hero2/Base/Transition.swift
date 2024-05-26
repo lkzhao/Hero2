@@ -83,25 +83,27 @@ open class Transition: NSObject {
     }
 
     open func endInteractiveTransition(shouldFinish: Bool) {
-        guard isInteractive else { return }
-        for (view, animations) in pausedAnimations {
-            for (key, anim) in animations {
-                view.layer.add(anim, forKey: key)
+        Task(priority: .userInitiated) { @MainActor in
+            guard isInteractive else { return }
+            for (view, animations) in pausedAnimations {
+                for (key, anim) in animations {
+                    view.layer.add(anim, forKey: key)
+                }
             }
-        }
-        pausedAnimations.removeAll()
-        isInteractive = false
-        if shouldFinish {
-            transitionContext?.finishInteractiveTransition()
-        } else {
-            transitionContext?.cancelInteractiveTransition()
-        }
+            pausedAnimations.removeAll()
+            isInteractive = false
+            if shouldFinish {
+                transitionContext?.finishInteractiveTransition()
+            } else {
+                transitionContext?.cancelInteractiveTransition()
+            }
 
-        animator.isReversed = !shouldFinish
-        if animator.state == .inactive {
-            animator.startAnimation()
-        } else {
-            animator.continueAnimation(withTimingParameters: nil, durationFactor: 1)
+            animator.isReversed = !shouldFinish
+            if animator.state == .inactive {
+                animator.startAnimation()
+            } else {
+                animator.continueAnimation(withTimingParameters: nil, durationFactor: 1)
+            }
         }
     }
 
