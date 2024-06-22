@@ -1,7 +1,7 @@
 import BaseToolbox
 import UIKit
 
-open class HeroTransition: Transition {
+open class HeroTransition: BaseTransition {
     // MARK: - public
 
     public func apply(position: CGPoint, to view: UIView) {

@@ -37,7 +37,7 @@ public struct MatchTransitionOptions {
 /// The foreground view will be masked to the item and expand as the transition
 /// progress. This transition is interruptible if `isUserInteractionEnabled` is set to true.
 ///
-open class MatchTransition: Transition {
+open class MatchTransition: BaseTransition {
     /// Global transition options
     public static var defaultOptions = MatchTransitionOptions()
 

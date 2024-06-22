@@ -7,7 +7,7 @@
 
 import Foundation
 
-public class FadeTransition: Transition {
+public class FadeTransition: BaseTransition {
     public override func animate() {
         guard let front = foregroundView else {
             fatalError()

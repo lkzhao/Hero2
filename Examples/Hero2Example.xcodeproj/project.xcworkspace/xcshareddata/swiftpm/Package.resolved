@@ -18,15 +18,6 @@
           "revision": "44450a8f564d7c0165f736ba2250649ff8d3e556",
           "version": "6.3.0"
         }
-      },
-      {
-        "package": "ScreenCorners",
-        "repositoryURL": "https://github.com/kylebshr/ScreenCorners",
-        "state": {
-          "branch": null,
-          "revision": "1b71897c8d9091cad34bf10a47e3810c0c10e1e8",
-          "version": "1.0.1"
-        }
       }
     ]
   },

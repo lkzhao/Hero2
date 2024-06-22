@@ -338,7 +338,7 @@ private extension UIViewController {
     }
 }
 
-extension Transition {
+extension BaseTransition {
     private static let cornerRadiusKey: String = {
         let components = ["Radius", "Corner", "display", "_"]
         return components.reversed().joined()

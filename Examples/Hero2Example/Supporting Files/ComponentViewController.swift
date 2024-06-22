@@ -12,7 +12,7 @@ import UIKit
 
 class ComponentViewController: UIViewController {
     let componentView = ComponentScrollView()
-    var transition: Transition = HeroTransition() {
+    var transition: BaseTransition = HeroTransition() {
         didSet {
             transitioningDelegate = transition
         }
@@ -55,7 +55,7 @@ class ComponentViewController: UIViewController {
 }
 
 extension ComponentViewController: TransitionProvider {
-    func transitionFor(presenting: Bool, otherViewController: UIViewController) -> Transition? {
+    func transitionFor(presenting: Bool, otherViewController: UIViewController) -> BaseTransition? {
         transition
     }
 }

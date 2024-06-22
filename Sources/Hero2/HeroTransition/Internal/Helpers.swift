@@ -53,47 +53,51 @@ func viewStateFrom(modifiers: [HeroModifier], metadata: inout ModifierProcessMet
 
 func process(modifiers: [HeroModifier], on state: inout ViewState, metadata: inout ModifierProcessMetadata) {
     for modifier in modifiers {
-        switch modifier {
-        case .fade:
-            state.alpha = 0
-        case .transform(let transform):
-            state.transform = (state.transform ?? .identity).concatenating(transform)
-        case .shadowOpacity(let shadowOpacity):
-            state.shadowOpacity = shadowOpacity
-        case .zPosition(let zPosition):
-            state.zPosition = zPosition
-        case .overlayColor(let color):
-            state.overlayColor = color
-        case .backgroundColor(let color):
-            state.backgroundColor = color
-        case .delay(let delay):
-            state.delay = delay
-        case .duration(let duration):
-            state.duration = duration
-        case .containerType(let containerType):
-            state.containerType = containerType
-        case .snapshotType(let snapshotType):
-            state.snapshotType = snapshotType
-        case .scaleSize:
-            state.scaleSize = true
-        case .matchWidthOnly:
-            state.matchWidthOnly = true
-        case .skipContainer:
-            state.skipContainer = true
-        case .forceTransition:
-            state.forceTransition = true
-        case .match(let matchId):
-            if metadata.otherViews[matchId] != nil {
-                state.match = matchId
-                metadata.isMatched = true
-            }
-        case ._beginWith(let modifiers):
-            var beginState = ViewState()
-            process(modifiers: modifiers, on: &beginState, metadata: &metadata)
-            state.beginState = (state.beginState ?? ViewState())?.merge(state: beginState)
-        case ._process(let processor):
-            process(modifiers: processor(metadata), on: &state, metadata: &metadata)
+        process(modifier: modifier, on: &state, metadata: &metadata)
+    }
+}
+
+func process(modifier: HeroModifier, on state: inout ViewState, metadata: inout ModifierProcessMetadata) {
+    switch modifier {
+    case .fade:
+        state.alpha = 0
+    case .transform(let transform):
+        state.transform = (state.transform ?? .identity).concatenating(transform)
+    case .shadowOpacity(let shadowOpacity):
+        state.shadowOpacity = shadowOpacity
+    case .zPosition(let zPosition):
+        state.zPosition = zPosition
+    case .overlayColor(let color):
+        state.overlayColor = color
+    case .backgroundColor(let color):
+        state.backgroundColor = color
+    case .delay(let delay):
+        state.delay = delay
+    case .duration(let duration):
+        state.duration = duration
+    case .containerType(let containerType):
+        state.containerType = containerType
+    case .snapshotType(let snapshotType):
+        state.snapshotType = snapshotType
+    case .scaleSize:
+        state.scaleSize = true
+    case .matchWidthOnly:
+        state.matchWidthOnly = true
+    case .skipContainer:
+        state.skipContainer = true
+    case .forceTransition:
+        state.forceTransition = true
+    case .match(let matchId):
+        if metadata.otherViews[matchId] != nil {
+            state.match = matchId
+            metadata.isMatched = true
         }
+    case ._beginWith(let modifiers):
+        var beginState = ViewState()
+        process(modifiers: modifiers, on: &beginState, metadata: &metadata)
+        state.beginState = (state.beginState ?? ViewState())?.merge(state: beginState)
+    case ._process(let processor):
+        process(modifiers: processor(metadata), on: &state, metadata: &metadata)
     }
 }
 

@@ -1,4 +1,4 @@
-// Transition.swift
+// BaseTransition.swift
 // Copyright © 2020 Noto. All rights reserved.
 
 import UIKit
@@ -7,7 +7,7 @@ extension Notification.Name {
     public static let transitionDidUpdateIsAnimating = Notification.Name("transitionDidUpdateIsAnimating")
 }
 
-open class Transition: NSObject {
+open class BaseTransition: NSObject {
     public static var animatingTransitionCount: Int = 0
     public private(set) var isPresenting: Bool = true
     public private(set) var isInteractive = false
@@ -132,7 +132,7 @@ open class Transition: NSObject {
 }
 
 // MARK: - Helper Getters
-extension Transition {
+extension BaseTransition {
     public var transitionContainer: UIView? {
         transitionContext?.containerView
     }
@@ -186,7 +186,7 @@ extension Transition {
     }
 }
 
-extension Transition: UIViewControllerInteractiveTransitioning {
+extension BaseTransition: UIViewControllerInteractiveTransitioning {
     open func interruptibleAnimator(using _: UIViewControllerContextTransitioning) -> UIViewImplicitlyAnimating {
         animator
     }
@@ -200,7 +200,7 @@ extension Transition: UIViewControllerInteractiveTransitioning {
     }
 }
 
-extension Transition: UIViewControllerAnimatedTransitioning {
+extension BaseTransition: UIViewControllerAnimatedTransitioning {
     open func animateTransition(using context: UIViewControllerContextTransitioning) {
         transitionContext = context
         pausedAnimations.removeAll()
@@ -343,7 +343,7 @@ extension Transition: UIViewControllerAnimatedTransitioning {
     }
 }
 
-extension Transition: UIViewControllerTransitioningDelegate {
+extension BaseTransition: UIViewControllerTransitioningDelegate {
     @discardableResult internal func setupTransition(isPresenting: Bool, navigationController: UINavigationController? = nil) -> Self {
         self.isPresenting = isPresenting
         self.isTransitioning = true
@@ -372,7 +372,7 @@ extension Transition: UIViewControllerTransitioningDelegate {
     }
 }
 
-extension Transition: UINavigationControllerDelegate {
+extension BaseTransition: UINavigationControllerDelegate {
     public func navigationController(_: UINavigationController, interactionControllerFor _: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
         interactiveTransitioning
     }

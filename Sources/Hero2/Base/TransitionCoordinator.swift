@@ -1,14 +1,14 @@
 import UIKit
 
 public protocol TransitionProvider: UIViewController {
-    func transitionFor(presenting: Bool, otherViewController: UIViewController) -> Transition?
+    func transitionFor(presenting: Bool, otherViewController: UIViewController) -> BaseTransition?
 }
 
 public class TransitionCoordinator: NSObject {
     public static let shared = TransitionCoordinator()
 
-    public var defaultTransition: Transition = HeroTransition()
-    public private(set) var currentTransition: Transition?
+    public var defaultTransition: BaseTransition = HeroTransition()
+    public private(set) var currentTransition: BaseTransition?
     public var isTransitioning: Bool {
         currentTransition?.isTransitioning == true
     }
